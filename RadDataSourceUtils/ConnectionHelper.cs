@@ -1,4 +1,4 @@
-﻿namespace  RelationalAnomalyGroupsDataSource
+﻿namespace RadDataSourceUtils
 {
 	using System;
 	using System.IO;
@@ -56,7 +56,7 @@
 			{
 				using (BinaryWriter bw = new BinaryWriter(ms))
 				{
-					bw.Write((int)1); // version
+					bw.Write(1); // version
 					bw.Write(1000); // ms PollingInterval
 					bw.Write(100); // ms PollingIntervalFast
 					bw.Write(1000); // StackOverflowSize
@@ -67,7 +67,7 @@
 					bw.Write((int)attributesToAdd);
 
 					bw.Write("r"); // connection is remoting or IPC (which inherits from remoting)
-					bw.Write((int)1); // version
+					bw.Write(1); // version
 					bw.Write(30); // s PollingFallbackTime
 				}
 
@@ -75,5 +75,4 @@
 			}
 		}
 	}
-
 }

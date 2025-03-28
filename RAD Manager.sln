@@ -22,8 +22,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelationalAnomalyGroupsData
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelationalGroupInfoDataSource", "RelationalGroupInfoDataSource\RelationalGroupInfoDataSource.csproj", "{E209F086-6C2A-4A63-9378-7C81EEF5928A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelationalTrendDataSource", "RelationalTrendDataSource\RelationalTrendDataSource.csproj", "{034802A9-ED06-4005-A66B-C6B0833D0EC5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelationalAnomalyScoreDataSource", "RelationalAnomalyScoreDataSource\RelationalAnomalyScoreDataSource.csproj", "{6ACAC0BA-48D9-4827-A1C8-E16164035E67}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RetrainRADModel", "RetrainRADModel\RetrainRADModel.csproj", "{D82E4480-9933-4966-997A-B19AE14ADCAC}"
@@ -31,6 +29,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadWidgets", "RADWidgets\RadWidgets.csproj", "{391C490F-138C-4CD1-90F2-5514F6C8315A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EditRADParameterGroup", "EditRADParameterGroup\EditRADParameterGroup.csproj", "{120BA61E-DD71-4C88-B0F6-6A367B9EE524}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RadDataSourceUtils", "RadDataSourceUtils\RadDataSourceUtils.shproj", "{2ADE4ECB-223A-40E2-B795-2F33A74D70D8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,10 +58,6 @@ Global
 		{E209F086-6C2A-4A63-9378-7C81EEF5928A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E209F086-6C2A-4A63-9378-7C81EEF5928A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E209F086-6C2A-4A63-9378-7C81EEF5928A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{034802A9-ED06-4005-A66B-C6B0833D0EC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{034802A9-ED06-4005-A66B-C6B0833D0EC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{034802A9-ED06-4005-A66B-C6B0833D0EC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{034802A9-ED06-4005-A66B-C6B0833D0EC5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6ACAC0BA-48D9-4827-A1C8-E16164035E67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6ACAC0BA-48D9-4827-A1C8-E16164035E67}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6ACAC0BA-48D9-4827-A1C8-E16164035E67}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -87,5 +83,11 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0C090A6-5A8E-4200-87E5-92D361756E2E}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		RadDataSourceUtils\RadDataSourceUtils.projitems*{2ade4ecb-223a-40e2-b795-2f33a74d70d8}*SharedItemsImports = 13
+		RadDataSourceUtils\RadDataSourceUtils.projitems*{6acac0ba-48d9-4827-a1c8-e16164035e67}*SharedItemsImports = 5
+		RadDataSourceUtils\RadDataSourceUtils.projitems*{c58bf363-9f7a-49f5-b2f2-045cc5b59de2}*SharedItemsImports = 5
+		RadDataSourceUtils\RadDataSourceUtils.projitems*{e209f086-6c2a-4a63-9378-7c81eef5928a}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

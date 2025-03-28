@@ -29,8 +29,8 @@
 
 	public class TimeRangeSelector : MultiSelectorItemSelector<TimeRangeItem>
 	{
-		private DateTimePicker startTimePicker_;
-		private DateTimePicker endTimePicker_;
+		private readonly DateTimePicker startTimePicker_;
+		private readonly DateTimePicker endTimePicker_;
 
 		public TimeRangeSelector(IEngine engine)
 		{
@@ -62,8 +62,6 @@
 		{
 			get
 			{
-				if (startTimePicker_.DateTime == null || endTimePicker_.DateTime == null)
-					return null;
 				if (startTimePicker_.DateTime >= endTimePicker_.DateTime)
 					return null;
 				return new TimeRangeItem(new TimeRange(startTimePicker_.DateTime, endTimePicker_.DateTime));

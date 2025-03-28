@@ -39,7 +39,7 @@ public class Script
 				return;
 			}
 
-			var dialog = new RetrainRADModelDialog(engine, groupNamesAndIds[0].Item2, groupNamesAndIds[0].Item1);
+			var dialog = new RetrainRadModelDialog(engine, groupNamesAndIds[0].Item2, groupNamesAndIds[0].Item1);
 			dialog.Accepted += Dialog_Accepted;
 			dialog.Cancelled += Dialog_Cancelled;
 
@@ -74,7 +74,7 @@ public class Script
 
 	private void Dialog_Accepted(object sender, EventArgs e)
 	{
-		var dialog = sender as RetrainRADModelDialog;
+		var dialog = sender as RetrainRadModelDialog;
 		if (dialog == null)
 			throw new ArgumentException("Invalid sender type");
 

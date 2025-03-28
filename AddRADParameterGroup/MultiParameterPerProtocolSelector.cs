@@ -21,7 +21,7 @@
 			var protocolNameLabel = new Label("Connector");
 			protocolNameDropDown_ = new DropDown<GetProtocolsResponseMessage>()
 			{
-				Options = FetchProtocols().Where(p => p.IsExportedProtocol == false).Select(p => new Option<GetProtocolsResponseMessage>(p.Protocol, p)),
+				Options = FetchProtocols().Where(p => !p.IsExportedProtocol).Select(p => new Option<GetProtocolsResponseMessage>(p.Protocol, p)),
 				IsDisplayFilterShown = true,
 				IsSorted = true,
 			};

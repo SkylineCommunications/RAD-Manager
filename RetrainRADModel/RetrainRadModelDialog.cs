@@ -7,12 +7,12 @@
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
-	public class RetrainRADModelDialog : Dialog
+	public class RetrainRadModelDialog : Dialog
 	{
 		private readonly Button okButton_;
 		private readonly MultiTimeRangeSelector timeRangeSelector_;
 
-		public RetrainRADModelDialog(IEngine engine, string groupName, int dataMinerID) : base(engine)
+		public RetrainRadModelDialog(IEngine engine, string groupName, int dataMinerID) : base(engine)
 		{
 			ShowScriptAbortPopup = false;
 			GroupName = groupName;

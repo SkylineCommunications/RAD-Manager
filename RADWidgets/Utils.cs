@@ -138,7 +138,7 @@
 			catch (Exception e)
 			{
 				engine.Log($"Could not fetch elements: {e}");
-				return null;
+				return new List<LiteElementInfoEvent>();
 			}
 		}
 

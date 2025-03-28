@@ -46,7 +46,7 @@ namespace RadWidgets
 	{
 		private readonly MultiSelectorItemSelector<T> itemSelector_;
 		private readonly TreeView selectedItemsView_;
-		private Dictionary<string, T> selectedItems_ = new Dictionary<string, T>();
+		private readonly Dictionary<string, T> selectedItems_ = new Dictionary<string, T>();
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MultiSelector{T}"/> class.
