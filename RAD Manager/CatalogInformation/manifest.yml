@@ -49,7 +49,8 @@ source_code_url:
 #   A valid URL
 #   Max length: 2048 characters
 #   Note: When Skyline Communications Reusable GitHub workflows are used, this will be automatically filled in.
-documentation_url: https://docs.dataminer.services/user-guide/Basic_Functionality/Alarms/Working_with_alarms/Advanced_analytics_features/Relational_anomaly_detection.html
+documentation_url: https://aka.dataminer.services/RAD-Manager
+#TODO: make this link once the docs are updated!
 # [Optional]
 # People who are responsible for this Catalog item. Might be developers, but this is not required.
 # Format: 'name <email> (URL)'
