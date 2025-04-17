@@ -23,5 +23,5 @@ This app requires DataMiner version 10.5.4/10.6.0 or higher.
 Full documentation can be found at the following locations
 
 - [Relational anomaly detection](https://aka.dataminer.services/RAD)
-- [Working with the RAD Manager](https://aka.dataminer.services/RAD-Manager)
+- [Working with the RAD Manager](https://aka.dataminer.services/RADManager)
 #TODO: make this link once the docs have been updated
