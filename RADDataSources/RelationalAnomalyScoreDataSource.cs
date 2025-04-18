@@ -3,11 +3,7 @@ namespace RadDataSources
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using RadUtils;
 	using Skyline.DataMiner.Analytics.GenericInterface;
-	using Skyline.DataMiner.Analytics.Mad;
-	using Skyline.DataMiner.Net.Exceptions;
-	using Skyline.DataMiner.Net.Helper;
 
 	/// <summary>
 	/// Represents a DataMiner Automation script.
@@ -19,7 +15,8 @@ namespace RadDataSources
 		private static readonly GQIIntArgument DataMinerID = new GQIIntArgument("dataMinerID");
 		private static readonly GQIDateTimeArgument StartTime = new GQIDateTimeArgument("startTime");
 		private static readonly GQIDateTimeArgument EndTime = new GQIDateTimeArgument("endTime");
-		private readonly AnomalyScoreData _anomalyScoreData = new AnomalyScoreData();
+		private static readonly AnomalyScoreCache _anomalyScoreCache = new AnomalyScoreCache();
+		private IEnumerable<KeyValuePair<DateTime, double>> _anomalyScores = new List<KeyValuePair<DateTime, double>>();
 		private string _groupName = string.Empty;
 		private int _dataMinerID = -1;
 		private DateTime? _startTime = null;
@@ -64,40 +61,12 @@ namespace RadDataSources
 			if (string.IsNullOrEmpty(_groupName) || _startTime == null || _endTime == null)
 			{
 				_logger.Error("Group name or time range is empty");
-				_anomalyScoreData.AnomalyScores.Clear();
+				_anomalyScores = new List<KeyValuePair<DateTime, double>>();
 				return default;
 			}
 
-			if (_groupName == _anomalyScoreData.GroupName && _anomalyScoreData.AnomalyScores.IsNotNullOrEmpty())
-			{
-				// ie we've already fetched the data for this group previously
-				var lastTimestamp = _anomalyScoreData.AnomalyScores.Last().Key;
-				if ((DateTime.UtcNow - lastTimestamp).TotalMinutes <= 5)
-					return default;
-			}
-
-			try
-			{
-				_anomalyScoreData.AnomalyScores.Clear();
-				var madDataResponse = RadMessageHelper.FetchRADData(ConnectionHelper.Connection, _dataMinerID, _groupName, DateTime.Now.AddMonths(-1), DateTime.Now);
-				_logger.Information($"Number of points: {madDataResponse?.Data.Count}");
-				if (madDataResponse != null)
-				{
-					foreach (MADDataPoint point in madDataResponse.Data)
-					{
-						_anomalyScoreData.AnomalyScores.Add(new KeyValuePair<DateTime, double>(point.Timestamp, point.AnomalyScore));
-					}
-				}
-
-				_anomalyScoreData.GroupName = _groupName;
-				_anomalyScoreData.DataMinerID = _dataMinerID;
-
-				return default;
-			}
-			catch (Exception ex)
-			{
-				throw new DataMinerCommunicationException("Failed to fetch MAD data", ex);
-			}
+			_anomalyScores = _anomalyScoreCache.GetAnomalyScores(_dataMinerID, _groupName, _startTime.Value, _endTime.Value);
+			return default;
 		}
 
 		public GQIColumn[] GetColumns()
@@ -107,41 +76,17 @@ namespace RadDataSources
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			var rows = new List<GQIRow>();
-
-			foreach (var entry in _anomalyScoreData.AnomalyScores)
+			var rows = _anomalyScores.Select(s =>
 			{
-				DateTime time = entry.Key.ToUniversalTime();
-				if (time < _startTime)
+				GQICell[] cells = new GQICell[]
 				{
-					continue;
-				}
-				else if (time > _endTime)
-				{
-					break;
-				}
-
-				GQICell[] cells = new GQICell[2];
-				cells[0] = new GQICell { Value = time };
-				cells[1] = new GQICell { Value = entry.Value };
-				rows.Add(new GQIRow(cells));
-			}
+					new GQICell { Value = s.Key },
+					new GQICell { Value = s.Value },
+				};
+				return new GQIRow(cells);
+			}).ToArray();
 
 			return new GQIPage(rows.ToArray());
 		}
-	}
-
-	public class AnomalyScoreData
-	{
-		public AnomalyScoreData()
-		{
-			AnomalyScores = new List<KeyValuePair<DateTime, double>>();
-		}
-
-		public string GroupName { get; set; }
-
-		public int DataMinerID { get; set; }
-
-		public List<KeyValuePair<DateTime, double>> AnomalyScores { get; set; }
 	}
 }
