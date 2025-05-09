@@ -62,15 +62,15 @@ namespace RadDataSources
 				return new GQIPage(Array.Empty<GQIRow>());
 
 			int dataMinerID = _dmaIDEnumerator.Current;
-			var response = RadMessageHelper.FetchParameterGroups(ConnectionHelper.Connection, dataMinerID);
-			if (response == null)
+			var groupNames = RadMessageHelper.FetchParameterGroups(ConnectionHelper.Connection, dataMinerID);
+			if (groupNames == null)
 			{
 				_logger.Error($"Could not fetch RAD group names from agent {dataMinerID}: no response or response of the wrong type received");
 				return new GQIPage(new GQIRow[0]) { HasNextPage = true };
 			}
 
-			var rows = new List<GQIRow>(response.GroupNames.Count);
-			foreach (var groupName in response.GroupNames)
+			var rows = new List<GQIRow>(groupNames.Count);
+			foreach (var groupName in groupNames)
 			{
 				var groupInfo = RadMessageHelper.FetchParameterGroupInfo(ConnectionHelper.Connection, dataMinerID, groupName);
 				if (groupInfo == null)

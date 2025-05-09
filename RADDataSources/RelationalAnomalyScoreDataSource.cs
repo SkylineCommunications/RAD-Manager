@@ -65,7 +65,16 @@ namespace RadDataSources
 				return default;
 			}
 
-			_anomalyScores = _anomalyScoreCache.GetAnomalyScores(_dataMinerID, _groupName, _startTime.Value, _endTime.Value);
+			try
+			{
+				_anomalyScores = _anomalyScoreCache.GetAnomalyScores(_dataMinerID, _groupName, _startTime.Value, _endTime.Value);
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Failed to fetch anomaly scores: {e}");
+				throw;
+			}
+
 			return default;
 		}
 

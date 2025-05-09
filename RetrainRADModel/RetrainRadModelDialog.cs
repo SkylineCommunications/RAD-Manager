@@ -55,7 +55,7 @@
 
 		public int DataMinerID { get; private set; }
 
-		public IEnumerable<Skyline.DataMiner.Analytics.Mad.TimeRange> GetSelectedTimeRanges()
+		public IEnumerable<RadUtils.TimeRange> GetSelectedTimeRanges()
 		{
 			return _timeRangeSelector.GetSelected().Select(i => i.TimeRange);
 		}

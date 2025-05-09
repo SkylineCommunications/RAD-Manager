@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using Skyline.DataMiner.Analytics.Mad;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net;
@@ -12,12 +13,12 @@
 	/// </summary>
 	public static class RadMessageHelper
 	{
-		public static GetMADParameterGroupsResponseMessage FetchParameterGroups(Connection connection, int dataMinerID)
+		public static List<string> FetchParameterGroups(Connection connection, int dataMinerID)
 		{
 			return FetchParameterGroups(connection.HandleSingleResponseMessage, dataMinerID);
 		}
 
-		public static GetMADParameterGroupsResponseMessage FetchParameterGroups(IEngine engine, int dataMinerID)
+		public static List<string> FetchParameterGroups(IEngine engine, int dataMinerID)
 		{
 			return FetchParameterGroups(engine.SendSLNetSingleResponseMessage, dataMinerID);
 		}
@@ -32,55 +33,56 @@
 			return FetchParameterGroupInfo(engine.SendSLNetSingleResponseMessage, dataMinerID, groupName);
 		}
 
-		public static GetMADDataResponseMessage FetchRADData(Connection connection, int dataMinerID, string groupName, DateTime startTime, DateTime endTime)
+		public static List<KeyValuePair<DateTime, double>> FetchAnomalyScoreData(Connection connection, int dataMinerID, string groupName, DateTime startTime, DateTime endTime)
 		{
-			return FetchRADData(connection.HandleSingleResponseMessage, dataMinerID, groupName, startTime, endTime);
+			return FetchAnomalyScoreData(connection.HandleSingleResponseMessage, dataMinerID, groupName, startTime, endTime);
 		}
 
-		public static GetMADDataResponseMessage FetchRADData(IEngine engine, int dataMinerID, string groupName, DateTime startTime, DateTime endTime)
+		public static List<KeyValuePair<DateTime, double>> FetchAnomalyScoreData(IEngine engine, int dataMinerID, string groupName, DateTime startTime, DateTime endTime)
 		{
-			return FetchRADData(engine.SendSLNetSingleResponseMessage, dataMinerID, groupName, startTime, endTime);
+			return FetchAnomalyScoreData(engine.SendSLNetSingleResponseMessage, dataMinerID, groupName, startTime, endTime);
 		}
 
-		public static RemoveMADParameterGroupResponseMessage RemoveParameterGroup(Connection connection, int dataMinerID, string groupName)
+		public static void RemoveParameterGroup(Connection connection, int dataMinerID, string groupName)
 		{
-			return RemoveParameterGroup(connection.HandleSingleResponseMessage, dataMinerID, groupName);
+			RemoveParameterGroup(connection.HandleSingleResponseMessage, dataMinerID, groupName);
 		}
 
-		public static RemoveMADParameterGroupResponseMessage RemoveParameterGroup(IEngine engine, int dataMinerID, string groupName)
+		public static void RemoveParameterGroup(IEngine engine, int dataMinerID, string groupName)
 		{
-			return RemoveParameterGroup(engine.SendSLNetSingleResponseMessage, dataMinerID, groupName);
+			RemoveParameterGroup(engine.SendSLNetSingleResponseMessage, dataMinerID, groupName);
 		}
 
-		public static AddMADParameterGroupResponseMessage AddParameterGroup(Connection connection, MADGroupInfo groupInfo)
+		public static void AddParameterGroup(Connection connection, MADGroupInfo groupInfo)
 		{
-			return AddParameterGroup(connection.HandleSingleResponseMessage, groupInfo);
+			AddParameterGroup(connection.HandleSingleResponseMessage, groupInfo);
 		}
 
-		public static AddMADParameterGroupResponseMessage AddParameterGroup(IEngine engine, MADGroupInfo groupInfo)
+		public static void AddParameterGroup(IEngine engine, MADGroupInfo groupInfo)
 		{
-			return AddParameterGroup(engine.SendSLNetSingleResponseMessage, groupInfo);
+			AddParameterGroup(engine.SendSLNetSingleResponseMessage, groupInfo);
 		}
 
-		public static RetrainMADModelResponseMessage RetrainParameterGroup(Connection connection, int dataMinerID, string groupName, List<Skyline.DataMiner.Analytics.Mad.TimeRange> timeRanges)
+		public static void RetrainParameterGroup(Connection connection, int dataMinerID, string groupName, IEnumerable<TimeRange> timeRanges)
 		{
-			return RetrainParameterGroup(connection.HandleSingleResponseMessage, dataMinerID, groupName, timeRanges);
+			RetrainParameterGroup(connection.HandleSingleResponseMessage, dataMinerID, groupName, timeRanges);
 		}
 
-		public static RetrainMADModelResponseMessage RetrainParameterGroup(IEngine engine, int dataMinerID, string groupName, List<Skyline.DataMiner.Analytics.Mad.TimeRange> timeRanges)
+		public static void RetrainParameterGroup(IEngine engine, int dataMinerID, string groupName, IEnumerable<TimeRange> timeRanges)
 		{
-			return RetrainParameterGroup(engine.SendSLNetSingleResponseMessage, dataMinerID, groupName, timeRanges);
+			RetrainParameterGroup(engine.SendSLNetSingleResponseMessage, dataMinerID, groupName, timeRanges);
 		}
 
 #pragma warning disable CS0618 // Type or member is obsolete: messages are obsolete since 10.5.5, but replacements were only added in that version
-		private static GetMADParameterGroupsResponseMessage FetchParameterGroups(Func<DMSMessage, DMSMessage> sendMessageFunc, int dataMinerID)
+		private static List<string> FetchParameterGroups(Func<DMSMessage, DMSMessage> sendMessageFunc, int dataMinerID)
 		{
 			GetMADParameterGroupsMessage request = new GetMADParameterGroupsMessage()
 			{
 				DataMinerID = dataMinerID,
 			};
 
-			return sendMessageFunc(request) as GetMADParameterGroupsResponseMessage;
+			var response = sendMessageFunc(request) as GetMADParameterGroupsResponseMessage;
+			return response?.GroupNames;
 		}
 
 		private static MADGroupInfo FetchParameterGroupInfo(
@@ -97,7 +99,7 @@
 			return response?.GroupInfo;
 		}
 
-		private static GetMADDataResponseMessage FetchRADData(
+		private static List<KeyValuePair<DateTime, double>> FetchAnomalyScoreData(
 			Func<DMSMessage, DMSMessage> sendMessageFunc,
 			int dataMinerID,
 			string groupName,
@@ -108,7 +110,8 @@
 			{
 				DataMinerID = dataMinerID,
 			};
-			return sendMessageFunc(request) as GetMADDataResponseMessage;
+			var response = sendMessageFunc(request) as GetMADDataResponseMessage;
+			return response?.Data.Select(p => new KeyValuePair<DateTime, double>(p.Timestamp.ToUniversalTime(), p.AnomalyScore)).ToList();
 		}
 
 		private static RemoveMADParameterGroupResponseMessage RemoveParameterGroup(
@@ -135,14 +138,27 @@
 			Func<DMSMessage, DMSMessage> sendMessageFunc,
 			int dataMinerID,
 			string groupName,
-			List<Skyline.DataMiner.Analytics.Mad.TimeRange> timeRanges)
+			IEnumerable<TimeRange> timeRanges)
 		{
-			var request = new RetrainMADModelMessage(groupName, timeRanges)
+			var request = new RetrainMADModelMessage(groupName, timeRanges.Select(r => new Skyline.DataMiner.Analytics.Mad.TimeRange(r.Start, r.End)).ToList())
 			{
 				DataMinerID = dataMinerID,
 			};
 			return sendMessageFunc(request) as RetrainMADModelResponseMessage;
 		}
 #pragma warning restore CS0618 // Type or member is obsolete
+	}
+
+	public class TimeRange
+	{
+		public TimeRange(DateTime start, DateTime end)
+		{
+			Start = start;
+			End = end;
+		}
+
+		public DateTime Start { get; set; }
+
+		public DateTime End { get; set; }
 	}
 }

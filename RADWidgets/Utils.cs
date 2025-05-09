@@ -178,14 +178,14 @@
 			{
 				try
 				{
-					var response = RadMessageHelper.FetchParameterGroups(engine, agent.Id);
-					if (response == null)
+					var groupNames = RadMessageHelper.FetchParameterGroups(engine, agent.Id);
+					if (groupNames == null)
 					{
 						engine.Log("Could not fetch RAD group names: no response or response of the wrong type received", LogType.Error, 5);
 						return new List<string> { };
 					}
 
-					return response.GroupNames;
+					return groupNames;
 				}
 				catch (Exception e)
 				{

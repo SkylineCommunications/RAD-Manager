@@ -8,21 +8,21 @@
 
 	public class TimeRangeItem : MultiSelectorItem
 	{
-		public TimeRangeItem(Skyline.DataMiner.Analytics.Mad.TimeRange range)
+		public TimeRangeItem(RadUtils.TimeRange range)
 		{
 			this.TimeRange = range;
 		}
 
-		public Skyline.DataMiner.Analytics.Mad.TimeRange TimeRange { get; set; }
+		public RadUtils.TimeRange TimeRange { get; set; }
 
 		public override string GetKey()
 		{
-			return $"{TimeRange.StartTime.ToString("o", CultureInfo.InvariantCulture)}-{TimeRange.EndTime.ToString("o", CultureInfo.InvariantCulture)}";
+			return $"{TimeRange.Start.ToString("o", CultureInfo.InvariantCulture)}-{TimeRange.End.ToString("o", CultureInfo.InvariantCulture)}";
 		}
 
 		public override string GetDisplayValue()
 		{
-			return $"From {TimeRange.StartTime} to {TimeRange.EndTime}";
+			return $"From {TimeRange.Start} to {TimeRange.End}";
 		}
 	}
 
@@ -63,7 +63,7 @@
 			{
 				if (_startTimePicker.DateTime >= _endTimePicker.DateTime)
 					return null;
-				return new TimeRangeItem(new Skyline.DataMiner.Analytics.Mad.TimeRange(_startTimePicker.DateTime, _endTimePicker.DateTime));
+				return new TimeRangeItem(new RadUtils.TimeRange(_startTimePicker.DateTime, _endTimePicker.DateTime));
 			}
 		}
 

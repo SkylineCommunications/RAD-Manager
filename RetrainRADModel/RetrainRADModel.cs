@@ -80,7 +80,7 @@ public class Script
 
 		try
 		{
-			RadMessageHelper.RetrainParameterGroup(_app.Engine, dialog.DataMinerID, dialog.GroupName, dialog.GetSelectedTimeRanges().ToList());
+			RadMessageHelper.RetrainParameterGroup(_app.Engine, dialog.DataMinerID, dialog.GroupName, dialog.GetSelectedTimeRanges());
 		}
 		catch (Exception ex)
 		{
