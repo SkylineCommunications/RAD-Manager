@@ -11,13 +11,15 @@ namespace RadDataSources
 	[GQIMetaData(Name = "Get Relational Anomaly Score")]
 	public class RelationalAnomalyScoreDataSource : IGQIDataSource, IGQIOnInit, IGQIInputArguments, IGQIOnPrepareFetch
 	{
-		private static readonly GQIStringArgument GroupName = new GQIStringArgument("groupName");
-		private static readonly GQIIntArgument DataMinerID = new GQIIntArgument("dataMinerID");
-		private static readonly GQIDateTimeArgument StartTime = new GQIDateTimeArgument("startTime");
-		private static readonly GQIDateTimeArgument EndTime = new GQIDateTimeArgument("endTime");
+		private static readonly GQIStringArgument GroupName = new GQIStringArgument("Group Name");
+		private static readonly GQIIntArgument DataMinerID = new GQIIntArgument("DataMiner ID");
+		private static readonly GQIDateTimeArgument StartTime = new GQIDateTimeArgument("Start Time");
+		private static readonly GQIDateTimeArgument EndTime = new GQIDateTimeArgument("End Time");
+		private static readonly GQIBooleanArgument SkipCache = new GQIBooleanArgument("Skip Cache");
 		private static readonly AnomalyScoreCache _anomalyScoreCache = new AnomalyScoreCache();
 		private List<KeyValuePair<DateTime, double>> _anomalyScores = new List<KeyValuePair<DateTime, double>>();
 		private string _groupName = string.Empty;
+		private bool _skipCache = false;
 		private int _dataMinerID = -1;
 		private DateTime? _startTime = null;
 		private DateTime? _endTime = null;
@@ -32,7 +34,7 @@ namespace RadDataSources
 
 		public GQIArgument[] GetInputArguments()
 		{
-			return new GQIArgument[] { GroupName, DataMinerID, StartTime, EndTime };
+			return new GQIArgument[] { GroupName, DataMinerID, StartTime, EndTime, SkipCache };
 		}
 
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
@@ -53,6 +55,9 @@ namespace RadDataSources
 				_logger.Error("Unable to parse input times");
 			}
 
+			if (!args.TryGetArgumentValue(SkipCache, out _skipCache))
+				_skipCache = false;
+
 			return default;
 		}
 
@@ -65,7 +70,16 @@ namespace RadDataSources
 				return default;
 			}
 
-			_anomalyScores = _anomalyScoreCache.GetAnomalyScores(_dataMinerID, _groupName, _startTime.Value, _endTime.Value);
+			try
+			{
+				_anomalyScores = _anomalyScoreCache.GetAnomalyScores(_dataMinerID, _groupName, _startTime.Value, _endTime.Value, _skipCache);
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Failed to fetch anomaly scores: {e}");
+				throw;
+			}
+
 			return default;
 		}
 

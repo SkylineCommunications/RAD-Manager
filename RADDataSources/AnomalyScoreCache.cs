@@ -26,7 +26,7 @@
 		private readonly object _anomalyScoreDataLock = new object();
 		private AnomalyScoreData _anomalyScoreData = null;
 
-		public List<KeyValuePair<DateTime, double>> GetAnomalyScores(int dataMinerID, string groupName, DateTime startTime, DateTime endTime)
+		public List<KeyValuePair<DateTime, double>> GetAnomalyScores(int dataMinerID, string groupName, DateTime startTime, DateTime endTime, bool skipCache)
 		{
 			lock (_anomalyScoreDataLock)
 			{
@@ -34,7 +34,8 @@
 					groupName != _anomalyScoreData.GroupName ||
 					DateTime.UtcNow > _anomalyScoreData.CacheTime.AddMinutes(5) ||
 					startTime < _anomalyScoreData.RequestStartTime.AddMinutes(-5) ||
-					endTime > _anomalyScoreData.RequestEndTime.AddMinutes(5))
+					endTime > _anomalyScoreData.RequestEndTime.AddMinutes(5) ||
+					skipCache)
 				{
 					UpdateAnomalyScoreData(dataMinerID, groupName, startTime, endTime);
 				}
