@@ -114,9 +114,17 @@
 		{
 			var protocol = _protocolNameDropDown.Selected;
 			if (protocol == null)
+			{
 				_protocolVersionDropDown.Options = new List<Option<string>>();
+			}
 			else
+			{
 				_protocolVersionDropDown.Options = protocol.Versions.OrderBy(v => v).Select(s => GetProtocolVersionOption(s)).ToList();
+				var defaultSelection = _protocolVersionDropDown.Options.FirstOrDefault(v => v?.Value == "Production");
+				if (defaultSelection != null)
+					_protocolVersionDropDown.SelectedOption = defaultSelection;
+			}
+
 			OnSelectedProtocolVersionChanged();
 		}
 
