@@ -1,0 +1,156 @@
+﻿namespace RadWidgets
+{
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+
+	public class LabelEditor : Section, IValidationWidget
+	{
+		private readonly TextBox _textBox;
+
+		public LabelEditor(int index, string parameterLabel = null)
+		{
+			string tooltip = $"The label of the parameter {index + 1}.";
+			var label = new Label($"Parameter {index + 1}")
+			{
+				Tooltip = tooltip,
+			};
+
+			_textBox = new TextBox
+			{
+				Tooltip = tooltip,
+				Text = parameterLabel ?? string.Empty,
+				PlaceHolder = $"Parameter {index + 1}",
+				MinWidth = 300,
+			};
+			_textBox.Changed += (sender, args) => Changed?.Invoke(this, EventArgs.Empty);
+
+			AddWidget(label, 0, 0);
+			AddWidget(_textBox, 0, 1);
+		}
+
+		public event EventHandler Changed;
+
+		public string Label => _textBox.Text;
+
+		public UIValidationState ValidationState
+		{
+			get => _textBox.ValidationState;
+			set => _textBox.ValidationState = value;
+		}
+
+		public string ValidationText
+		{
+			get => _textBox.ValidationText;
+			set => _textBox.ValidationText = value;
+		}
+	}
+
+	public class RadLabelEditorDialog : Dialog
+	{
+		private readonly List<LabelEditor> _labelEditors;
+		private readonly Label _detailsLabel;
+		private readonly Button _okButton;
+
+		public RadLabelEditorDialog(IEngine engine, List<string> labels) : base(engine)
+		{
+			Title = "Edit Parameter Labels";
+			_labelEditors = new List<LabelEditor>(labels.Count);
+			foreach (var label in labels)
+			{
+				var editor = new LabelEditor(_labelEditors.Count, label);
+				editor.Changed += (sender, args) => OnLabelChanged(sender as LabelEditor);
+				_labelEditors.Add(editor);
+			}
+
+			_detailsLabel = new Label();
+
+			var cancelButton = new Button("Cancel")
+			{
+				Tooltip = "Discard the changes to the labels above.",
+			};
+			cancelButton.Pressed += (sender, args) => Cancelled?.Invoke(this, EventArgs.Empty);
+
+			_okButton = new Button("OK")
+			{
+				Style = ButtonStyle.CallToAction,
+			};
+			_okButton.Pressed += (sender, args) => Accepted?.Invoke(this, EventArgs.Empty);
+
+			OnLabelChanged(_labelEditors.First());
+
+			int row = 0;
+			foreach (var editor in _labelEditors)
+				AddSection(editor, row++, 0);
+
+			AddWidget(_detailsLabel, row, 0, 1, 2);
+			row++;
+
+			AddWidget(cancelButton, row, 0);
+			AddWidget(_okButton, row, 1);
+		}
+
+		public event EventHandler Accepted;
+
+		public event EventHandler Cancelled;
+
+		public List<string> Labels
+		{
+			get
+			{
+				return _labelEditors.Select(e => e.Label).ToList();
+			}
+		}
+
+		private void SetLabelEditorsValid()
+		{
+			foreach (var editor in _labelEditors)
+			{
+				editor.ValidationState = UIValidationState.Valid;
+				editor.ValidationText = string.Empty;
+			}
+		}
+
+		private void OnLabelChanged(LabelEditor editor)
+		{
+			SetLabelEditorsValid();
+
+			bool isEmpty = string.IsNullOrEmpty(editor.Label);
+			if (_labelEditors.Any(e => string.IsNullOrEmpty(e.Label) != isEmpty))
+			{
+				_detailsLabel.Text = "You should either provide a label for all parameters or for none.";
+				_detailsLabel.IsVisible = true;
+				_okButton.Tooltip = "Set the parameter labels above. Note that before submitting the group, you should make sure to either provide a label for all parameters, or for none.";
+				return;
+			}
+			else if (!isEmpty)
+			{
+				// Here, a label is provided for all parameters
+				var duplicateLabels = _labelEditors.GroupBy(e => e.Label, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1);
+				if (duplicateLabels.Any())
+				{
+					_detailsLabel.Text = $"The labels {duplicateLabels.Select(g => g.Key).HumanReadableJoin()} are duplicated.";
+					_detailsLabel.IsVisible = true;
+					_okButton.Tooltip = "Set the parameter labels above. Note that before submitting the group, you will have to remove the duplicated labels.";
+
+					foreach (var e in duplicateLabels.SelectMany(g => g))
+					{
+						e.ValidationState = UIValidationState.Invalid;
+						e.ValidationText = "This label is duplicated.";
+					}
+
+					return;
+				}
+			}
+
+			_detailsLabel.Text = string.Empty;
+			_detailsLabel.IsVisible = false;
+			if (isEmpty)
+				_okButton.Tooltip = "Set no parameter labels for the current group."; // Here all labels are empty
+			else
+				_okButton.Tooltip = "Set the parameter labels above for the current group."; // Here a label is provided for all parameters and no duplicates are found
+		}
+	}
+}

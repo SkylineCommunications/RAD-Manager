@@ -10,8 +10,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Cache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RadGroupBaseSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RadGroupSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RadMessageHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ParametersCache.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RadSharedModelGroupSettings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils.cs" />
   </ItemGroup>
 </Project>

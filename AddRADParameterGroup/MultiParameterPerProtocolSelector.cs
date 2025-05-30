@@ -3,11 +3,12 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using RadWidgets;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
-	public class MultiParameterPerProtocolSelector : Section
+	public class MultiParameterPerProtocolSelector : VisibilitySection
 	{
 		private readonly IEngine _engine;
 		private readonly Label _protocolNameLabel;
@@ -15,7 +16,6 @@
 		private readonly Label _protocolVersionLabel;
 		private readonly DropDown<string> _protocolVersionDropDown;
 		private readonly MultiProtocolParameterSelector _parameterSelector;
-		private bool _isVisible = true;
 
 		public MultiParameterPerProtocolSelector(IEngine engine) : base()
 		{
@@ -67,25 +67,6 @@
 		public string ProtocolName => _protocolNameDropDown.Selected?.Protocol;
 
 		public string ProtocolVersion => _protocolVersionDropDown.Selected;
-
-		public override bool IsVisible
-		{
-			// Note: we had to override this, since otherwise isVisible of the underlying widgets is called instead of on the sections
-			get => _isVisible;
-			set
-			{
-				if (_isVisible == value)
-					return;
-
-				_isVisible = value;
-
-				_protocolNameLabel.IsVisible = value;
-				_protocolNameDropDown.IsVisible = value;
-				_protocolVersionLabel.IsVisible = value;
-				_protocolVersionDropDown.IsVisible = value;
-				_parameterSelector.IsVisible = value;
-			}
-		}
 
 		public IEnumerable<ProtocolParameterSelectorInfo> GetSelectedParameters()
 		{

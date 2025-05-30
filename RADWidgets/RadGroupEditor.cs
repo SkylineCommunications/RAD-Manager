@@ -3,66 +3,39 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Skyline.DataMiner.Analytics.DataTypes;
+	using RadUtils;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
-	public class RadGroupSettings
-	{
-		public string GroupName { get; set; }
-
-		public IEnumerable<ParameterKey> Parameters { get; set; }
-
-		public RadGroupOptions Options { get; set; }
-	}
-
-	public class RadGroupEditor : Section
+	public class RadGroupEditor : VisibilitySection
 	{
 		public const int MIN_PARAMETERS = 2;
 		public const int MAX_PARAMETERS = 100;
-		private readonly Label _groupNameLabel;
-		private readonly TextBox _groupNameTextBox;
+		private readonly GroupNameSection _groupNameSection;
 		private readonly MultiParameterSelector _parameterSelector;
 		private readonly RadGroupOptionsEditor _optionsEditor;
 		private readonly Label _detailsLabel;
-		private readonly List<string> _existingGroupNames;
 		private bool _moreThanMinParametersSelected = false;
 		private bool _lessThanMaxParametersSelected = false;
-		private bool _isVisible = true;
 
-		public RadGroupEditor(IEngine engine, List<string> existingGroupNames, RadGroupSettings settings = null)
+		public RadGroupEditor(IEngine engine, List<string> existingGroupNames, ParametersCache parametersCache, RadGroupSettings settings = null)
 		{
-			_existingGroupNames = existingGroupNames;
-			if (settings != null) // The current group name should be accepted as valid
-				_existingGroupNames.Remove(settings.GroupName);
-
-			var groupNameTooltip = "Provide the name of the group. This name will be used when creating suggestion events for anomalies detected on this group.";
-			_groupNameLabel = new Label("Group name")
-			{
-				Tooltip = groupNameTooltip,
-			};
-			_groupNameTextBox = new TextBox()
-			{
-				Text = settings?.GroupName ?? string.Empty,
-				MinWidth = 600,
-				Tooltip = groupNameTooltip,
-			};
-			_groupNameTextBox.Changed += (sender, args) => OnGroupNameTextBoxChanged();
-
-			_parameterSelector = new MultiParameterSelector(engine, settings?.Parameters);
+			_parameterSelector = new MultiParameterSelector(engine, parametersCache, settings?.Parameters);
 			_parameterSelector.Changed += (sender, args) => OnParameterSelectorChanged();
+
+			_groupNameSection = new GroupNameSection(settings?.GroupName, existingGroupNames, _parameterSelector.ColumnCount - 1);
+			_groupNameSection.ValidationChanged += (sender, args) => OnGroupNameSectionValidationChanged();
 
 			_optionsEditor = new RadGroupOptionsEditor(_parameterSelector.ColumnCount, settings?.Options);
 
 			_detailsLabel = new Label();
 
-			OnGroupNameTextBoxChanged();
+			OnGroupNameSectionValidationChanged();
 			OnParameterSelectorChanged();
 
 			int row = 0;
-			AddWidget(_groupNameLabel, row, 0);
-			AddWidget(_groupNameTextBox, row, 1, 1, _parameterSelector.ColumnCount - 1);
-			++row;
+			AddSection(_groupNameSection, row, 0);
+			row += _groupNameSection.RowCount;
 
 			AddSection(_parameterSelector, row, 0);
 			row += _parameterSelector.RowCount;
@@ -81,7 +54,7 @@
 			{
 				return new RadGroupSettings
 				{
-					GroupName = _groupNameTextBox.Text,
+					GroupName = _groupNameSection.GroupName,
 					Parameters = _parameterSelector.GetSelectedParameters(),
 					Options = _optionsEditor.Options,
 				};
@@ -92,16 +65,15 @@
 		public override bool IsVisible
 		{
 			// Note: we had to override this, since otherwise isVisible of the underlying widgets is called instead of on the sections
-			get => _isVisible;
+			get => IsSectionVisible;
 			set
 			{
-				if (_isVisible == value)
+				if (IsSectionVisible == value)
 					return;
 
-				_isVisible = value;
+				IsSectionVisible = value;
 
-				_groupNameLabel.IsVisible = value;
-				_groupNameTextBox.IsVisible = value;
+				_groupNameSection.IsVisible = value;
 				_parameterSelector.IsVisible = value;
 				_optionsEditor.IsVisible = value;
 				UpdateDetailsLabelVisibility();
@@ -114,10 +86,10 @@
 
 		private void UpdateIsValid()
 		{
-			IsValid = _groupNameTextBox.ValidationState == UIValidationState.Valid && _moreThanMinParametersSelected && _lessThanMaxParametersSelected;
+			IsValid = _groupNameSection.IsValid && _moreThanMinParametersSelected && _lessThanMaxParametersSelected;
 
 			List<string> validationTexts = new List<string>(2);
-			if (_groupNameTextBox.ValidationState == UIValidationState.Invalid && !_moreThanMinParametersSelected)
+			if (!_groupNameSection.IsValid && !_moreThanMinParametersSelected)
 				validationTexts.Add("provide a valid group name");
 			if (!_moreThanMinParametersSelected || !_lessThanMaxParametersSelected)
 				validationTexts.Add("make a valid selection of instances");
@@ -128,7 +100,7 @@
 
 		private void UpdateDetailsLabelVisibility()
 		{
-			_detailsLabel.IsVisible = _isVisible && _groupNameTextBox.ValidationState == UIValidationState.Valid && (!_moreThanMinParametersSelected || !_lessThanMaxParametersSelected);
+			_detailsLabel.IsVisible = IsSectionVisible && _groupNameSection.IsValid && (!_moreThanMinParametersSelected || !_lessThanMaxParametersSelected);
 		}
 
 		private void UpdateDetailsLabel()
@@ -157,24 +129,8 @@
 			}
 		}
 
-		private void OnGroupNameTextBoxChanged()
+		private void OnGroupNameSectionValidationChanged()
 		{
-			if (string.IsNullOrEmpty(_groupNameTextBox.Text))
-			{
-				_groupNameTextBox.ValidationState = UIValidationState.Invalid;
-				_groupNameTextBox.ValidationText = "Provide a group name";
-			}
-			else if (_existingGroupNames.Contains(_groupNameTextBox.Text))
-			{
-				_groupNameTextBox.ValidationState = UIValidationState.Invalid;
-				_groupNameTextBox.ValidationText = "Group name already exists";
-			}
-			else
-			{
-				_groupNameTextBox.ValidationState = UIValidationState.Valid;
-				_groupNameTextBox.ValidationText = string.Empty;
-			}
-
 			UpdateDetailsLabelVisibility();
 			UpdateIsValid();
 		}

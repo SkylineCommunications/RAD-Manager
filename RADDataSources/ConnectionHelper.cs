@@ -8,7 +8,7 @@
 	using Skyline.DataMiner.Net.Exceptions;
 	using Skyline.DataMiner.Net.Messages;
 
-	internal static class ConnectionHelper
+	public static class ConnectionHelper
 	{
 		private const string APPLICATION_NAME = "GQI RAD data sources";
 		private static readonly object _connectionLock = new object();

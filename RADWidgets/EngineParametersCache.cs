@@ -1,16 +1,16 @@
-﻿namespace AddRadParameterGroup
+﻿namespace RadWidgets
 {
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages;
 
 	/// <summary>
-	/// Cache for parameters.
+	/// Cache for parameters using the IEngine class to send messages.
 	/// </summary>
-	public class ParametersCache : RadUtils.ParametersCache
+	public class EngineParametersCache : RadUtils.ParametersCache
 	{
 		private readonly IEngine _engine;
 
-		public ParametersCache(IEngine engine)
+		public EngineParametersCache(IEngine engine)
 		{
 			_engine = engine;
 		}

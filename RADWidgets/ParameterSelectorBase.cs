@@ -1,9 +1,6 @@
 ﻿namespace RadWidgets
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using RadUtils;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -11,7 +8,7 @@
 	public abstract class ParameterSelectorBase<T> : MultiSelectorItemSelector<T>, IValidationWidget where T : MultiSelectorItem
 	{
 		private readonly IEngine _engine;
-		private readonly DropDown<ParameterInfo> _parametersDropDown;
+		private readonly RadParametersDropDown _parametersDropDown;
 		private readonly TextBox _instanceTextBox;
 
 		protected ParameterSelectorBase(IEngine engine, bool leaveFirstColEmpty)
@@ -19,11 +16,7 @@
 			_engine = engine;
 
 			var parametersLabel = new Label("Parameter");
-			_parametersDropDown = new DropDown<ParameterInfo>()
-			{
-				IsDisplayFilterShown = true,
-				IsSorted = true,
-			};
+			_parametersDropDown = new RadParametersDropDown(engine);
 			_parametersDropDown.Changed += (sender, args) => OnSelectedParameterChanged();
 
 			string instanceTooltip = "Specify the display key to include specific cells from the current table column. Use * and ? as wildcards.";
@@ -68,7 +61,6 @@
 		protected void OnSelectedParameterChanged()
 		{
 			var parameter = _parametersDropDown.Selected;
-			_parametersDropDown.Tooltip = parameter?.DisplayName ?? string.Empty;
 			_instanceTextBox.ValidationState = UIValidationState.Valid;
 			if (parameter?.IsTableColumn != true)
 			{
@@ -81,27 +73,21 @@
 			}
 		}
 
-		protected virtual bool IsValidForRAD(ParameterInfo info)
+		protected void SetPossibleParameters(int dataMinerID, int elementID)
 		{
-			return info.IsRadSupported();
+			_parametersDropDown.SetPossibleParameters(dataMinerID, elementID);
+			OnSelectedParameterChanged();
 		}
 
-		protected void SetPossibleParameters(GetProtocolInfoResponseMessage protocol)
+		protected void SetPossibleParameters(string protocolName, string protocolVersion)
 		{
-			if (protocol == null)
-			{
-				_engine.Log("Got invalid protocol", LogType.Error, 5);
-				ClearPossibleParameters();
-				return;
-			}
-
-			_parametersDropDown.Options = protocol.Parameters.Where(p => IsValidForRAD(p)).OrderBy(p => p.DisplayName).Select(p => new Option<ParameterInfo>(p.DisplayName, p));
+			_parametersDropDown.SetPossibleParameters(protocolName, protocolVersion);
 			OnSelectedParameterChanged();
 		}
 
 		protected void ClearPossibleParameters()
 		{
-			_parametersDropDown.Options = new List<Option<ParameterInfo>>();
+			_parametersDropDown.ClearPossibleParameters();
 			OnSelectedParameterChanged();
 		}
 

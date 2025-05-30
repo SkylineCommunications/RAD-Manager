@@ -13,6 +13,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.5.5.2" />
+    <PackageReference Include="Skyline.DataMiner.Internal.SLAnalyticsTypes" Version="10.5.2519-1374" />
     <PackageReference Include="Skyline.DataMiner.Utils.InteractiveAutomationScriptToolkit" Version="10.0.5" />
   </ItemGroup>
   <ItemGroup>

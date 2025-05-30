@@ -42,7 +42,7 @@ namespace RadWidgets
 	/// it will take (itemSelector.RowCount + 2) rows and (itemSelector.ColumnCount + 1) columns.
 	/// </summary>
 	/// <typeparam name="T">The type of the items that can be selected.</typeparam>
-	public abstract class MultiSelector<T> : Section where T : MultiSelectorItem
+	public abstract class MultiSelector<T> : VisibilitySection where T : MultiSelectorItem
 	{
 		private readonly MultiSelectorItemSelector<T> _itemSelector;
 		private readonly Label _noItemsSelectedLabel;
@@ -50,7 +50,6 @@ namespace RadWidgets
 		private readonly Dictionary<string, T> _selectedItems = new Dictionary<string, T>();
 		private readonly Button _addButton;
 		private readonly Button _removeButton;
-		private bool _isVisible = true;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MultiSelector{T}"/> class.
@@ -132,13 +131,13 @@ namespace RadWidgets
 		public override bool IsVisible
 		{
 			// Note: we had to override this, since otherwise all child widgets are made visible when this is set to true.
-			get => _isVisible;
+			get => IsSectionVisible;
 			set
 			{
-				if (value == _isVisible)
+				if (value == IsSectionVisible)
 					return;
 
-				_isVisible = value;
+				IsSectionVisible = value;
 
 				_itemSelector.IsVisible = value;
 				_addButton.IsVisible = value;
@@ -203,7 +202,7 @@ namespace RadWidgets
 
 		private void UpdateTreeViewVisibility()
 		{
-			if (!_isVisible)
+			if (!IsSectionVisible)
 			{
 				_noItemsSelectedLabel.IsVisible = false;
 				_selectedItemsView.IsVisible = false;

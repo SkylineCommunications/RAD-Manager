@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Linq;
-	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Messages;
 
 	/// <summary>
@@ -10,6 +9,10 @@
 	/// </summary>
 	public abstract class ParametersCache : Cache<ParameterInfo[]>
 	{
+		protected ParametersCache() : base(100)
+		{
+		}
+
 		protected abstract void LogError(string message);
 
 		protected abstract DMSMessage SendSingleResponseMessage(DMSMessage request);

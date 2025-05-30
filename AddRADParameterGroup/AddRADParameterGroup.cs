@@ -73,12 +73,17 @@ public class Script
 		{
 			try
 			{
-				RadMessageHelper.AddParameterGroup(_app.Engine, group);
+				if (group is RadGroupSettings singleGroup)
+					RadMessageHelper.AddParameterGroup(_app.Engine, singleGroup);
+				else if (group is RadSharedModelGroupSettings sharedGroup)
+					RadMessageHelper.AddParameterGroup(_app.Engine, sharedGroup);
+				else
+					throw new Exception($"Invalid group type: {group.GetType()}");
 			}
 			catch (Exception ex)
 			{
-				_app.Engine.GenerateInformation($"Failed to add parameter group '{group.Name}': {ex}");
-				failedGroups.Add(Tuple.Create(group.Name, ex));
+				_app.Engine.GenerateInformation($"Failed to add parameter group '{group.GroupName}': {ex}");
+				failedGroups.Add(Tuple.Create(group.GroupName, ex));
 			}
 		}
 

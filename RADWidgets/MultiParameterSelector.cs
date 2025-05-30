@@ -2,6 +2,7 @@
 {
 	using System.Collections.Generic;
 	using System.Linq;
+	using RadUtils;
 	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages;
@@ -10,7 +11,8 @@
 	{
 		private bool _parameterAlreadySelected = false;
 
-		public MultiParameterSelector(IEngine engine, IEnumerable<ParameterKey> parameters = null) : base(new ParameterSelector(engine), null, "No parameters selected")
+		public MultiParameterSelector(IEngine engine, ParametersCache parametersCache, IEnumerable<ParameterKey> parameters = null) :
+			base(new ParameterSelector(engine), null, "No parameters selected")
 		{
 			AddButtonTooltip = "Add the instance specified on the left to the parameter group.";
 			RemoveButtonTooltip = "Remove the instance(s) selected on the left from the parameter group.";
@@ -21,8 +23,7 @@
 				foreach (var parameter in parameters)
 				{
 					var element = engine.FindElement(parameter.DataMinerID, parameter.ElementID);
-					var protocol = Utils.FetchElementProtocol(engine, parameter.DataMinerID, parameter.ElementID);
-					var paramInfo = protocol?.Parameters.FirstOrDefault(p => p.ID == parameter.ParameterID);
+					var paramInfo = Utils.FetchParameterInfo(engine, parametersCache, parameter.DataMinerID, parameter.ElementID, parameter.ParameterID);
 					selection.Add(new ParameterSelectorInfo()
 					{
 						ElementName = element?.ElementName ?? "Unknown element",

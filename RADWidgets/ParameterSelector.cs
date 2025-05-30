@@ -3,7 +3,6 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using RadUtils;
 	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages;
@@ -65,19 +64,12 @@
 
 	public class ParameterSelector : ParameterSelectorBase<ParameterSelectorInfo>
 	{
-		private readonly DropDown<LiteElementInfoEvent> _elementsDropDown;
+		private readonly ElementsDropDown _elementsDropDown;
 
 		public ParameterSelector(IEngine engine) : base(engine, true)
 		{
 			var elementsLabel = new Label("Element");
-			var elements = Utils.FetchElements(engine).Where(e => !e.IsDynamicElement).OrderBy(e => e.Name).ToList();
-			_elementsDropDown = new DropDown<LiteElementInfoEvent>()
-			{
-				Options = elements.Select(e => new Option<LiteElementInfoEvent>(e.Name, e)),
-				IsDisplayFilterShown = true,
-				IsSorted = true,
-				MinWidth = 300,
-			};
+			_elementsDropDown = new ElementsDropDown(engine);
 			_elementsDropDown.Changed += (sender, args) => OnSelectedElementChanged();
 			OnSelectedElementChanged();
 
@@ -108,7 +100,7 @@
 				var matchingInstances = new List<DynamicTableIndex>();
 				if (parameter.IsTableColumn && parameter.ParentTable != null)
 				{
-					matchingInstances = Utils.FetchMatchingInstancesWithTrending(Engine, element.DataMinerID, element.ElementID, parameter, InstanceTextBox.Text).ToList();
+					matchingInstances = Utils.FetchInstancesWithTrending(Engine, element.DataMinerID, element.ElementID, parameter, InstanceTextBox.Text).ToList();
 					if (matchingInstances.Count == 0)
 					{
 						ValidationState = UIValidationState.Invalid;
@@ -131,23 +123,16 @@
 			}
 		}
 
-		protected override bool IsValidForRAD(ParameterInfo info)
-		{
-			return base.IsValidForRAD(info) && info.HasTrending();
-		}
-
 		private void OnSelectedElementChanged()
 		{
 			var element = _elementsDropDown.Selected;
-			_elementsDropDown.Tooltip = element?.Name ?? string.Empty;
 			if (element == null)
 			{
 				ClearPossibleParameters();
 				return;
 			}
 
-			var protocol = Utils.FetchElementProtocol(Engine, element.DataMinerID, element.ElementID);
-			SetPossibleParameters(protocol);
+			SetPossibleParameters(element.DataMinerID, element.ElementID);
 		}
 	}
 }

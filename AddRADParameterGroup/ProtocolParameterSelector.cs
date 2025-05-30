@@ -1,9 +1,7 @@
 ﻿namespace AddParameterGroup
 {
-	using System;
 	using RadWidgets;
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Net.Messages;
 
 	public class ProtocolParameterSelectorInfo : MultiSelectorItem
 	{
@@ -72,27 +70,7 @@
 
 		public void SetProtocol(string protocolName, string protocolVersion)
 		{
-			if (string.IsNullOrEmpty(protocolName) || string.IsNullOrEmpty(protocolVersion))
-			{
-				ClearPossibleParameters();
-				return;
-			}
-
-			SetPossibleParameters(FetchProtocol(protocolName, protocolVersion));
-		}
-
-		private GetProtocolInfoResponseMessage FetchProtocol(string protocolName, string protocolVersion)
-		{
-			try
-			{
-				var request = new GetProtocolMessage(protocolName, protocolVersion);
-				return Engine.SendSLNetSingleResponseMessage(request) as GetProtocolInfoResponseMessage;
-			}
-			catch (Exception e)
-			{
-				Engine.Log($"Could not fetch protocol with name '{protocolName}' and version '{protocolVersion}': {e}");
-				return null;
-			}
+			SetPossibleParameters(protocolName, protocolVersion);
 		}
 	}
 }
