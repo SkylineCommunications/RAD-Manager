@@ -6,9 +6,9 @@
 	using System.Linq;
 	using AddRadParameterGroup;
 	using RadWidgets;
-	using Skyline.DataMiner.Analytics.Mad;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.RadToolkit;
 
 	public enum AddGroupType
 	{
@@ -16,6 +16,8 @@
 		Single,
 		[Description("Add group for each element with given connector")]
 		MultipleOnProtocol,
+		[Description("Add group with shared model")]
+		SharedModel,
 	}
 
 	public class AddParameterGroupDialog : Dialog
@@ -23,6 +25,7 @@
 		private readonly EnumDropDown<AddGroupType> _addTypeDropDown;
 		private readonly RadGroupEditor _groupEditor;
 		private readonly RadGroupByProtocolCreator _groupByProtocolCreator;
+		private readonly RadSharedModelGroupEditor _sharedModelGroupEditor;
 		private readonly Button _okButton;
 
 		public AddParameterGroupDialog(IEngine engine) : base(engine)
@@ -34,18 +37,25 @@
 			{
 				Tooltip = "Choose whether to add a single group, or multiple groups at once using the specified method.",
 			};
-			_addTypeDropDown = new EnumDropDown<AddGroupType>()
+			List<AddGroupType> excludedTypes = new List<AddGroupType>();
+			if (!engine.GetRadHelper().AllowSharedModelGroups)
+				excludedTypes.Add(AddGroupType.SharedModel);
+			_addTypeDropDown = new EnumDropDown<AddGroupType>(excludedTypes)
 			{
 				Selected = AddGroupType.Single,
 			};
 			_addTypeDropDown.Changed += (sender, args) => OnAddTypeChanged();
 
-			var existingGroupNames = Utils.FetchRadGroupNames(engine);
-			_groupEditor = new RadGroupEditor(engine, existingGroupNames);
+			var existingGroupNames = RadWidgets.Utils.FetchRadGroupIDs(engine).Select(id => id.GroupName).Distinct().ToList();
+			var parametersCache = new EngineParametersCache(engine);
+			_groupEditor = new RadGroupEditor(engine, existingGroupNames, parametersCache);
 			_groupEditor.ValidationChanged += (sender, args) => OnEditorValidationChanged(_groupEditor.IsValid, _groupEditor.ValidationText);
 
-			_groupByProtocolCreator = new RadGroupByProtocolCreator(engine, existingGroupNames);
+			_groupByProtocolCreator = new RadGroupByProtocolCreator(engine, existingGroupNames, parametersCache);
 			_groupByProtocolCreator.ValidationChanged += (sender, args) => OnEditorValidationChanged(_groupByProtocolCreator.IsValid, _groupByProtocolCreator.ValidationText);
+
+			_sharedModelGroupEditor = new RadSharedModelGroupEditor(engine, existingGroupNames, parametersCache);
+			_sharedModelGroupEditor.ValidationChanged += (sender, args) => OnEditorValidationChanged(_sharedModelGroupEditor.IsValid, _sharedModelGroupEditor.ValidationText);
 
 			_okButton = new Button()
 			{
@@ -69,6 +79,9 @@
 			AddSection(_groupByProtocolCreator, row, 0);
 			row += _groupByProtocolCreator.RowCount;
 
+			AddSection(_sharedModelGroupEditor, row, 0);
+			row += _sharedModelGroupEditor.RowCount;
+
 			AddWidget(cancelButton, row, 0, 1, 1);
 			AddWidget(_okButton, row, 1, 1, _groupByProtocolCreator.ColumnCount - 1);
 		}
@@ -77,22 +90,14 @@
 
 		public event EventHandler Cancelled;
 
-		public List<MADGroupInfo> GetGroupsToAdd()
+		public List<RadGroupSettings> GetGroupsToAdd()
 		{
 			if (_addTypeDropDown.Selected == AddGroupType.Single)
-			{
-				var groupInfo = new MADGroupInfo(
-					_groupEditor.Settings.GroupName,
-					_groupEditor.Settings.Parameters.ToList(),
-					_groupEditor.Settings.Options.UpdateModel,
-					_groupEditor.Settings.Options.AnomalyThreshold,
-					_groupEditor.Settings.Options.MinimalDuration);
-				return new List<MADGroupInfo>() { groupInfo };
-			}
-			else
-			{
+				return new List<RadGroupSettings>() { _groupEditor.Settings };
+			else if (_addTypeDropDown.Selected == AddGroupType.MultipleOnProtocol)
 				return _groupByProtocolCreator.GetGroupsToAdd();
-			}
+			else
+				return new List<RadGroupSettings>() { _sharedModelGroupEditor.GetSettings() };
 		}
 
 		private void OnEditorValidationChanged(bool isValid, string validationText)
@@ -100,7 +105,7 @@
 			if (isValid)
 			{
 				_okButton.IsEnabled = true;
-				if (_addTypeDropDown.Selected == AddGroupType.Single)
+				if (_addTypeDropDown.Selected == AddGroupType.Single || _addTypeDropDown.Selected == AddGroupType.SharedModel)
 				{
 					_okButton.Tooltip = "Add the parameter group specified above to the RAD configuration";
 				}
@@ -122,17 +127,28 @@
 			{
 				_groupEditor.IsVisible = true;
 				_groupByProtocolCreator.IsVisible = false;
+				_sharedModelGroupEditor.IsVisible = false;
 				_okButton.Text = "Add group";
 				_addTypeDropDown.Tooltip = "Add the parameter group specified below.";
 				OnEditorValidationChanged(_groupEditor.IsValid, _groupEditor.ValidationText);
 			}
-			else
+			else if (_addTypeDropDown.Selected == AddGroupType.MultipleOnProtocol)
 			{
 				_groupEditor.IsVisible = false;
 				_groupByProtocolCreator.IsVisible = true;
+				_sharedModelGroupEditor.IsVisible = false;
 				_okButton.Text = "Add group(s)";
 				_addTypeDropDown.Tooltip = "Add a parameter group with the instances and options specified below for each element that uses the given connection and connector version.";
 				OnEditorValidationChanged(_groupByProtocolCreator.IsValid, _groupByProtocolCreator.ValidationText);
+			}
+			else
+			{
+				_groupEditor.IsVisible = false;
+				_groupByProtocolCreator.IsVisible = false;
+				_sharedModelGroupEditor.IsVisible = true;
+				_okButton.Text = "Add group";
+				_addTypeDropDown.Tooltip = "Add a parameter group with multiple subgroups that share a single model.";
+				OnEditorValidationChanged(_sharedModelGroupEditor.IsValid, _sharedModelGroupEditor.ValidationText);
 			}
 		}
 	}

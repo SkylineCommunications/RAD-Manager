@@ -12,10 +12,9 @@
     <VersionComment>Initial Version</VersionComment>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.5.5.2" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.0.1">
+    <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.5.4.2" />
+    <PackageReference Include="Skyline.DataMiner.Utils.RadToolkit" Version="1.0.0-rc2" />
+    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

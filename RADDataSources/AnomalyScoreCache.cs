@@ -3,14 +3,17 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using RadUtils;
 	using Skyline.DataMiner.Net.Exceptions;
 
 	public class AnomalyScoreData
 	{
+		public int DataMinerID { get; set; }
+
 		public string GroupName { get; set; }
 
-		public int DataMinerID { get; set; }
+		public string SubGroupName { get; set; }
+
+		public Guid SubGroupID { get; set; }
 
 		public List<KeyValuePair<DateTime, double>> AnomalyScores { get; set; }
 
@@ -26,18 +29,22 @@
 		private readonly object _anomalyScoreDataLock = new object();
 		private AnomalyScoreData _anomalyScoreData = null;
 
-		public List<KeyValuePair<DateTime, double>> GetAnomalyScores(int dataMinerID, string groupName, DateTime startTime, DateTime endTime, bool skipCache)
+		public List<KeyValuePair<DateTime, double>> GetAnomalyScores(int dataMinerID, string groupName, string subGroupName, Guid subGroupID,
+			DateTime startTime, DateTime endTime, bool skipCache)
 		{
 			lock (_anomalyScoreDataLock)
 			{
 				if (_anomalyScoreData == null ||
+					dataMinerID != _anomalyScoreData.DataMinerID ||
 					groupName != _anomalyScoreData.GroupName ||
+					subGroupName != _anomalyScoreData.SubGroupName ||
+					subGroupID != _anomalyScoreData.SubGroupID ||
 					DateTime.UtcNow > _anomalyScoreData.CacheTime.AddMinutes(5) ||
 					startTime < _anomalyScoreData.RequestStartTime.AddMinutes(-5) ||
 					endTime > _anomalyScoreData.RequestEndTime.AddMinutes(5) ||
 					skipCache)
 				{
-					UpdateAnomalyScoreData(dataMinerID, groupName, startTime, endTime);
+					UpdateAnomalyScoreData(dataMinerID, groupName, subGroupName, subGroupID, startTime, endTime);
 				}
 
 				return _anomalyScoreData.AnomalyScores
@@ -46,22 +53,26 @@
 			}
 		}
 
-		private void UpdateAnomalyScoreData(int dataMinerID, string groupName, DateTime startTime, DateTime endTime)
+		private void UpdateAnomalyScoreData(int dataMinerID, string groupName, string subGroupName, Guid subGroupID, DateTime startTime, DateTime endTime)
 		{
 			DateTime now = DateTime.UtcNow;
 
 			try
 			{
-				var requestStartTime = Min(now.AddMonths(-1), startTime);
+				var requestStartTime = Min(now.AddDays(-7), startTime);
 				var requestEndTime = Max(now, endTime);
-				var anomalyScores = RadMessageHelper.FetchAnomalyScoreData(ConnectionHelper.Connection, dataMinerID, groupName, requestStartTime, requestEndTime);
+				List<KeyValuePair<DateTime, double>> anomalyScores = null;
+
+				anomalyScores = FetchAnomalyScore(dataMinerID, groupName, subGroupName, subGroupID, requestStartTime, requestEndTime);
 				if (anomalyScores == null)
 					throw new DataMinerCommunicationException("No response or a response of the wrong type received");
 
 				_anomalyScoreData = new AnomalyScoreData()
 				{
-					GroupName = groupName,
 					DataMinerID = dataMinerID,
+					GroupName = groupName,
+					SubGroupName = subGroupName,
+					SubGroupID = subGroupID,
 					CacheTime = now,
 					RequestStartTime = requestStartTime,
 					RequestEndTime = requestEndTime,
@@ -72,6 +83,24 @@
 			{
 				throw new DataMinerCommunicationException("Failed to fetch RAD data", ex);
 			}
+		}
+
+		private List<KeyValuePair<DateTime, double>> FetchAnomalyScore(int dataMinerID, string groupName, string subGroupName,
+			Guid subGroupID, DateTime startTime, DateTime endTime)
+		{
+			try
+			{
+				if (subGroupID != Guid.Empty)
+					return ConnectionHelper.RadHelper.FetchAnomalyScoreData(dataMinerID, groupName, subGroupID, startTime, endTime);
+				if (!string.IsNullOrEmpty(subGroupName))
+					return ConnectionHelper.RadHelper.FetchAnomalyScoreData(dataMinerID, groupName, subGroupName, startTime, endTime);
+			}
+			catch (NotSupportedException)
+			{
+				// If the method is not supported, we fall back to the method without fetching on subgroup
+			}
+
+			return ConnectionHelper.RadHelper.FetchAnomalyScoreData(dataMinerID, groupName, startTime, endTime);
 		}
 
 		private DateTime Min(DateTime time1, DateTime time2)

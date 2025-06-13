@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AddParameterGroup;
-using RadUtils;
 using RadWidgets;
 using Skyline.DataMiner.Automation;
 using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+using Skyline.DataMiner.Utils.RadToolkit;
 
 public class Script
 {
@@ -73,19 +73,19 @@ public class Script
 		{
 			try
 			{
-				RadMessageHelper.AddParameterGroup(_app.Engine, group);
+				_app.Engine.GetRadHelper().AddParameterGroup(group);
 			}
 			catch (Exception ex)
 			{
-				_app.Engine.GenerateInformation($"Failed to add parameter group '{group.Name}': {ex}");
-				failedGroups.Add(Tuple.Create(group.Name, ex));
+				_app.Engine.GenerateInformation($"Failed to add parameter group '{group.GroupName}': {ex}");
+				failedGroups.Add(Tuple.Create(group.GroupName, ex));
 			}
 		}
 
 		if (failedGroups.Count > 0)
 		{
 			var ex = new AggregateException("Failed to add parameter group(s) to RAD configuration", failedGroups.Select(p => p.Item2));
-			RadWidgets.Utils.ShowExceptionDialog(_app, $"Failed to create {failedGroups.Select(p => p.Item1).HumanReadableJoin()}", ex, dialog);
+			Utils.ShowExceptionDialog(_app, $"Failed to create {failedGroups.Select(p => p.Item1).HumanReadableJoin()}", ex, dialog);
 
 			return;
 		}

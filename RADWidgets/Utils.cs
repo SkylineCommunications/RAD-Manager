@@ -4,39 +4,45 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Text;
+	using System.Text.RegularExpressions;
 	using RadUtils;
+	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Automation;
 	using Skyline.DataMiner.Core.DataMinerSystem.Common;
-	using Skyline.DataMiner.Net.Helper;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.RadToolkit;
 
 	public static class Utils
 	{
 		/// <summary>
-		/// Get the group name and DataMiner ID from the script parameters.
+		/// Get the group name, DataMiner ID and (if provided) subgroup ID from the script parameters.
 		/// </summary>
 		/// <param name="app">The app.</param>
-		/// <returns>A list with the DataMiner IDs and names of the provided groups, or an empty list if none were provided.</returns>
-		/// <exception cref="FormatException">Thrown when the DataMiner ID script parameter could not be parsed, or when the number of group names and data miner IDs provided do not match.</exception>
-		public static List<Tuple<int, string>> GetGroupNameAndDataMinerID(InteractiveController app)
+		/// <returns>A list of IRadGroupIDs representing the IDs of the groups provided in the script arguments.</returns>
+		/// <exception cref="FormatException">Thrown when the provided group IDs could not be parsed.</exception>
+		public static List<IRadGroupID> ParseGroupIDParameter(InteractiveController app)
 		{
-			var groupNames = ParseScriptParameterValue(app.Engine.GetScriptParam("GroupName")?.Value);
-			var dataMinerIDs = ParseScriptParameterValue(app.Engine.GetScriptParam("DataMinerID")?.Value);
-			if (groupNames.IsNullOrEmpty() || dataMinerIDs.IsNullOrEmpty())
-				return new List<Tuple<int, string>>();
+			var groupIDs = ParseScriptParameterValue(app.Engine.GetScriptParam("Group ID")?.Value);
 
-			if (groupNames.Count != dataMinerIDs.Count)
-				throw new FormatException("The number of group names and DataMiner IDs must be equal");
-
-			var result = new List<Tuple<int, string>>(groupNames.Count);
-			for (int i = 0; i < groupNames.Count; ++i)
+			var result = new List<IRadGroupID>();
+			Regex regex = new Regex(@"^(?<DataMinerID>\d+)/(?<GroupName>.+)/(?<SubgroupID>[-A-Za-z0-9]*?)$");
+			foreach (var groupIDStr in groupIDs)
 			{
-				if (!int.TryParse(dataMinerIDs[i], out int dataMinerID))
-					throw new FormatException($"DataMinerID parameter is not a valid number, got '{dataMinerIDs[i]}'");
+				var match = regex.Match(groupIDStr);
+				if (!match.Success)
+					throw new FormatException($"Group ID parameter '{groupIDStr}' is not in the correct format. Expected format: 'DataMinerID/GroupName/SubgroupID'");
 
-				result.Add(new Tuple<int, string>(dataMinerID, groupNames[i]));
+				if (!int.TryParse(match.Groups["DataMinerID"].Value, out int dataMinerID))
+					throw new FormatException($"DataMinerID parameter is not a valid number, got '{match.Groups["DataMinerID"].Value}'");
+				string groupName = match.Groups["GroupName"].Value;
+				if (string.IsNullOrEmpty(match.Groups["SubgroupID"].Value))
+					result.Add(new RadGroupID(dataMinerID, groupName));
+				else if (Guid.TryParse(match.Groups["SubgroupID"].Value, out var subgroupID))
+					result.Add(new RadSubgroupID(dataMinerID, groupName, subgroupID));
+				else
+					throw new FormatException($"SubgroupID parameter is not a valid GUID, got '{match.Groups["SubgroupID"].Value}'");
 			}
 
 			return result;
@@ -124,6 +130,11 @@
 			app.ShowDialog(exceptionDialog);
 		}
 
+		/// <summary>
+		/// Fetches all elements (including hidden, paused, stopped and service elements) from the DataMiner system. Returns an empty list and logs an exception if the elements could not be fetched.
+		/// </summary>
+		/// <param name="engine">The engine.</param>
+		/// <returns>A list of elements, or an empty list when an error occured..</returns>
 		public static List<LiteElementInfoEvent> FetchElements(IEngine engine)
 		{
 			try
@@ -165,27 +176,88 @@
 			}
 		}
 
-		public static IEnumerable<DynamicTableIndex> FetchMatchingInstancesWithTrending(IEngine engine, int dataMinerID, int elementID, ParameterInfo parameterInfo, string displayKeyFilter)
+		/// <summary>
+		/// Fetches the parameter info for the given element and parameter ID. Returns null and logs an exception if the parameter info could not be fetched.
+		/// </summary>
+		/// <param name="engine">The engine.</param>
+		/// <param name="cache">The parameters cache.</param>
+		/// <param name="dataMinerID">The DataMiner ID of the element.</param>
+		/// <param name="elementID">The element ID.</param>
+		/// <param name="parameterID">The parameter ID.</param>
+		/// <returns>The parameter info, or null if the parameter could not be found.</returns>
+		public static ParameterInfo FetchParameterInfo(IEngine engine, ParametersCache cache, int dataMinerID, int elementID, int parameterID)
 		{
-			return FetchMatchingInstances(engine, dataMinerID, elementID, parameterInfo.ParentTablePid, displayKeyFilter)
+			if (!cache.TryGet(dataMinerID, elementID, out var parameterInfos))
+				return null;
+
+			var paramInfo = parameterInfos?.FirstOrDefault(p => p.ID == parameterID);
+			if (paramInfo == null)
+			{
+				engine.Log($"Could not find parameter {parameterID} in protocol for element {dataMinerID}/{elementID}");
+				return null;
+			}
+
+			return paramInfo;
+		}
+
+		/// <summary>
+		/// Fetches the protocol information for the given protocol name and version. Returns null and logs an exception if the protocol could not be fetched.
+		/// </summary>
+		/// <param name="engine">The engine.</param>
+		/// <param name="protocolName">The name of the protocol.</param>
+		/// <param name="protocolVersion">The version of the protocol.</param>
+		/// <returns>The protocol information, or null.</returns>
+		public static GetProtocolInfoResponseMessage FetchProtocol(IEngine engine, string protocolName, string protocolVersion)
+		{
+			try
+			{
+				var request = new GetProtocolMessage(protocolName, protocolVersion);
+				return engine.SendSLNetSingleResponseMessage(request) as GetProtocolInfoResponseMessage;
+			}
+			catch (Exception e)
+			{
+				engine.Log($"Could not fetch protocol with name '{protocolName}' and version '{protocolVersion}': {e}");
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// Fetches all trended instances of a table based on the given DataMiner ID, element ID and parameter info of a table column.
+		/// Returns an empty list and logs an exception if the instances could not be fetched.
+		/// </summary>
+		/// <param name="engine">The engine.</param>
+		/// <param name="dataMinerID">The DataMiner ID.</param>
+		/// <param name="elementID">The element ID.</param>
+		/// <param name="parameterInfo">The parameter info of the table column.</param>
+		/// <param name="displayKeyFilter">The filter to use on the display keys.</param>
+		/// <returns>A list of all matching, trended parameters. Or an empty list when an error occured.</returns>
+		public static IEnumerable<DynamicTableIndex> FetchInstancesWithTrending(IEngine engine, int dataMinerID, int elementID, ParameterInfo parameterInfo, string displayKeyFilter = null)
+		{
+			return FetchInstances(engine, dataMinerID, elementID, parameterInfo.ParentTablePid, displayKeyFilter)
 				.Where(i => parameterInfo.IsRealTimeTrended(i.DisplayValue) || parameterInfo.IsAverageTrended(i.DisplayValue));
 		}
 
-		public static List<string> FetchRadGroupNames(IEngine engine)
+		/// <summary>
+		/// Fetch the IDs of all RAD groups in the system.
+		/// </summary>
+		/// <param name="engine">The engine.</param>
+		/// <returns>A list of RAD group IDs.</returns>
+		public static List<RadGroupID> FetchRadGroupIDs(IEngine engine)
 		{
-			var result = new List<string>();
+			var result = new List<RadGroupID>();
+			var radHelper = engine.GetRadHelper();
 			foreach (var agent in engine.GetDms().GetAgents())
 			{
 				try
 				{
-					var groupNames = RadMessageHelper.FetchParameterGroups(engine, agent.Id);
+					var groupNames = radHelper.FetchParameterGroups(agent.Id);
 					if (groupNames == null)
 					{
 						engine.Log("Could not fetch RAD group names: no response or response of the wrong type received", LogType.Error, 5);
-						return new List<string> { };
+						continue;
 					}
 
-					return groupNames;
+					result.AddRange(groupNames.Select(n => new RadGroupID(agent.Id, n)));
 				}
 				catch (Exception e)
 				{
@@ -194,6 +266,78 @@
 			}
 
 			return result;
+		}
+
+		/// <summary>
+		/// Convert a parameter to a string of the form "ElementName/ParameterName/Instance". If the parameter has no instance, it will be "ElementName/ParameterName".
+		/// </summary>
+		/// <param name="key">The parameter key.</param>
+		/// <param name="engine">The engine object.</param>
+		/// <param name="parametersCache">The cache object.</param>
+		/// <returns>A string representing the current parameter key.</returns>
+		public static string ToHumanReadableString(this ParameterKey key, IEngine engine, ParametersCache parametersCache)
+		{
+			if (key == null)
+				return string.Empty;
+
+			var element = engine.FindElement(key.DataMinerID, key.ElementID);
+			string elementName = element?.ElementName ?? $"{key.DataMinerID}/{key.ElementID}";
+			var paramInfo = FetchParameterInfo(engine, parametersCache, key.DataMinerID, key.ElementID, key.ParameterID);
+			string parameterName = paramInfo?.DisplayName ?? key.ParameterID.ToString();
+			if (!string.IsNullOrEmpty(key.DisplayInstance))
+				return $"{elementName}/{parameterName}/{key.DisplayInstance}";
+			else if (!string.IsNullOrEmpty(key.Instance))
+				return $"{elementName}/{parameterName}/{key.Instance}";
+			else
+				return $"{elementName}/{parameterName}";
+		}
+
+		/// <summary>
+		/// Gets the parameter description of a subgroup. This is a human readable string containing the parameters in the group.
+		/// </summary>
+		/// <param name="engine">The engine.</param>
+		/// <param name="parametersCache">The parameters cache.</param>
+		/// <param name="info">The subgroup info.</param>
+		/// <returns>The parameter description.</returns>
+		public static string GetParameterDescription(IEngine engine, ParametersCache parametersCache, RadSubgroupInfo info)
+		{
+			if (info == null)
+				return string.Empty;
+
+			var parameterStrs = new List<string>();
+			foreach (var p in info.Parameters)
+				parameterStrs.Add(p?.Key.ToHumanReadableString(engine, parametersCache));
+
+			return parameterStrs.Select(s => $"'{s}'").HumanReadableJoin();
+		}
+
+		/// <summary>
+		/// Return true if <paramref name="a"/> has the same parameters as <paramref name="b"/>, taking the order into account. For a good comparison,
+		/// the parameters need to be normalized with <see cref="NormalizeParameters(RadSubgroupSettings)"/>.
+		/// </summary>
+		/// <param name="a">The first group settings.</param>
+		/// <param name="b">The second group settings.</param>
+		/// <returns>True if both groups has the same parameter, false otherwise.</returns>
+		public static bool HasSameOrderedParameters(this RadSubgroupSettings a, RadSubgroupSettings b)
+		{
+			if (a?.Parameters == null && b?.Parameters == null)
+				return true;
+			if (a?.Parameters == null || b?.Parameters == null)
+				return false;
+
+			return a.Parameters.SequenceEqual(b.Parameters, new RadParameterEqualityComparer());
+		}
+
+		/// <summary>
+		/// Normalizes the parameters of the given RadSubgroupSettings by ordering the parameters by their label names (if any are provided).
+		/// </summary>
+		/// <param name="settings">The subgroup settings.</param>
+		public static void NormalizeParameters(this RadSubgroupSettings settings)
+		{
+			if (settings?.Parameters == null)
+				return;
+			if (!string.IsNullOrEmpty(settings.Parameters.FirstOrDefault()?.Label))
+				settings.Parameters = settings.Parameters.OrderBy(p => p?.Label, StringComparer.OrdinalIgnoreCase).ToList();
 		}
 
 		/// <summary>
@@ -240,6 +384,40 @@
 		}
 
 		/// <summary>
+		/// Wrap the text to the specified maximum line length. Source: https://gist.github.com/anderssonjohan/660952.
+		/// </summary>
+		/// <param name="text">The text to wrap.</param>
+		/// <param name="maxLineLength">The maximal line length.</param>
+		/// <returns>The wrapped text.</returns>
+		public static List<string> WordWrap(this string text, int maxLineLength)
+		{
+			var list = new List<string>();
+			if (string.IsNullOrEmpty(text))
+				return list;
+			if (maxLineLength <= 0)
+				throw new ArgumentOutOfRangeException(nameof(maxLineLength), "Max line length must be greater than 0.");
+
+			int currentIndex;
+			var lastWrap = 0;
+			var whitespace = new[] { ' ', '\r', '\n', '\t' };
+			var breakChars = new[] { ' ', ',', '.', '?', '!', ':', ';', '-', '\n', '\r', '\t' };
+			do
+			{
+				if (lastWrap + maxLineLength > text.Length)
+					currentIndex = text.Length;
+				else
+					currentIndex = text.LastIndexOfAny(breakChars, Math.Min(text.Length - 1, lastWrap + maxLineLength)) + 1;
+				if (currentIndex <= lastWrap)
+					currentIndex = Math.Min(lastWrap + maxLineLength, text.Length);
+				list.Add(text.Substring(lastWrap, currentIndex - lastWrap).Trim(whitespace));
+				lastWrap = currentIndex;
+			}
+			while (currentIndex < text.Length);
+
+			return list;
+		}
+
+		/// <summary>
 		/// Capitalize the first letter of the string. If the provided string is null, null will be returned. If the provided string is empty,
 		/// an empty string will be returned.
 		/// </summary>
@@ -252,20 +430,30 @@
 			return char.ToUpper(s[0]) + s.Substring(1);
 		}
 
-		private static DynamicTableIndex[] FetchMatchingInstances(IEngine engine, int dataMinerID, int elementID, int tableParameterID, string displayKeyFilter)
+		public static RadHelper GetRadHelper(this IEngine engine)
+		{
+			if (engine == null)
+				throw new ArgumentNullException(nameof(engine));
+
+			return new RadHelper(Engine.SLNetRaw, new Logger(s => engine.Log(s, LogType.Error, 0)));
+		}
+
+		private static DynamicTableIndex[] FetchInstances(IEngine engine, int dataMinerID, int elementID, int tableParameterID, string displayKeyFilter = null)
 		{
 			try
 			{
-				var indicesRequest = new GetDynamicTableIndices(dataMinerID, elementID, tableParameterID)
+				var indicesRequest = new GetDynamicTableIndices(dataMinerID, elementID, tableParameterID);
+				if (!string.IsNullOrEmpty(displayKeyFilter))
 				{
-					KeyFilter = displayKeyFilter,
-					KeyFilterType = GetDynamicTableIndicesKeyFilterType.DisplayKey,
-				};
+					indicesRequest.KeyFilter = displayKeyFilter;
+					indicesRequest.KeyFilterType = GetDynamicTableIndicesKeyFilterType.DisplayKey;
+				}
+
 				var indicesResponse = engine.SendSLNetSingleResponseMessage(indicesRequest) as DynamicTableIndicesResponse;
 				if (indicesResponse == null)
 				{
 					engine.Log(
-						$"Could not fetch primary keys for element {dataMinerID}/{elementID} parameter {tableParameterID} with filter {displayKeyFilter}: " +
+						$"Could not fetch primary keys for element {dataMinerID}/{elementID} parameter {tableParameterID} with filter '{displayKeyFilter ?? string.Empty}': " +
 						$"no response, or response of the wrong type received",
 						LogType.Error,
 						5);
@@ -276,7 +464,7 @@
 			}
 			catch (Exception e)
 			{
-				engine.Log($"Could not fetch primary keys for element {dataMinerID}/{elementID} parameter {tableParameterID} with filter {displayKeyFilter}: {e}", LogType.Error, 5);
+				engine.Log($"Could not fetch primary keys for element {dataMinerID}/{elementID} parameter {tableParameterID} with filter '{displayKeyFilter ?? string.Empty}': {e}", LogType.Error, 5);
 				return Array.Empty<DynamicTableIndex>();
 			}
 		}

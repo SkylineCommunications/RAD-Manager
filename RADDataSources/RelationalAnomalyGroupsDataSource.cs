@@ -3,10 +3,10 @@ namespace RadDataSources
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using RadUtils;
 	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Messages;
+	using Skyline.DataMiner.Utils.RadToolkit;
 
 	/// <summary>
 	/// We return a table with the group names, their parameters, updateModel value and AnomalyThreshold for all configured groups.
@@ -24,7 +24,7 @@ namespace RadDataSources
 		{
 			_dms = args.DMS;
 			_logger = args.Logger;
-			ConnectionHelper.InitializeConnection(_dms);
+			ConnectionHelper.InitializeConnection(_dms, _logger);
 			return default;
 		}
 
@@ -38,6 +38,9 @@ namespace RadDataSources
 				new GQIBooleanColumn("Update Model"),
 				new GQIDoubleColumn("Anomaly Threshold"),
 				new GQITimeSpanColumn("Minimum Anomaly Duration"),
+				new GQIBooleanColumn("Is Monitored"),
+				new GQIStringColumn("Parent Group"),
+				new GQIStringColumn("Subgroup ID"),
 			};
 		}
 
@@ -62,44 +65,64 @@ namespace RadDataSources
 				return new GQIPage(Array.Empty<GQIRow>());
 
 			int dataMinerID = _dmaIDEnumerator.Current;
-			var groupNames = RadMessageHelper.FetchParameterGroups(ConnectionHelper.Connection, dataMinerID);
+			var groupNames = ConnectionHelper.RadHelper.FetchParameterGroups(dataMinerID);
 			if (groupNames == null)
 			{
 				_logger.Error($"Could not fetch RAD group names from agent {dataMinerID}: no response or response of the wrong type received");
-				return new GQIPage(new GQIRow[0]) { HasNextPage = true };
+				return new GQIPage(Array.Empty<GQIRow>()) { HasNextPage = true };
 			}
 
-			var rows = new List<GQIRow>(groupNames.Count);
-			foreach (var groupName in groupNames)
-			{
-				var groupInfo = RadMessageHelper.FetchParameterGroupInfo(ConnectionHelper.Connection, dataMinerID, groupName);
-				if (groupInfo == null)
-				{
-					_logger.Error($"Could not fetch RAD group info for group {groupName}: no response or response of the wrong type received");
-					continue;
-				}
-
-				var parameterStr = groupInfo.Parameters.Select(p => ParameterKeyToString(p));
-				rows.Add(new GQIRow(
-					new GQICell[]
-					{
-						new GQICell() { Value = groupName },
-						new GQICell() { Value = dataMinerID },
-						new GQICell() { Value = $"[{string.Join(", ", parameterStr)}]" },
-						new GQICell() { Value = groupInfo.UpdateModel },
-						new GQICell() { Value = groupInfo.AnomalyThreshold ?? 3.0 },
-						new GQICell() { Value = TimeSpan.FromMinutes(groupInfo.MinimumAnomalyDuration ?? 5) },
-					}));
-			}
-
-			return new GQIPage(rows.ToArray())
+			return new GQIPage(groupNames.SelectMany(g => GetRowsForGroup(dataMinerID, g)).ToArray())
 			{
 				HasNextPage = true,
 			};
 		}
 
+		private IEnumerable<GQIRow> GetRowsForGroup(int dataMinerID, string groupName)
+		{
+			var groupInfo = ConnectionHelper.RadHelper.FetchParameterGroupInfo(dataMinerID, groupName);
+			if (groupInfo == null)
+			{
+				_logger.Error($"Could not fetch RAD group info for group '{groupName}' from agent {dataMinerID}: no response or response of the wrong type received");
+				yield break;
+			}
+
+			if (groupInfo.Subgroups == null || groupInfo.Subgroups.Count == 0)
+			{
+				_logger.Error($"Group '{groupName}' from agent {dataMinerID} has no subgroups defined.");
+				yield break;
+			}
+
+			bool sharedModelGroup = groupInfo.Subgroups.Count > 1;
+			foreach (var subgroupInfo in groupInfo.Subgroups)
+			{
+				if (subgroupInfo == null)
+				{
+					_logger.Error($"Subgroup info for group '{groupName}' is null in agent {dataMinerID}.");
+					continue;
+				}
+
+				yield return new GQIRow(
+					new GQICell[]
+					{
+						new GQICell() { Value = groupName },
+						new GQICell() { Value = dataMinerID },
+						new GQICell() { Value = ParameterKeysToString(subgroupInfo.Parameters?.Select(p => p?.Key)) },
+						new GQICell() { Value = groupInfo.Options?.UpdateModel ?? false },
+						new GQICell() { Value = subgroupInfo.Options?.GetAnomalyThresholdOrDefault(groupInfo.Options?.AnomalyThreshold) ?? RadGroupOptions.DefaultAnomalyThreshold },
+						new GQICell() { Value = TimeSpan.FromMinutes(subgroupInfo.Options?.GetMinimalDurationOrDefault(groupInfo.Options?.MinimalDuration) ?? RadGroupOptions.DefaultMinimalDuration) },
+						new GQICell() { Value = subgroupInfo.IsMonitored },
+						new GQICell() { Value = groupName }, // Parent group
+						new GQICell() { Value = sharedModelGroup ? subgroupInfo.ID.ToString() : string.Empty }, // Subgroup ID
+					});
+			}
+		}
+
 		private string ParameterKeyToString(ParameterKey pKey)
 		{
+			if (pKey == null)
+				return string.Empty;
+
 			string elementName;
 			if (!_elementNames.TryGet(pKey.DataMinerID, pKey.ElementID, out elementName))
 				elementName = $"{pKey.DataMinerID}/{pKey.ElementID}";
@@ -118,6 +141,14 @@ namespace RadDataSources
 				return $"{elementName}/{parameterName}";
 			else
 				return $"{elementName}/{parameterName}/{instance}";
+		}
+
+		private string ParameterKeysToString(IEnumerable<ParameterKey> pKeys)
+		{
+			if (pKeys == null)
+				return string.Empty;
+
+			return $"[{string.Join(", ", pKeys.Select(p => ParameterKeyToString(p)))}]";
 		}
 	}
 }

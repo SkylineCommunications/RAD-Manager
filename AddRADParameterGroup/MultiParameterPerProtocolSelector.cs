@@ -3,26 +3,24 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using RadWidgets;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
-	public class MultiParameterPerProtocolSelector : Section
+	public class MultiParameterPerProtocolSelector : VisibilitySection
 	{
 		private readonly IEngine _engine;
-		private readonly Label _protocolNameLabel;
 		private readonly DropDown<GetProtocolsResponseMessage> _protocolNameDropDown;
-		private readonly Label _protocolVersionLabel;
 		private readonly DropDown<string> _protocolVersionDropDown;
 		private readonly MultiProtocolParameterSelector _parameterSelector;
-		private bool _isVisible = true;
 
 		public MultiParameterPerProtocolSelector(IEngine engine) : base()
 		{
 			_engine = engine;
 
 			string protocolNameTooltip = "Make a parameter group for each element that uses this connector.";
-			_protocolNameLabel = new Label("Connector")
+			var protocolNameLabel = new Label("Connector")
 			{
 				Tooltip = protocolNameTooltip,
 			};
@@ -36,7 +34,7 @@
 			_protocolNameDropDown.Changed += (sender, args) => OnSelectedProtocolChanged();
 
 			string protocolVersionTooltip = "Make a parameter group for each element that uses this connector version.";
-			_protocolVersionLabel = new Label("Connector version")
+			var protocolVersionLabel = new Label("Connector version")
 			{
 				Tooltip = protocolVersionTooltip,
 			};
@@ -53,10 +51,10 @@
 			_parameterSelector.Changed += (sender, args) => Changed?.Invoke(this, EventArgs.Empty);
 			OnSelectedProtocolChanged();
 
-			AddWidget(_protocolNameLabel, 0, 0);
+			AddWidget(protocolNameLabel, 0, 0);
 			AddWidget(_protocolNameDropDown, 0, 1, 1, _parameterSelector.ColumnCount - 1);
 
-			AddWidget(_protocolVersionLabel, 1, 0);
+			AddWidget(protocolVersionLabel, 1, 0);
 			AddWidget(_protocolVersionDropDown, 1, 1, 1, _parameterSelector.ColumnCount - 1);
 
 			AddSection(_parameterSelector, 2, 0);
@@ -67,25 +65,6 @@
 		public string ProtocolName => _protocolNameDropDown.Selected?.Protocol;
 
 		public string ProtocolVersion => _protocolVersionDropDown.Selected;
-
-		public override bool IsVisible
-		{
-			// Note: we had to override this, since otherwise isVisible of the underlying widgets is called instead of on the sections
-			get => _isVisible;
-			set
-			{
-				if (_isVisible == value)
-					return;
-
-				_isVisible = value;
-
-				_protocolNameLabel.IsVisible = value;
-				_protocolNameDropDown.IsVisible = value;
-				_protocolVersionLabel.IsVisible = value;
-				_protocolVersionDropDown.IsVisible = value;
-				_parameterSelector.IsVisible = value;
-			}
-		}
 
 		public IEnumerable<ProtocolParameterSelectorInfo> GetSelectedParameters()
 		{

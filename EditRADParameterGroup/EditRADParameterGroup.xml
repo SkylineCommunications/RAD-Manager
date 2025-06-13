@@ -15,10 +15,7 @@
 
 	<Parameters>
 		<ScriptParameter id="1" type="string" values="">
-			<Description>GroupName</Description>
-		</ScriptParameter>
-		<ScriptParameter id="2" type="string" values="">
-			<Description>DataMinerID</Description>
+			<Description>Group ID</Description>
 		</ScriptParameter>
 	</Parameters>
 

@@ -5,15 +5,16 @@
 	using RadWidgets;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.RadToolkit;
 
 	public class TimeRangeItem : MultiSelectorItem
 	{
-		public TimeRangeItem(RadUtils.TimeRange range)
+		public TimeRangeItem(TimeRange range)
 		{
 			this.TimeRange = range;
 		}
 
-		public RadUtils.TimeRange TimeRange { get; set; }
+		public TimeRange TimeRange { get; set; }
 
 		public override string GetKey()
 		{
@@ -63,7 +64,7 @@
 			{
 				if (_startTimePicker.DateTime >= _endTimePicker.DateTime)
 					return null;
-				return new TimeRangeItem(new RadUtils.TimeRange(_startTimePicker.DateTime, _endTimePicker.DateTime));
+				return new TimeRangeItem(new TimeRange(_startTimePicker.DateTime, _endTimePicker.DateTime));
 			}
 		}
 

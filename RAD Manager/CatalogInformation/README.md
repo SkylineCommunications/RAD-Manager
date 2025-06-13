@@ -4,6 +4,9 @@
 
 This app allows you to **easily configure** relational anomaly detection and **visualize** its results.
 
+> [!NOTE]
+> From version 3.0.0 onwards, the RAD Manager app requires the [GQI DxM](https://aka.dataminer.services/gqi-dxm). Make sure the GQI DxM is installed and enabled before installing the RAD Manager, or use RAD Manager version 2.0.4.
+
 ![The RAD Manager app](./Images/RAD_Manager.png)
 
 ## Key features

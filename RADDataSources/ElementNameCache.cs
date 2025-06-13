@@ -12,7 +12,7 @@
 	{
 		private readonly IGQILogger _logger = null;
 
-		public ElementNameCache(IGQILogger logger)
+		public ElementNameCache(IGQILogger logger) : base(1000)
 		{
 			_logger = logger;
 		}
