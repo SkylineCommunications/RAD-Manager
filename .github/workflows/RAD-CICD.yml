@@ -74,6 +74,7 @@ jobs:
         run: dotnet consolidate -s "RAD Manager.sln"
         
   CI:
+    needs: [nuget_validation, unit_tests]
     uses: SkylineCommunications/_ReusableWorkflows/.github/workflows/DataMiner App Packages Master Workflow.yml@main
     with:
       configuration: Release
