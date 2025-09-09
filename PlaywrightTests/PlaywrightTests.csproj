@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="Microsoft.Playwright.NUnit" Version="1.55.0" />
     <PackageReference Include="MSTest" Version="3.6.4" />
-    <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.5.9.1" />
+    <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.5.4.2" />
     <PackageReference Include="Skyline.DataMiner.Utils.QAPortalAPI" Version="1.0.14" />
   </ItemGroup>
 
