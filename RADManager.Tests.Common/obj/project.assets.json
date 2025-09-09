@@ -813,28 +813,28 @@
           }
         }
       },
-      "Skyline.DataMiner.Dev.Automation/10.5.9.1": {
+      "Skyline.DataMiner.Dev.Automation/10.5.4.2": {
         "type": "package",
         "dependencies": {
-          "Skyline.DataMiner.Dev.Common": "10.5.9.1",
-          "Skyline.DataMiner.Files.SLAnalyticsTypes": "10.5.9.1",
-          "Skyline.DataMiner.Files.SLManagedAutomation": "10.5.9.1"
+          "Skyline.DataMiner.Dev.Common": "10.5.4.2",
+          "Skyline.DataMiner.Files.SLAnalyticsTypes": "10.5.4.2",
+          "Skyline.DataMiner.Files.SLManagedAutomation": "10.5.4.2"
         }
       },
-      "Skyline.DataMiner.Dev.Common/10.5.9.1": {
+      "Skyline.DataMiner.Dev.Common/10.5.4.2": {
         "type": "package",
         "dependencies": {
           "Newtonsoft.Json": "13.0.2",
           "SharpZipLib": "1.3.3",
-          "Skyline.DataMiner.Files.DataMinerMessageBroker.API": "10.5.9.1",
-          "Skyline.DataMiner.Files.SLLoggerUtil": "10.5.9.1",
-          "Skyline.DataMiner.Files.SLNetTypes": "10.5.9.1",
-          "Skyline.DataMiner.Files.SLProtoBufLibrary": "10.5.9.1",
-          "Skyline.DataMiner.Files.Skyline.DataMiner.Storage.Types": "10.5.9.1",
-          "Skyline.DataMiner.Files.protobufnet": "10.5.9.1"
+          "Skyline.DataMiner.Files.DataMinerMessageBroker.API": "10.5.4.2",
+          "Skyline.DataMiner.Files.SLLoggerUtil": "10.5.4.2",
+          "Skyline.DataMiner.Files.SLNetTypes": "10.5.4.2",
+          "Skyline.DataMiner.Files.SLProtoBufLibrary": "10.5.4.2",
+          "Skyline.DataMiner.Files.Skyline.DataMiner.Storage.Types": "10.5.4.2",
+          "Skyline.DataMiner.Files.protobufnet": "10.5.4.2"
         }
       },
-      "Skyline.DataMiner.Files.DataMinerMessageBroker.API/10.5.9.1": {
+      "Skyline.DataMiner.Files.DataMinerMessageBroker.API/10.5.4.2": {
         "type": "package",
         "compile": {
           "ref/net462/DataMinerMessageBroker.API.dll": {}
@@ -843,7 +843,7 @@
           "lib/net462/DataMinerMessageBroker.API.dll": {}
         }
       },
-      "Skyline.DataMiner.Files.protobufnet/10.5.9.1": {
+      "Skyline.DataMiner.Files.protobufnet/10.5.4.2": {
         "type": "package",
         "compile": {
           "lib/net462/_._": {}
@@ -852,7 +852,7 @@
           "lib/net462/protobuf-net.dll": {}
         }
       },
-      "Skyline.DataMiner.Files.Skyline.DataMiner.Storage.Types/10.5.9.1": {
+      "Skyline.DataMiner.Files.Skyline.DataMiner.Storage.Types/10.5.4.2": {
         "type": "package",
         "compile": {
           "ref/net462/Skyline.DataMiner.Storage.Types.dll": {}
@@ -861,7 +861,7 @@
           "lib/net462/Skyline.DataMiner.Storage.Types.dll": {}
         }
       },
-      "Skyline.DataMiner.Files.SLAnalyticsTypes/10.5.9.1": {
+      "Skyline.DataMiner.Files.SLAnalyticsTypes/10.5.4.2": {
         "type": "package",
         "compile": {
           "lib/net462/SLAnalyticsTypes.dll": {}
@@ -870,7 +870,7 @@
           "lib/net462/SLAnalyticsTypes.dll": {}
         }
       },
-      "Skyline.DataMiner.Files.SLLoggerUtil/10.5.9.1": {
+      "Skyline.DataMiner.Files.SLLoggerUtil/10.5.4.2": {
         "type": "package",
         "compile": {
           "ref/net462/SLLoggerUtil.dll": {}
@@ -879,7 +879,7 @@
           "lib/net462/SLLoggerUtil.dll": {}
         }
       },
-      "Skyline.DataMiner.Files.SLManagedAutomation/10.5.9.1": {
+      "Skyline.DataMiner.Files.SLManagedAutomation/10.5.4.2": {
         "type": "package",
         "compile": {
           "lib/net462/SLManagedAutomation.dll": {
@@ -892,7 +892,7 @@
           }
         }
       },
-      "Skyline.DataMiner.Files.SLNetTypes/10.5.9.1": {
+      "Skyline.DataMiner.Files.SLNetTypes/10.5.4.2": {
         "type": "package",
         "compile": {
           "ref/net462/SLNetTypes.dll": {
@@ -905,7 +905,7 @@
           }
         }
       },
-      "Skyline.DataMiner.Files.SLProtoBufLibrary/10.5.9.1": {
+      "Skyline.DataMiner.Files.SLProtoBufLibrary/10.5.4.2": {
         "type": "package",
         "compile": {
           "lib/net462/_._": {}
@@ -3477,38 +3477,38 @@
         "sharpziplib.nuspec"
       ]
     },
-    "Skyline.DataMiner.Dev.Automation/10.5.9.1": {
-      "sha512": "wBV1QoaKmD8CtTSqqh8sSi8RciUAmJt810X47h0R2GG+LVqEEirG4KbNw170It/5eQKncLWJiZ/IafnUQ5XBBQ==",
+    "Skyline.DataMiner.Dev.Automation/10.5.4.2": {
+      "sha512": "u9aNjiVdKalLmnMyi65KlpZup8j2KOrf5b5ySJxUPRkA4D8Pn1mgR6WP7fZoybXyABP5IV4ZFJI6TAReWPhTgw==",
       "type": "package",
-      "path": "skyline.dataminer.dev.automation/10.5.9.1",
+      "path": "skyline.dataminer.dev.automation/10.5.4.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.txt",
         "docs/README.md",
         "images/devicon.png",
-        "skyline.dataminer.dev.automation.10.5.9.1.nupkg.sha512",
+        "skyline.dataminer.dev.automation.10.5.4.2.nupkg.sha512",
         "skyline.dataminer.dev.automation.nuspec"
       ]
     },
-    "Skyline.DataMiner.Dev.Common/10.5.9.1": {
-      "sha512": "5kYxpG89Bd1FWwwO3dxteQ0jcCeo8dgrYgQHuXV1/o4HUExXYWzmpQ/r9B2wsxTSSHPjRp6QmO2A/38nRZ0Esw==",
+    "Skyline.DataMiner.Dev.Common/10.5.4.2": {
+      "sha512": "Tawg0EVB5lNLNORrQC5Ont20XAR9G+BB7pVfrf6OzyM/+91CU06e2VJIAK0kF5wCFstcaA8CY/Tn/kFqhvmB9Q==",
       "type": "package",
-      "path": "skyline.dataminer.dev.common/10.5.9.1",
+      "path": "skyline.dataminer.dev.common/10.5.4.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.txt",
         "docs/README.md",
         "images/devicon.png",
-        "skyline.dataminer.dev.common.10.5.9.1.nupkg.sha512",
+        "skyline.dataminer.dev.common.10.5.4.2.nupkg.sha512",
         "skyline.dataminer.dev.common.nuspec"
       ]
     },
-    "Skyline.DataMiner.Files.DataMinerMessageBroker.API/10.5.9.1": {
-      "sha512": "D+r1N1eKKEetLZWriLE+LqvpEUA6gulIikmfJejpBq2/N1k27x6RXaJORhiHnFJnS3Gi9JiJHXEykeMIv1qczw==",
+    "Skyline.DataMiner.Files.DataMinerMessageBroker.API/10.5.4.2": {
+      "sha512": "ympJXmXCqZpWSmv/dxjcPWhKhhydbauoiGa9b+rqbph+lINF/JTEDyjTpxfYfLQxwRjjlNozBFVidl2oiknn+Q==",
       "type": "package",
-      "path": "skyline.dataminer.files.dataminermessagebroker.api/10.5.9.1",
+      "path": "skyline.dataminer.files.dataminermessagebroker.api/10.5.4.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3517,14 +3517,14 @@
         "images/fileicon.png",
         "lib/net462/DataMinerMessageBroker.API.dll",
         "ref/net462/DataMinerMessageBroker.API.dll",
-        "skyline.dataminer.files.dataminermessagebroker.api.10.5.9.1.nupkg.sha512",
+        "skyline.dataminer.files.dataminermessagebroker.api.10.5.4.2.nupkg.sha512",
         "skyline.dataminer.files.dataminermessagebroker.api.nuspec"
       ]
     },
-    "Skyline.DataMiner.Files.protobufnet/10.5.9.1": {
-      "sha512": "yYyGfqNtrQG6A3s4FR1eIGo8n65nyIRn45HRDK6y+EfLGBQkvcV/DKDJte7NyTOb7E8x1/42bMIgXPmQ0OlEXg==",
+    "Skyline.DataMiner.Files.protobufnet/10.5.4.2": {
+      "sha512": "FUqtDzRqTzg/sXdygTg2/L3LB2HNFGeL5E/zHVW9cDQ+TeyOLrPGFsNocH6JUvC59z8crchZz8Yb5pr5zXgYAA==",
       "type": "package",
-      "path": "skyline.dataminer.files.protobufnet/10.5.9.1",
+      "path": "skyline.dataminer.files.protobufnet/10.5.4.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3532,14 +3532,14 @@
         "docs/README.md",
         "images/fileicon.png",
         "lib/net462/protobuf-net.dll",
-        "skyline.dataminer.files.protobufnet.10.5.9.1.nupkg.sha512",
+        "skyline.dataminer.files.protobufnet.10.5.4.2.nupkg.sha512",
         "skyline.dataminer.files.protobufnet.nuspec"
       ]
     },
-    "Skyline.DataMiner.Files.Skyline.DataMiner.Storage.Types/10.5.9.1": {
-      "sha512": "p6D4a3Ilq8MJg+/rYtEO0z960Su0OuRMXPAxfxXlfLRZGrBpr8KPCHv8YCQjzO+0Euw0tr9VJ2sJ/J1cgtTV7A==",
+    "Skyline.DataMiner.Files.Skyline.DataMiner.Storage.Types/10.5.4.2": {
+      "sha512": "BIzRu5jRDSjZ9xDTC8WsVpKCMbhOhAgd3RO9pFWPWyvSJ2FxcO18fLzZAFVKaFx27nivEBZmzcC7H1EdV78sqw==",
       "type": "package",
-      "path": "skyline.dataminer.files.skyline.dataminer.storage.types/10.5.9.1",
+      "path": "skyline.dataminer.files.skyline.dataminer.storage.types/10.5.4.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3548,14 +3548,14 @@
         "images/fileicon.png",
         "lib/net462/Skyline.DataMiner.Storage.Types.dll",
         "ref/net462/Skyline.DataMiner.Storage.Types.dll",
-        "skyline.dataminer.files.skyline.dataminer.storage.types.10.5.9.1.nupkg.sha512",
+        "skyline.dataminer.files.skyline.dataminer.storage.types.10.5.4.2.nupkg.sha512",
         "skyline.dataminer.files.skyline.dataminer.storage.types.nuspec"
       ]
     },
-    "Skyline.DataMiner.Files.SLAnalyticsTypes/10.5.9.1": {
-      "sha512": "bFD+moyZODWHRIhhTx3duTXdHBDUxtoUw8UwIijTmqCK4C0OC1n0dfEg9flOBnr6Arswik03nHHy05+3CzYyMQ==",
+    "Skyline.DataMiner.Files.SLAnalyticsTypes/10.5.4.2": {
+      "sha512": "dTRj0D950FQ9FrXErEyxlqnABQc/50nRe3sv/CGytEafDohF7avMQuobv/3O97hw/Kihz3d2V5uApIP/2i+FvA==",
       "type": "package",
-      "path": "skyline.dataminer.files.slanalyticstypes/10.5.9.1",
+      "path": "skyline.dataminer.files.slanalyticstypes/10.5.4.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3563,14 +3563,14 @@
         "docs/README.md",
         "images/fileicon.png",
         "lib/net462/SLAnalyticsTypes.dll",
-        "skyline.dataminer.files.slanalyticstypes.10.5.9.1.nupkg.sha512",
+        "skyline.dataminer.files.slanalyticstypes.10.5.4.2.nupkg.sha512",
         "skyline.dataminer.files.slanalyticstypes.nuspec"
       ]
     },
-    "Skyline.DataMiner.Files.SLLoggerUtil/10.5.9.1": {
-      "sha512": "UnQSfAtrS3ogGSXIzU0FnN99298vdxNSxyHFUqeN3kSueeqJUImQrU/c9ttEWFPPUtOUEyhO/W9p1X+pfCsgLQ==",
+    "Skyline.DataMiner.Files.SLLoggerUtil/10.5.4.2": {
+      "sha512": "gPddwb4P+9GvW+MmJ+kjQ3hzTDKePpFcrKzrWHUSUBWnxDHSzGgUYe5dHjZEY/8fKt78Up0j+LwhcYXJX2eckQ==",
       "type": "package",
-      "path": "skyline.dataminer.files.slloggerutil/10.5.9.1",
+      "path": "skyline.dataminer.files.slloggerutil/10.5.4.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3579,14 +3579,14 @@
         "images/fileicon.png",
         "lib/net462/SLLoggerUtil.dll",
         "ref/net462/SLLoggerUtil.dll",
-        "skyline.dataminer.files.slloggerutil.10.5.9.1.nupkg.sha512",
+        "skyline.dataminer.files.slloggerutil.10.5.4.2.nupkg.sha512",
         "skyline.dataminer.files.slloggerutil.nuspec"
       ]
     },
-    "Skyline.DataMiner.Files.SLManagedAutomation/10.5.9.1": {
-      "sha512": "NvfZQDdDwCKvPYFnSjLoglyCas90h7lw/4hbbXSEzl3jE6U0zYkzzsHvWHq75b3Tf1heOYogyYr6rlIuYKisog==",
+    "Skyline.DataMiner.Files.SLManagedAutomation/10.5.4.2": {
+      "sha512": "kBjDZJjX/IZncHLWxAzKFpMLTjBfemq0Lbj7f10dy52OFdJlbk5n5k7+yjpWZyyzPj6MqY2HpT5hKdIhTwXDPw==",
       "type": "package",
-      "path": "skyline.dataminer.files.slmanagedautomation/10.5.9.1",
+      "path": "skyline.dataminer.files.slmanagedautomation/10.5.4.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3595,14 +3595,14 @@
         "images/fileicon.png",
         "lib/net462/SLManagedAutomation.dll",
         "lib/net462/SLManagedAutomation.xml",
-        "skyline.dataminer.files.slmanagedautomation.10.5.9.1.nupkg.sha512",
+        "skyline.dataminer.files.slmanagedautomation.10.5.4.2.nupkg.sha512",
         "skyline.dataminer.files.slmanagedautomation.nuspec"
       ]
     },
-    "Skyline.DataMiner.Files.SLNetTypes/10.5.9.1": {
-      "sha512": "JtiTaCyTCuhbCnUouXHSYFGfDFs+nnAhbhk+ArqX4X5KGOT9T5+wtpcggjg30lRjCyKXL0Xu5sFQMuu5wKyrlw==",
+    "Skyline.DataMiner.Files.SLNetTypes/10.5.4.2": {
+      "sha512": "wrIMvIWJ4kcjW0gPVw/ywoLqwPFLz6TDgr1jBPgTAennoLZ5Nqap6OfB/GVqDdonkCWg8nJnVMZIbDl7+4RV4w==",
       "type": "package",
-      "path": "skyline.dataminer.files.slnettypes/10.5.9.1",
+      "path": "skyline.dataminer.files.slnettypes/10.5.4.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3613,14 +3613,14 @@
         "lib/net462/SLNetTypes.xml",
         "ref/net462/SLNetTypes.dll",
         "ref/net462/SLNetTypes.xml",
-        "skyline.dataminer.files.slnettypes.10.5.9.1.nupkg.sha512",
+        "skyline.dataminer.files.slnettypes.10.5.4.2.nupkg.sha512",
         "skyline.dataminer.files.slnettypes.nuspec"
       ]
     },
-    "Skyline.DataMiner.Files.SLProtoBufLibrary/10.5.9.1": {
-      "sha512": "l/OdDP29+BxKyLkhMK2+nmVDYhahXM8fjO4qq9T624WLWoicppbLy2jLtTD8+KMzg+qibgO2wsgndpLHt9DIng==",
+    "Skyline.DataMiner.Files.SLProtoBufLibrary/10.5.4.2": {
+      "sha512": "4L01GjUrVUQYgJwoo+AqGG/I//Q+1c8Y9sNaOXzOBy1GmpWDEygigqUiATUdEEMsyxJYt+Y5WjXnFhCYRAZTuw==",
       "type": "package",
-      "path": "skyline.dataminer.files.slprotobuflibrary/10.5.9.1",
+      "path": "skyline.dataminer.files.slprotobuflibrary/10.5.4.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3628,7 +3628,7 @@
         "docs/README.md",
         "images/fileicon.png",
         "lib/net462/SLProtoBufLibrary.dll",
-        "skyline.dataminer.files.slprotobuflibrary.10.5.9.1.nupkg.sha512",
+        "skyline.dataminer.files.slprotobuflibrary.10.5.4.2.nupkg.sha512",
         "skyline.dataminer.files.slprotobuflibrary.nuspec"
       ]
     },
@@ -5901,7 +5901,7 @@
       "Microsoft.Playwright >= 1.55.0",
       "Microsoft.Playwright.MSTest >= 1.55.0",
       "Microsoft.Playwright.NUnit >= 1.55.0",
-      "Skyline.DataMiner.Dev.Automation >= 10.5.9.1",
+      "Skyline.DataMiner.Dev.Automation >= 10.5.4.2",
       "Skyline.DataMiner.Utils.QAPortalAPI >= 1.0.14",
       "StyleCop.Analyzers >= 1.1.118"
     ]
@@ -5979,7 +5979,7 @@
           },
           "Skyline.DataMiner.Dev.Automation": {
             "target": "Package",
-            "version": "[10.5.9.1, )"
+            "version": "[10.5.4.2, )"
           },
           "Skyline.DataMiner.Utils.QAPortalAPI": {
             "target": "Package",
@@ -6017,7 +6017,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Package 'Skyline.DataMiner.Files.DataMinerMessageBroker.API 10.5.9.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "message": "Package 'Skyline.DataMiner.Files.DataMinerMessageBroker.API 10.5.4.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
       "libraryId": "Skyline.DataMiner.Files.DataMinerMessageBroker.API",
       "targetGraphs": [
         "net8.0"
@@ -6027,7 +6027,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Package 'Skyline.DataMiner.Files.protobufnet 10.5.9.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "message": "Package 'Skyline.DataMiner.Files.protobufnet 10.5.4.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
       "libraryId": "Skyline.DataMiner.Files.protobufnet",
       "targetGraphs": [
         "net8.0"
@@ -6037,7 +6037,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Package 'Skyline.DataMiner.Files.Skyline.DataMiner.Storage.Types 10.5.9.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "message": "Package 'Skyline.DataMiner.Files.Skyline.DataMiner.Storage.Types 10.5.4.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
       "libraryId": "Skyline.DataMiner.Files.Skyline.DataMiner.Storage.Types",
       "targetGraphs": [
         "net8.0"
@@ -6047,7 +6047,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Package 'Skyline.DataMiner.Files.SLAnalyticsTypes 10.5.9.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "message": "Package 'Skyline.DataMiner.Files.SLAnalyticsTypes 10.5.4.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
       "libraryId": "Skyline.DataMiner.Files.SLAnalyticsTypes",
       "targetGraphs": [
         "net8.0"
@@ -6057,7 +6057,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Package 'Skyline.DataMiner.Files.SLLoggerUtil 10.5.9.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "message": "Package 'Skyline.DataMiner.Files.SLLoggerUtil 10.5.4.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
       "libraryId": "Skyline.DataMiner.Files.SLLoggerUtil",
       "targetGraphs": [
         "net8.0"
@@ -6067,7 +6067,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Package 'Skyline.DataMiner.Files.SLManagedAutomation 10.5.9.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "message": "Package 'Skyline.DataMiner.Files.SLManagedAutomation 10.5.4.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
       "libraryId": "Skyline.DataMiner.Files.SLManagedAutomation",
       "targetGraphs": [
         "net8.0"
@@ -6077,7 +6077,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Package 'Skyline.DataMiner.Files.SLNetTypes 10.5.9.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "message": "Package 'Skyline.DataMiner.Files.SLNetTypes 10.5.4.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
       "libraryId": "Skyline.DataMiner.Files.SLNetTypes",
       "targetGraphs": [
         "net8.0"
@@ -6087,7 +6087,7 @@
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "Package 'Skyline.DataMiner.Files.SLProtoBufLibrary 10.5.9.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "message": "Package 'Skyline.DataMiner.Files.SLProtoBufLibrary 10.5.4.2' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
       "libraryId": "Skyline.DataMiner.Files.SLProtoBufLibrary",
       "targetGraphs": [
         "net8.0"

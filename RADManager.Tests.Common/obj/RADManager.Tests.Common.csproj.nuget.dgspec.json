@@ -73,7 +73,7 @@
             },
             "Skyline.DataMiner.Dev.Automation": {
               "target": "Package",
-              "version": "[10.5.9.1, )"
+              "version": "[10.5.4.2, )"
             },
             "Skyline.DataMiner.Utils.QAPortalAPI": {
               "target": "Package",
