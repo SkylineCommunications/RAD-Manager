@@ -51,6 +51,14 @@ jobs:
       - name: Build Solution
         run: msbuild "RAD Manager.sln" /p:Configuration=Release /verbosity:quiet /clp:"Summary;ErrorsOnly;ForceConsoleColor" /p:WarningLevel=0 /p:RunCodeAnalysis=false /maxcpucount
 
+      - name: Install Playwright.NET
+        uses: phil-scott-78/setup-playwright-dotnet@v0.1.0-alpha
+        with:
+          dotnet-version: 8.0.x
+          with-deps: true
+          browsers: 'chromium firefox'
+          install-powershell: true
+          
       - name: Run Unit Tests
         shell: pwsh
         run: |
