@@ -24,8 +24,12 @@
   <ItemGroup>
     <ProjectReference Include="..\RADManager.Tests.Common\RADManager.Tests.Common.csproj" />
   </ItemGroup>
-
   <ItemGroup>
+	<Content Include="bin\Debug\net8.0\testhost.x86.runtimeconfig.json" />
+  </ItemGroup>
+
+
+	<ItemGroup>
     <Using Include="Microsoft.Playwright.MSTest" />
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
     <Using Include="System.Text.RegularExpressions" />
