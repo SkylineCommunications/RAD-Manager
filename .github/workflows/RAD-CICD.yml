@@ -59,6 +59,9 @@ jobs:
           browsers: 'chromium firefox'
           install-powershell: true
           
+      - name: Ensure browsers are installed
+        run: pwsh bin/Debug/net8.0/playwright.ps1 install --with-deps
+
       - name: Run Unit Tests
         shell: pwsh
         run: |
