@@ -21,3 +21,5 @@ EditRADParameterGroup/bin
 EditRADParameterGroup/obj
 RADDataSources/obj
 RADDataSources/bin
+PlaywrightTests/bin/Debug/net8.0/.playwright/package/bin
+RADManager.Tests.Common/bin/Debug/net8.0/.playwright/package/bin
