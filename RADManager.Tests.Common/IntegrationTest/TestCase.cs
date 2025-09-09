@@ -37,7 +37,7 @@
 		/// <summary>
 		/// Gets or sets information about the failure if the test case did not succeed.
 		/// </summary>
-		public string FailInfo { get; set; }
+		public string? FailInfo { get; set; }
 
 		/// <summary>
 		/// Return false or throw exception on failure.
@@ -82,7 +82,7 @@
 			return new TestCaseReport(Name, IsSuccess.Value ? QAPortalAPI.Enums.Result.Success : QAPortalAPI.Enums.Result.Failure, FailInfo);
 		}
 
-		public bool TryGetPerfomanceReport(out PerformanceTestCaseReport performanceReport)
+		public bool TryGetPerfomanceReport(out PerformanceTestCaseReport? performanceReport)
 		{
 			performanceReport = null;
 			if (!ExecutionTime.HasValue)
@@ -106,12 +106,12 @@
 		}
 
 		public void AssertResult()
-		{
-			Assert.IsTrue(IsSuccess, FailInfo);
-			if (!Debugger.IsAttached)
-			{
-				Assert.IsTrue(IsInTime, $"Test exceeded maximum execution time of {MaxExecutionTime.TotalMilliseconds} ms (execution time: {ExecutionTime.Value.TotalMilliseconds} ms).");
-			}
-		}
+        {
+            Assert.IsTrue(IsSuccess, FailInfo);
+            if (!Debugger.IsAttached)
+            {
+                Assert.IsTrue(IsInTime && ExecutionTime.HasValue, $"Test exceeded maximum execution time of {MaxExecutionTime.TotalMilliseconds} ms (execution time: {(ExecutionTime.HasValue ? ExecutionTime.Value.TotalMilliseconds : 0)} ms).");
+            }
+        }
 	}
 }

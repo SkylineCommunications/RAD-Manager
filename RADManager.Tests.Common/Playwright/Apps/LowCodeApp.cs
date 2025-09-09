@@ -23,12 +23,9 @@
 
 		protected Config Config { get; }
 
-		public static async Task<IEnumerable<string>> GetSidebarPagesAsync(LowCodeAppPage page)
+		public static async Task<IEnumerable<string?>> GetSidebarPagesAsync(LowCodeAppPage page)
 		{
-			if (page is null)
-			{
-				throw new ArgumentNullException(nameof(page));
-			}
+			ArgumentNullException.ThrowIfNull(page);
 
 			var sidebarTabs = await page.Body.GetByTestId("app-sidebar.sidebar-tab").AllAsync();
 
@@ -57,7 +54,7 @@
 			}
 
 			var page = await _browserContext.NewPageAsync();
-			await GotoAndLoginAsync(page, $"https:/slc-h56-g01.skyline.local/app/{ID}/{Uri.EscapeUriString(title)}");
+			await GotoAndLoginAsync(page, $"https:/slc-h56-g01.skyline.local/app/{ID}/{Uri.EscapeDataString(title)}");
 
 			return new LowCodeAppPage(page);
 		}
@@ -79,12 +76,12 @@
 			return subPages;
 		}
 
-		private async Task<IResponse> GotoAndLoginAsync(IPage page, string url, PageGotoOptions options = default)
-		{
-			var result = await page.GotoAsync(url, options);
-			await Authentication.LoginAsync(page, Config);
+		private async Task<IResponse?> GotoAndLoginAsync(IPage page, string url, PageGotoOptions? options = default)
+        {
+            var result = await page.GotoAsync(url, options);
+            await Authentication.LoginAsync(page, Config);
 
-			return result;
-		}
+            return result;
+        }
 	}
 }

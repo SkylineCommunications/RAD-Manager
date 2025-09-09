@@ -10,17 +10,17 @@
 		{
 		}
 
-		public string UserName => Environment.GetEnvironmentVariable("US");
+		public string UserName => Environment.GetEnvironmentVariable("US") ?? string.Empty;
 
-		public string Password => Environment.GetEnvironmentVariable("PP");
+		public string Password => Environment.GetEnvironmentVariable("PP") ?? string.Empty;
 
-		public string EMail => Environment.GetEnvironmentVariable("EM");
+		public string EMail => Environment.GetEnvironmentVariable("EM") ?? string.Empty;
 
-		public string B2cUserName => Environment.GetEnvironmentVariable("B2C_US");
+		public string B2cUserName => Environment.GetEnvironmentVariable("B2C_US") ?? string.Empty;
 
-		public string B2cPassword => Environment.GetEnvironmentVariable("B2C_PP");
+		public string B2cPassword => Environment.GetEnvironmentVariable("B2C_PP") ?? string.Empty;
 
-		public string BaseUrl => Environment.GetEnvironmentVariable("HN");
+		public string BaseUrl => Environment.GetEnvironmentVariable("HN") ?? string.Empty;
 
 		public static Config Load()
 		{
@@ -31,7 +31,7 @@
 
 		private static void LoadEnv()
 		{
-			var solutionRoot = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
+			var solutionRoot = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)?.Parent?.Parent?.Parent?.FullName;
 			Console.WriteLine($"Solution root: {solutionRoot}");
 			var localEnvPath = Path.Combine(solutionRoot, ".env");
 			var productionEnvPath = Path.Combine("c:\\Skyline DataMiner\\Playwright_Tests", ".env");

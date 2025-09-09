@@ -1,5 +1,3 @@
-C:\devcore3\RADManager\RAD-Manager\PlaywrightTests\bin\Debug\net8.0\testhost.x86.exe
-C:\devcore3\RADManager\RAD-Manager\PlaywrightTests\bin\Debug\net8.0\testhost.x86.dll
 C:\devcore3\RADManager\RAD-Manager\PlaywrightTests\bin\Debug\net8.0\.playwright\node\win32_x64\node.exe
 C:\devcore3\RADManager\RAD-Manager\PlaywrightTests\bin\Debug\net8.0\.playwright\node\LICENSE
 C:\devcore3\RADManager\RAD-Manager\PlaywrightTests\bin\Debug\net8.0\.playwright\package\api.json
@@ -540,3 +538,5 @@ C:\devcore3\RADManager\RAD-Manager\PlaywrightTests\bin\Debug\net8.0\RADManager.T
 C:\devcore3\RADManager\RAD-Manager\PlaywrightTests\bin\Debug\net8.0\RADManager.Tests.Common.pdb
 C:\devcore3\RADManager\RAD-Manager\PlaywrightTests\bin\Debug\net8.0\Microsoft.Playwright.NUnit.dll
 C:\devcore3\RADManager\RAD-Manager\PlaywrightTests\bin\Debug\net8.0\nunit.framework.dll
+C:\devcore3\RADManager\RAD-Manager\PlaywrightTests\bin\Debug\net8.0\testhost.x86.exe
+C:\devcore3\RADManager\RAD-Manager\PlaywrightTests\bin\Debug\net8.0\testhost.x86.dll

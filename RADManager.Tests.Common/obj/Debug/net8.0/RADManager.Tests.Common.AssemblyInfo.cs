@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RADManager.Tests.Common")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+18d2419b62999603069c66e4e844976fb10ac700")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5cb5eb0c59d9e8f2edd4d63c3be24e47c25697b0")]
 [assembly: System.Reflection.AssemblyProductAttribute("RADManager.Tests.Common")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RADManager.Tests.Common")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

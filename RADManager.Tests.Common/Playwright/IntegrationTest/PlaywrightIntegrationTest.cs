@@ -4,19 +4,16 @@
 	using System.Diagnostics;
 	using System.IO;
 	using System.Threading.Tasks;
-
 	using Microsoft.Extensions.Logging;
-
 	using Microsoft.Playwright;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-	using Skyline.DataMiner.RADManager.Tests.Common.IntegrationTest;
 	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.RADManager.Tests.Common.IntegrationTest;
 
 	public abstract class PlaywrightIntegrationTest : IntegrationTest
 	{
-		private Lazy<IConnection> lazyConnection;
-		private IConnection providedConnection;
+		private Lazy<IConnection>? lazyConnection;
+		private IConnection? providedConnection;
 
 		protected PlaywrightIntegrationTest(TestContext testContext)
 		{
@@ -28,22 +25,21 @@
 
 		protected PlaywrightIntegrationTest(IConnection connection)
 		{
-
 			Config = Config.Load();
 			providedConnection = connection;
 		}
 
-		public override IConnection Connection => providedConnection ?? lazyConnection.Value;
+		public override IConnection Connection => providedConnection ?? lazyConnection!.Value;
 
 		protected Config Config { get; private set; }
 
-		protected IPlaywright Playwright { get; private set; }
+		protected IPlaywright? Playwright { get; private set; }
 
-		protected IBrowser Browser { get; private set; }
+		protected IBrowser? Browser { get; private set; }
 
-		protected IBrowserContext Context { get; private set; }
+		protected IBrowserContext? Context { get; private set; }
 
-		protected TestContext TestContext { get; set; }
+		protected TestContext? TestContext { get; set; }
 
 		public override void Cleanup()
 		{
@@ -93,7 +89,7 @@
 
 				await Context.Tracing.StartAsync(new TracingStartOptions
 				{
-					Title = $"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}",
+					Title = $"{TestContext?.FullyQualifiedTestClassName}.{TestContext?.TestName}",
 					Screenshots = true,
 					Snapshots = true,
 					Sources = true,
@@ -102,30 +98,37 @@
 			catch (Exception ex)
 			{
 				Logger?.LogError(ex, "Failed to launch browser.");
-				throw ex;
+				throw;
 			}
 		}
 
 		private async Task CleanupBrowser()
-		{
-			if (TestContext != null && (TestContext.CurrentTestOutcome != UnitTestOutcome.Passed || Debugger.IsAttached))
-			{
-				var tracePath = Path.Combine(
-					Directory.GetCurrentDirectory(),
-					"playwright-traces",
-					$"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}.zip");
+        {
+            if (Context != null)
+            {
+                if (TestContext != null && (TestContext.CurrentTestOutcome != UnitTestOutcome.Passed || Debugger.IsAttached))
+                {
+                    var tracePath = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "playwright-traces",
+                        $"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}.zip");
 
-				await Context.Tracing.StopAsync(new TracingStopOptions { Path = tracePath });
-			}
-			else
-			{
-				await Context.Tracing.StopAsync();
-			}
+                    await Context.Tracing.StopAsync(new TracingStopOptions { Path = tracePath });
+                }
+                else
+                {
+                    await Context.Tracing.StopAsync();
+                }
 
-			await Context.CloseAsync();
-			await Browser.CloseAsync();
+                await Context.CloseAsync();
+            }
 
-			Playwright.Dispose();
-		}
+            if (Browser != null)
+            {
+                await Browser.CloseAsync();
+            }
+
+            Playwright?.Dispose();
+        }
 	}
 }
