@@ -6556,12 +6556,6 @@
   },
   "logs": [
     {
-      "code": "Undefined",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "No Authorization header detected"
-    },
-    {
       "code": "NU1701",
       "level": "Warning",
       "warningLevel": 1,

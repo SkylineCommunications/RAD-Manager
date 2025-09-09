@@ -109,15 +109,6 @@
   ],
   "logs": [
     {
-      "code": "Undefined",
-      "level": "Warning",
-      "message": "No Authorization header detected",
-      "projectPath": "C:\\devcore3\\RADManager\\RAD-Manager\\PlaywrightTests\\PlaywrightTests.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\devcore3\\RADManager\\RAD-Manager\\PlaywrightTests\\PlaywrightTests.csproj",
-      "targetGraphs": []
-    },
-    {
       "code": "NU1701",
       "level": "Warning",
       "message": "Package 'Skyline.DataMiner.Files.DataMinerMessageBroker.API 10.5.9.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
