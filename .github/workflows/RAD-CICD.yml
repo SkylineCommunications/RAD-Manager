@@ -16,7 +16,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
-unit_tests:
+ unit_tests:
     name: Unit Tests
     needs: nuget_validation
     runs-on: windows-latest
@@ -60,6 +60,19 @@ unit_tests:
           | Select-Object -ExpandProperty FullName
         Write-Host $TestDlls
         & vstest.console.exe $TestDlls /Logger:TRX /Parallel
+
+  nuget_validation:
+    name: Validate NuGets
+    runs-on: ubuntu-latest
+    
+    steps:
+     - uses: actions/checkout@v4
+
+     - name: Install dotnet-consolidate
+       run: dotnet tool install -g dotnet-consolidate
+
+     - name: Run dotnet consolidate
+       run: dotnet consolidate -s RAD Manager.sln
         
   CI:
     uses: SkylineCommunications/_ReusableWorkflows/.github/workflows/DataMiner App Packages Master Workflow.yml@main
