@@ -14,8 +14,8 @@ on:
   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
- unit_tests:
+  jobs:
+   unit_tests:
     name: Unit Tests
     needs: nuget_validation
     runs-on: windows-latest
