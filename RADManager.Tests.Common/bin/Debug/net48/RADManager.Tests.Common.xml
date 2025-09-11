@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>RADManager.Tests.Common</name>
+    </assembly>
+    <members>
+        <member name="P:Skyline.DataMiner.RADManager.Tests.Common.IntegrationTest.TestCase.Name">
+            <summary>
+            Gets the name of the test case.
+            </summary>
+        </member>
+        <member name="P:Skyline.DataMiner.RADManager.Tests.Common.IntegrationTest.TestCase.MaxExecutionTime">
+            <summary>
+            Gets the maximum allowed execution time for this test case.
+            </summary>
+        </member>
+        <member name="P:Skyline.DataMiner.RADManager.Tests.Common.IntegrationTest.TestCase.IsSuccess">
+            <summary>
+            Gets a value indicating whether the test case succeeded. Null if not executed yet.
+            </summary>
+        </member>
+        <member name="P:Skyline.DataMiner.RADManager.Tests.Common.IntegrationTest.TestCase.ExecutionTime">
+            <summary>
+            Gets the execution time of the test case. Null if the test case did not succeed or was not executed yet.
+            </summary>
+        </member>
+        <member name="P:Skyline.DataMiner.RADManager.Tests.Common.IntegrationTest.TestCase.IsInTime">
+            <summary>
+            Gets a value indicating whether the test case executed within the allowed time. False if the test case did not succeed or was not executed yet.
+            </summary>
+        </member>
+        <member name="P:Skyline.DataMiner.RADManager.Tests.Common.IntegrationTest.TestCase.FailInfo">
+            <summary>
+            Gets or sets information about the failure if the test case did not succeed.
+            </summary>
+        </member>
+        <member name="M:Skyline.DataMiner.RADManager.Tests.Common.IntegrationTest.TestCase.Execute">
+            <summary>
+            Return false or throw exception on failure.
+            </summary>
+            <returns>Whether the test succeeded.</returns>
+        </member>
+        <member name="M:Skyline.DataMiner.RADManager.Tests.Common.IntegrationTest.TestCase.RunTestCase">
+            <summary>
+            Runs the test case and measures execution time.
+            </summary>
+            <returns>Whether the test succeeded.</returns>
+        </member>
+    </members>
+</doc>
