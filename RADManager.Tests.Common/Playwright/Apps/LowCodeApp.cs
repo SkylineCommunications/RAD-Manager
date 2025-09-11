@@ -57,7 +57,7 @@
 			}
 
 			var page = await _browserContext.NewPageAsync();
-			await GotoAndLoginAsync(page, $"https:/slc-h56-g01.skyline.local/app/{ID}/{Uri.EscapeDataString(title)}");
+			await GotoAndLoginAsync(page, $"https:/adelinasp.skyline.local/app/{ID}/{Uri.EscapeDataString(title)}");
 
 			return new LowCodeAppPage(page);
 		}

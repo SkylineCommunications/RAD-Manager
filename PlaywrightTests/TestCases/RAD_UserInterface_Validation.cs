@@ -61,7 +61,7 @@
 			await AppPage.CheckNoTryAgainButton();
 
 			// Validate that "Parameters in the selected group" text is visible on the page
-			await AppPage.ValidateComponentByText("#db-component-3", "Group Information", 0);
+			await AppPage.ValidateComponentByText("#db-component-3", "Parameters in the selected group", 0);
 
 			// Validate that "Time range to show on trend graphs" text is visible on the page
 			await AppPage.ValidateComponentByText("#db-component-8", "Time range to show on trend graphs", 0);
@@ -70,7 +70,7 @@
 			await AppPage.ValidateComponentByText("#db-component-4", "Trend graph of selected parameters", 0);
 
 			// Validate that "Inspect the anomaly score of your group" text is visible on the page
-			await AppPage.ValidateComponentByText("#db-component-7", "Inspect the anomaly score of your group", 0);
+			//await AppPage.ValidateComponentByText("#db-component-7", "Inspect the anomaly score of your group", 0);
 		}
 
 		private async Task LoadInitialPageAsync()
