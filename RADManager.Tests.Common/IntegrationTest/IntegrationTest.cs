@@ -22,7 +22,7 @@
 
 		public abstract TestCase[] TestCases { get; }
 
-		public ILogger? Logger { get; set; }
+		public ILogger Logger { get; set; }
 
 		private static string Contact => "adelina.spatariu@skyline.be";
 
@@ -85,7 +85,7 @@
 				}
 
 				reportedFailedCase = reportedFailedCase || testCase.GetTestCaseReport().TestCaseResult == QAPortalAPI.Enums.Result.Failure;
-				if (testCase.TryGetPerfomanceReport(out PerformanceTestCaseReport? performanceReport))
+				if (testCase.TryGetPerfomanceReport(out PerformanceTestCaseReport performanceReport))
 				{
 					report.PerformanceTestCases.Add(performanceReport);
 				}
@@ -96,7 +96,7 @@
 
 		private static string GetAgentWhereScriptIsRunning(IEngine engine)
         {
-            string? agentName = null;
+            string agentName = null;
             try
             {
                 var message = new GetInfoMessage(-1, InfoType.LocalDataMinerInfo);

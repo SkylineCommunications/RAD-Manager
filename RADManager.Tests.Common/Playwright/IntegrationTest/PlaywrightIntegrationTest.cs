@@ -12,8 +12,8 @@
 
 	public abstract class PlaywrightIntegrationTest : IntegrationTest
 	{
-		private Lazy<IConnection>? lazyConnection;
-		private IConnection? providedConnection;
+		private Lazy<IConnection> lazyConnection;
+		private IConnection providedConnection;
 
 		protected PlaywrightIntegrationTest(TestContext testContext)
 		{
@@ -29,17 +29,17 @@
 			providedConnection = connection;
 		}
 
-		public override IConnection Connection => providedConnection ?? lazyConnection!.Value;
+		public override IConnection Connection => providedConnection ?? lazyConnection.Value;
 
 		protected Config Config { get; private set; }
 
-		protected IPlaywright? Playwright { get; private set; }
+		protected IPlaywright Playwright { get; private set; }
 
-		protected IBrowser? Browser { get; private set; }
+		protected IBrowser Browser { get; private set; }
 
-		protected IBrowserContext? Context { get; private set; }
+		protected IBrowserContext Context { get; private set; }
 
-		protected TestContext? TestContext { get; set; }
+		protected TestContext TestContext { get; set; }
 
 		public override void Cleanup()
 		{

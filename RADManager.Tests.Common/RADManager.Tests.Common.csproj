@@ -1,11 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Skyline.DataMiner.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <PlatformTarget>x86</PlatformTarget>
-	<GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
+	  <OutputType>Library</OutputType>
+	  <TargetFramework>net48</TargetFramework>
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +14,8 @@
     <PackageReference Include="Microsoft.Playwright.NUnit" Version="1.55.0" />
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.5.4.2" />
     <PackageReference Include="Skyline.DataMiner.Utils.QAPortalAPI" Version="1.0.14" />
+	  <PackageReference Include="MSTest.TestAdapter" Version="3.6.4" />
+	  <PackageReference Include="MSTest.TestFramework" Version="3.6.4" />
   </ItemGroup>
 
 </Project>

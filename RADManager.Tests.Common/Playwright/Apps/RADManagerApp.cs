@@ -1,5 +1,6 @@
 ﻿namespace RADManager.Tests.Common.Playwright.Apps
 {
+	using System;
 	using Microsoft.Playwright;
 	using Skyline.DataMiner.RADManager.Tests.Common.Playwright;
 

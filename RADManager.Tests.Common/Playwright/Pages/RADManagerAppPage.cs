@@ -14,7 +14,7 @@
 
 		public new IPage Page { get; }
 
-		public ILocator Locator(string selector, PageLocatorOptions? options = null)
+		public ILocator Locator(string selector, PageLocatorOptions options = null)
 		{
 			return Page.Locator(selector, options);
 		}
@@ -32,7 +32,7 @@
 
 		public async Task ValidateComponentByText(string locatorName, string text, int index)
 		{
-			var title = Locator(locatorName, new() { HasText = text }).Nth(index);
+			var title = Locator(locatorName, new PageLocatorOptions() { HasText = text }).Nth(index);
 			if (!await title.IsVisibleAsync())
 			{
 				// Scroll down the page to bring the element into view
@@ -44,7 +44,7 @@
 
 		public async Task CheckNoTryAgainButton()
 		{
-			var tryAgainButton = Page.Locator("dma-button", new() { HasText = "Try again" }).Nth(0);
+			var tryAgainButton = Page.Locator("dma-button", new PageLocatorOptions() { HasText = "Try again" }).Nth(0);
 			await Expect(tryAgainButton).Not.ToBeVisibleAsync();
 		}
 	}

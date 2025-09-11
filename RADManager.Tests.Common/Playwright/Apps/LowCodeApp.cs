@@ -23,20 +23,23 @@
 
 		protected Config Config { get; }
 
-		public static async Task<IEnumerable<string?>> GetSidebarPagesAsync(LowCodeAppPage page)
-		{
-			ArgumentNullException.ThrowIfNull(page);
+		public static async Task<IEnumerable<string>> GetSidebarPagesAsync(LowCodeAppPage page)
+        {
+            if (page == null)
+            {
+                throw new ArgumentNullException(nameof(page));
+            }
 
-			var sidebarTabs = await page.Body.GetByTestId("app-sidebar.sidebar-tab").AllAsync();
+            var sidebarTabs = await page.Body.GetByTestId("app-sidebar.sidebar-tab").AllAsync();
 
-			var titleTasks = sidebarTabs
-				.Select(tab => tab.Locator("i").GetAttributeAsync("title"))
-				.ToArray();
+            var titleTasks = sidebarTabs
+            .Select(tab => tab.Locator("i").GetAttributeAsync("title"))
+            .ToArray();
 
-			var titles = await Task.WhenAll(titleTasks);
+            var titles = await Task.WhenAll(titleTasks);
 
-			return titles.Where(title => !String.IsNullOrEmpty(title));
-		}
+            return titles.Where(title => !String.IsNullOrEmpty(title));
+        }
 
 		public async Task<LowCodeAppPage> NavigateToInitialPageAsync()
 		{
@@ -76,7 +79,7 @@
 			return subPages;
 		}
 
-		private async Task<IResponse?> GotoAndLoginAsync(IPage page, string url, PageGotoOptions? options = default)
+		private async Task<IResponse> GotoAndLoginAsync(IPage page, string url, PageGotoOptions options = default)
         {
             var result = await page.GotoAsync(url, options);
             await Authentication.LoginAsync(page, Config);
