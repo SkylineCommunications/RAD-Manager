@@ -4,9 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <PlatformTarget>x86</PlatformTarget>
-	<GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
+	  <ImplicitUsings>enable</ImplicitUsings>
+	  <UseVSTest>true</UseVSTest>
+	  <EnablePlaywright>true</EnablePlaywright>
   </PropertyGroup>
 
   <ItemGroup>
