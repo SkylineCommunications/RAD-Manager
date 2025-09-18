@@ -2,7 +2,7 @@ name: Playwright Tests
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # Every day at midnight UTC
+    - cron: '0 0 * * *' # Every day at midnight UTC
 
 jobs:
   test:
