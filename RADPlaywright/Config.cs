@@ -21,7 +21,7 @@
 
 			Credentials = new Authentication.Credentials(configuration["PLAYWRIGHT_USERNAME"], configuration["PLAYWRIGHT_PASSWORD"]);
 
-			BaseUrl = configuration["PLAYWRIGHT_URL"] ?? "https://slc-h56-g01.skyline.local";
+			BaseUrl = configuration["PLAYWRIGHT_URL"] ?? "https://analyticscl56-skyline.on.dataminer.services/";
 		}
 
 		public Authentication.Credentials Credentials { get; }
