@@ -1,0 +1,8 @@
+is_global = true
+build_property.RootNamespace = RADPlaywright
+build_property.ProjectDir = C:\devcore3\RADManager\RAD-Manager\RADPlaywright\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.CsWinRTUseWindowsUIXamlProjections = false
+build_property.EffectiveAnalysisLevelStyle = 
+build_property.EnableCodeStyleSeverity = 
