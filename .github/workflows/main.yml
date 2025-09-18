@@ -1,0 +1,59 @@
+name: Playwright Tests
+
+on:
+  # push:
+  #   branches: 
+  #    - '**'
+  # pull_request:
+  #   branches: 
+  #    - '**'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    env:
+      PLAYWRIGHT_USERNAME: ${{ secrets.PLAYWRIGHT_USERNAME }}
+      PLAYWRIGHT_PASSWORD: ${{ secrets.PLAYWRIGHT_PASSWORD }}
+      PLAYWRIGHT_URL: https://slc-h56-g01.skyline.local/
+
+    steps:
+     - uses: actions/checkout@v4
+
+     - name: Setup dotnet
+       uses: actions/setup-dotnet@v4
+
+     - name: Setup NuGet
+       uses: NuGet/setup-nuget@v2.0.1
+
+     - name: Add NuGet source
+       run: dotnet nuget add source "https://nuget.pkg.github.com/SkylineCommunications/index.json" --name github --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
+
+     - name: Enable cache
+       uses: actions/cache@v4
+       with:
+         key: ${{ runner.os }}-playwright-${{ hashFiles('**/*.csproj') }}
+         path: |
+           ~/.nuget/packages
+           ~/AppData/Local/ms-playwright
+
+     - name: Build
+       run: dotnet build -c Release -p WarningLevel=0 RADPlaywright
+       
+     - name: Ensure browsers are installed
+       run: pwsh RADPlaywright/bin/Release/net48/playwright.ps1 install --with-deps chromium
+
+     - name: Run tests
+       run: dotnet test -c Release --no-build --logger "console;verbosity=detailed" RADPlaywright
+
+     - name: Upload test results
+       if: always()
+       uses: actions/upload-artifact@v4
+       with:
+         name: playwright-traces
+         path: |
+           **/playwright-traces/*
