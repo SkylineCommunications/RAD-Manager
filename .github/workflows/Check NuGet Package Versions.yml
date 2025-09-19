@@ -11,6 +11,9 @@ on:
      - '**'
     paths:
      - '**/*.csproj'
+     
+     # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 env:
   #https://github.com/NuGet/Home/issues/7575#issuecomment-443801131
