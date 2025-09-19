@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\devcore3\\RADManager\\RAD-Manager\\RADPlaywright\\RADPlaywright.csproj": {}
+    "C:\\Users\\adelinasp\\RAD-Manager--fork\\RADPlaywright\\RADPlaywright.csproj": {}
   },
   "projects": {
-    "C:\\devcore3\\RADManager\\RAD-Manager\\RADPlaywright\\RADPlaywright.csproj": {
+    "C:\\Users\\adelinasp\\RAD-Manager--fork\\RADPlaywright\\RADPlaywright.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\devcore3\\RADManager\\RAD-Manager\\RADPlaywright\\RADPlaywright.csproj",
+        "projectUniqueName": "C:\\Users\\adelinasp\\RAD-Manager--fork\\RADPlaywright\\RADPlaywright.csproj",
         "projectName": "RADPlaywright",
-        "projectPath": "C:\\devcore3\\RADManager\\RAD-Manager\\RADPlaywright\\RADPlaywright.csproj",
+        "projectPath": "C:\\Users\\adelinasp\\RAD-Manager--fork\\RADPlaywright\\RADPlaywright.csproj",
         "packagesPath": "C:\\Users\\adelinasp\\.nuget\\packages\\",
-        "outputPath": "C:\\devcore3\\RADManager\\RAD-Manager\\RADPlaywright\\obj\\",
+        "outputPath": "C:\\Users\\adelinasp\\RAD-Manager--fork\\RADPlaywright\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

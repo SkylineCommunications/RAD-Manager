@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RADPlaywright")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+039092552a8fd879110a5e7312508baa4cd948b0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a90c7aa99125611a350eb206b18ab1eb3d5cfc07")]
 [assembly: System.Reflection.AssemblyProductAttribute("RADPlaywright")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RADPlaywright")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,18 +1,14 @@
 name: Check NuGet Package Versions
 
 on:
-  push:
-    branches: 
-     - '**'
-    paths:
-     - '**/*.csproj'  # Trigger on changes to project files
-  pull_request:
-    branches: 
-     - '**'
-    paths:
-     - '**/*.csproj'
-     
-     # Allows you to run this workflow manually from the Actions tab
+  # push:
+  #   branches: 
+  #    - '**'
+  # pull_request:
+  #   branches: 
+  #    - '**'
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 env:
