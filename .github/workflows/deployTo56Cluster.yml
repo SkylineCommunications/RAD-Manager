@@ -1,0 +1,94 @@
+name: Deploy to Analytics Cluster
+
+on:
+  # push:
+  #   branches: 
+  #    - '**'
+  # pull_request:
+  #   branches: 
+  #    - '**'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs: 
+  CD:   
+    name: CD
+    environment: Analytics 56 Cluster System
+    runs-on: ubuntu-latest
+    steps:
+       - uses: actions/checkout@v4
+        
+       - name: Setup .NET Core
+         uses: actions/setup-dotnet@v4
+         with:
+            dotnet-version: '8.0.x'
+    
+       - name: Cache and Install Mono
+         uses: awalsh128/cache-apt-pkgs-action@v1.5.0
+         with:
+           packages: mono-complete
+
+       - name: Find or create NuGet.config file
+         if: ${{ github.repository_owner }} == 'SkylineCommunications'
+         id: findOrCreateNuGetFile
+         run: |
+           file=$(find . -type f -iname 'nuget.config' | head -n 1)
+           if [[ -n "$file" ]]; then
+             echo "NuGet config file exists: $file"
+             echo NuGetFileName=$(basename $file) >> $GITHUB_OUTPUT
+           else
+             echo "NuGet config does not exist. Creating..."
+             dotnet new nugetconfig --output ${{ github.workspace }}
+             echo NuGetFileName=nuget.config >> $GITHUB_OUTPUT
+           fi
+         shell: bash
+
+       - name: Enable Skyline GitHub NuGet Registry
+         if: ${{ github.repository_owner }} == 'SkylineCommunications'
+         run: dotnet nuget add source "https://nuget.pkg.github.com/SkylineCommunications/index.json" --username USERNAME --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --configfile ${{ github.workspace }}/${{ steps.findOrCreateNuGetFile.outputs.NuGetFileName }}
+            
+       - name: Install .NET Tools
+         run: |
+            dotnet tool install -g Skyline.DataMiner.CICD.Tools.CatalogUpload
+            dotnet tool install -g Skyline.DataMiner.CICD.Tools.DataMinerDeploy
+                
+       - name: Build Package
+         if: github.ref_type == 'branch'
+         env:
+           DATAMINER_TOKEN: ${{ secrets.DATAMINER_TOKEN }}
+         shell: pwsh
+         run: |
+            dotnet build `
+              -p:Version="0.0.${{ github.run_number }}" `
+              -p:CatalogPublishKeyName="DATAMINER_TOKEN" `
+              -p:CatalogDefaultDownloadKeyName="DATAMINER_TOKEN" `
+              -c Release `
+    
+       - name: Find .dmapp file in bin folders
+         id: find-dmapp
+         shell: pwsh
+         run: |
+            $dmapp = Get-ChildItem -Path . -Recurse -Include *.dmapp
+        
+            if ($dmapp.Count -eq 0) {
+              Write-Error "No .dmapp files found in bin folders."
+              exit 1
+            } elseif ($dmapp.Count -gt 1) {
+              Write-Error "Multiple .dmapp files found. Expected only one."
+              $dmapp | ForEach-Object { Write-Host $_.FullName }
+              exit 1
+            }
+        
+            $path = $dmapp[0].FullName
+            Write-Host "Found .dmapp: $path"
+        
+            # Set GitHub Actions output variable
+            echo "dmapp_path=$path" >> $env:GITHUB_OUTPUT
+    
+       - name: VolatileUpload
+         id: uploadToCatalog
+         run: echo "id=$(dataminer-catalog-upload --path-to-artifact "${{ steps.find-dmapp.outputs.dmapp_path }}" --dm-catalog-token ${{ secrets.DATAMINER_DEPLOY_KEY_LOAD_SYSTEM }})" >> $GITHUB_OUTPUT
+    
+       - name: Deploy to DataMiner
+         run: dataminer-package-deploy from-volatile --artifact-id "${{ steps.uploadToCatalog.outputs.id }}" --dm-system-token ${{ secrets.DATAMINER_DEPLOY_KEY_LOAD_SYSTEM }}
