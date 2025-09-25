@@ -5,7 +5,6 @@ namespace RadDataSources
 	using System.Linq;
 	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Analytics.GenericInterface;
-	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Exceptions;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
@@ -140,7 +139,7 @@ namespace RadDataSources
 
 			foreach (var param in _parameters)
 			{
-				var paramID = new ParamID(param.Key.DataMinerID, param.Key.ElementID, param.Key.ParameterID, param.Key.Instance);
+				var paramID = param?.Key?.ToParamID();
 				var key = paramID.ToString();
 				var cells = new GQICell[]
 				{

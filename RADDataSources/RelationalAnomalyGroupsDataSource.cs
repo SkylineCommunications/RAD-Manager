@@ -5,8 +5,10 @@ namespace RadDataSources
 	using System.Linq;
 	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Analytics.GenericInterface;
-	using Skyline.DataMiner.Net.Exceptions;
+	using Skyline.DataMiner.Net.Enums;
+	using Skyline.DataMiner.Net.Filters;
 	using Skyline.DataMiner.Net.Messages;
+	using Skyline.DataMiner.Net.MetaData.DataClass;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
 	/// <summary>
@@ -22,6 +24,7 @@ namespace RadDataSources
 		private GQIDMS _dms;
 		private IGQILogger _logger;
 		private IEnumerator<RadGroupInfo> _groupInfoEnumerator;
+		private HashSet<Guid> _subgroupsWithActiveAnomaly;
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
@@ -45,6 +48,8 @@ namespace RadDataSources
 				new GQIBooleanColumn("Is Monitored"),
 				new GQIStringColumn("Parent Group"),
 				new GQIStringColumn("Subgroup ID"),
+				new GQIBooleanColumn("Is Shared Model Group"),
+				new GQIBooleanColumn("Has Active Anomaly"),
 			};
 		}
 
@@ -55,6 +60,8 @@ namespace RadDataSources
 
 			var groupInfos = _radHelper.FetchParameterGroupInfos();
 			_groupInfoEnumerator = groupInfos.GetEnumerator();
+
+			_subgroupsWithActiveAnomaly = GetSubgroupsWithActiveAnomaly();
 
 			return default;
 		}
@@ -125,19 +132,27 @@ namespace RadDataSources
 					minumumAnomalyDuration = _radHelper.DefaultMinimumAnomalyDuration;
 				}
 
-				yield return new GQIRow(
-					new GQICell[]
-					{
-						new GQICell() { Value = subgroupInfo.GetName(groupInfo.GroupName) },
-						new GQICell() { Value = groupInfo.DataMinerID },
-						new GQICell() { Value = ParameterKeysToString(subgroupInfo.Parameters?.Select(p => p?.Key)) },
-						new GQICell() { Value = groupInfo.Options?.UpdateModel ?? false },
-						new GQICell() { Value = anomalyThreshold },
-						new GQICell() { Value = TimeSpan.FromMinutes(minumumAnomalyDuration) },
-						new GQICell() { Value = subgroupInfo.IsMonitored },
-						new GQICell() { Value = groupInfo.GroupName }, // Parent group
-						new GQICell() { Value = sharedModelGroup ? subgroupInfo.ID.ToString() : string.Empty }, // Subgroup ID
-					});
+				var cells = new GQICell[]
+				{
+					new GQICell() { Value = subgroupInfo.GetName(groupInfo.GroupName) },
+					new GQICell() { Value = groupInfo.DataMinerID },
+					new GQICell() { Value = ParameterKeysToString(subgroupInfo.Parameters?.Select(p => p?.Key)) },
+					new GQICell() { Value = groupInfo.Options?.UpdateModel ?? false },
+					new GQICell() { Value = anomalyThreshold },
+					new GQICell() { Value = TimeSpan.FromMinutes(minumumAnomalyDuration) },
+					new GQICell() { Value = subgroupInfo.IsMonitored },
+					new GQICell() { Value = groupInfo.GroupName }, // Parent group
+					new GQICell() { Value = sharedModelGroup ? subgroupInfo.ID.ToString() : string.Empty }, // Subgroup ID
+					new GQICell() { Value = sharedModelGroup }, // Is Shared Model Group
+					new GQICell() { Value = _subgroupsWithActiveAnomaly.Contains(subgroupInfo.ID) }, // Has Active Anomaly
+				};
+				var parameters = subgroupInfo.Parameters?.Where(p => p?.Key != null)
+					.Select(p => new ObjectRefMetadata() { Object = p?.Key?.ToParamID() });
+				var row = new GQIRow(cells);
+				if (parameters != null)
+					row.Metadata = new GenIfRowMetadata(parameters.ToArray());
+
+				yield return row;
 			}
 		}
 
@@ -172,6 +187,35 @@ namespace RadDataSources
 				return string.Empty;
 
 			return $"[{string.Join(", ", pKeys.Select(p => ParameterKeyToString(p)))}]";
+		}
+
+		private HashSet<Guid> GetSubgroupsWithActiveAnomaly()
+		{
+			try
+			{
+				var activeSuggestionsRequest = new GetActiveAlarmsMessage()
+				{
+					Filter = new AlarmFilter(new AlarmFilterItemInt(AlarmFilterField.SourceID, new int[] { (int)SLAlarmSource.SuggestionEngine })),
+				};
+				var activeSuggestionsResponse = _dms.SendMessage(activeSuggestionsRequest) as ActiveAlarmsResponseMessage;
+				if (activeSuggestionsResponse == null)
+				{
+					_logger.Error("Failed to fetch active anomalies: Received no response or response of the wrong type");
+					return new HashSet<Guid>();
+				}
+
+				return activeSuggestionsResponse.ActiveAlarms?
+					.Where(a => a != null)
+					.Select(a => a.MetaData as MultivariateAnomalyMetaData)
+					.Where(m => m != null)
+					.Select(m => m.ParameterGroupID)
+					.ToHashSet() ?? new HashSet<Guid>();
+			}
+			catch (Exception ex)
+			{
+				_logger.Error(ex, "Failed to fetch active anomalies: " + ex.Message);
+				return new HashSet<Guid>();
+			}
 		}
 	}
 }
