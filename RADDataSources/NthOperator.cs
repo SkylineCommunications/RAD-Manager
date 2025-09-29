@@ -1,4 +1,4 @@
-﻿namespace RasDataSources
+﻿namespace RadDataSources
 {
 	using System;
 	using System.Collections.Generic;
