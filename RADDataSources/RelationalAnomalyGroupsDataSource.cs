@@ -142,7 +142,7 @@ namespace RadDataSources
 					new GQICell() { Value = TimeSpan.FromMinutes(minumumAnomalyDuration) },
 					new GQICell() { Value = subgroupInfo.IsMonitored },
 					new GQICell() { Value = groupInfo.GroupName }, // Parent group
-					new GQICell() { Value = sharedModelGroup ? subgroupInfo.ID.ToString() : string.Empty }, // Subgroup ID
+					new GQICell() { Value = subgroupInfo.ID.ToString() }, // Subgroup ID
 					new GQICell() { Value = sharedModelGroup }, // Is Shared Model Group
 					new GQICell() { Value = _subgroupsWithActiveAnomaly.Contains(subgroupInfo.ID) }, // Has Active Anomaly
 				};
