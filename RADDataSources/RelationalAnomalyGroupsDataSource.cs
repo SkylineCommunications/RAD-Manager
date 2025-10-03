@@ -7,6 +7,7 @@ namespace RadDataSources
 	using Skyline.DataMiner.Analytics.GenericInterface;
 	using Skyline.DataMiner.Net.Enums;
 	using Skyline.DataMiner.Net.Filters;
+	using Skyline.DataMiner.Net.Helper;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.MetaData.DataClass;
 	using Skyline.DataMiner.Utils.RadToolkit;
@@ -25,6 +26,7 @@ namespace RadDataSources
 		private IGQILogger _logger;
 		private IEnumerator<RadGroupInfo> _groupInfoEnumerator;
 		private HashSet<Guid> _subgroupsWithActiveAnomaly;
+		private Dictionary<Guid, int> _anomaliesPerSubgroup;
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
@@ -50,6 +52,7 @@ namespace RadDataSources
 				new GQIStringColumn("Subgroup ID"),
 				new GQIBooleanColumn("Is Shared Model Group"),
 				new GQIBooleanColumn("Has Active Anomaly"),
+				new GQIIntColumn("Anomalies in Last 30 Days"),
 			};
 		}
 
@@ -62,6 +65,7 @@ namespace RadDataSources
 			_groupInfoEnumerator = groupInfos.GetEnumerator();
 
 			_subgroupsWithActiveAnomaly = GetSubgroupsWithActiveAnomaly();
+			_anomaliesPerSubgroup = GetAnomaliesPerSubgroup();
 
 			return default;
 		}
@@ -145,6 +149,7 @@ namespace RadDataSources
 					new GQICell() { Value = subgroupInfo.ID.ToString() }, // Subgroup ID
 					new GQICell() { Value = sharedModelGroup }, // Is Shared Model Group
 					new GQICell() { Value = _subgroupsWithActiveAnomaly.Contains(subgroupInfo.ID) }, // Has Active Anomaly
+					new GQICell() { Value = _anomaliesPerSubgroup.TryGetValue(subgroupInfo.ID, out int count) ? count : 0 }, // Anomalies in Last 30 Days
 				};
 				var parameters = subgroupInfo.Parameters?.Where(p => p?.Key != null)
 					.Select(p => new ObjectRefMetadata() { Object = p?.Key?.ToParamID() });
@@ -217,5 +222,33 @@ namespace RadDataSources
 				return new HashSet<Guid>();
 			}
 		}
+
+		private Dictionary<Guid, int> GetAnomaliesPerSubgroup()
+		{
+			if (!_radHelper.HistoricalAnomaliesAvailable)
+				return new Dictionary<Guid, int>();
+
+			try
+			{
+				var now = DateTime.Now;
+				var anomalies = _radHelper.FetchRelationalAnomalies(now.AddDays(-30), now);
+				if (anomalies == null)
+				{
+					_logger.Error("Failed to fetch historical anomalies.");
+					return new Dictionary<Guid, int>();
+				}
+
+				return anomalies.Where(a => a != null)
+					.DistinctBy(a => a.AnomalyID)
+					.GroupBy(a => a.SubgroupID)
+					.ToDictionary(g => g.Key, g => g.Count());
+			}
+			catch (Exception ex)
+			{
+				_logger.Error(ex, "Failed to fetch anomaly counts: " + ex.Message);
+				return new Dictionary<Guid, int>();
+			}
+		}//TODO: make filtering options work as well
+		//TODO: best cache historical anomalies, I guess
 	}
 }
