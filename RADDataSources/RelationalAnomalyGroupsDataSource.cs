@@ -249,6 +249,5 @@ namespace RadDataSources
 				return new Dictionary<Guid, int>();
 			}
 		}//TODO: make filtering options work as well
-		//TODO: best cache historical anomalies, I guess
 	}
 }
