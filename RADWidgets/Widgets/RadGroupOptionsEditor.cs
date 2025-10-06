@@ -23,11 +23,11 @@
 			int columnCount,
 			RadGroupOptions options = null)
 		{
-			_updateModelCheckBox = new CheckBox("Update model on new data?")
+			_updateModelCheckBox = new CheckBox("Adapt model to new data?")
 			{
 				IsChecked = options?.UpdateModel ?? false,
-				Tooltip = "Whether to continuously update the RAD model when new trend data is available. If not selected, the model will only be trained after " +
-				"creation and when you manually specify a training range.",
+				Tooltip = "Whether to continuously update the RAD model when new trend data is available. If not selected, the model will remain static after creation, " +
+				" unless you manually specify a training range.",
 			};
 
 			_baseOptionsEditor = new RadGroupBaseOptionsEditor(columnCount, radHelper.DefaultAnomalyThreshold, radHelper.DefaultMinimumAnomalyDuration,
