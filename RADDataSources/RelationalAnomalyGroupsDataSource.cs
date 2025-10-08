@@ -2,6 +2,7 @@ namespace RadDataSources
 {
 	using System;
 	using System.Collections.Generic;
+	using System.ComponentModel;
 	using System.Linq;
 	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Analytics.GenericInterface;
@@ -12,26 +13,182 @@ namespace RadDataSources
 	using Skyline.DataMiner.Net.MetaData.DataClass;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
+	public enum SortingColumn
+	{
+		[Description("Name")]
+		Name,
+		[Description("Anomalies in Last 30 Days")]
+		AnomaliesInLast30Days,
+		[Description("Update Model")]
+		UpdateModel,
+		[Description("Anomaly Threshold")]
+		AnomalyThreshold,
+		[Description("Minimum Anomaly Duration")]
+		MinimumAnomalyDuration,
+	}
+
+	public class RadGroupRow
+	{
+		public RadGroupRow(string name, int dataMinerID, List<ParameterKey> parameters, bool updateModel, double anomalyThreshold, TimeSpan minimumAnomalyDuration, bool isMonitored, string parentGroup,
+			Guid subgroupID, bool isSharedModelGroup, bool hasActiveAnomaly, int anomaliesInLast30Days)
+		{
+			Name = name;
+			DataMinerID = dataMinerID;
+			Parameters = parameters;
+			UpdateModel = updateModel;
+			AnomalyThreshold = anomalyThreshold;
+			MinimumAnomalyDuration = minimumAnomalyDuration;
+			IsMonitored = isMonitored;
+			ParentGroup = parentGroup;
+			SubgroupID = subgroupID;
+			IsSharedModelGroup = isSharedModelGroup;
+			HasActiveAnomaly = hasActiveAnomaly;
+			AnomaliesInLast30Days = anomaliesInLast30Days;
+		}
+
+		public string Name { get; set; }
+
+		public int DataMinerID { get; set; }
+
+		public List<ParameterKey> Parameters { get; set; }
+
+		public bool UpdateModel { get; set; }
+
+		public double AnomalyThreshold { get; set; }
+
+		public TimeSpan MinimumAnomalyDuration { get; set; }
+
+		public bool IsMonitored { get; set; }
+
+		public string ParentGroup { get; set; }
+
+		public Guid SubgroupID { get; set; }
+
+		public bool IsSharedModelGroup { get; set; }
+
+		public bool HasActiveAnomaly { get; set; }
+
+		public int AnomaliesInLast30Days { get; set; }
+
+		public GQIRow ToGQIRow()
+		{
+			var cells = new GQICell[]
+			{
+				new GQICell { Value = Name },                                    // Name
+				new GQICell { Value = DataMinerID },                             // DataMiner Id
+				new GQICell { Value = ParameterKeysToString(Parameters) },       // Parameters
+				new GQICell { Value = UpdateModel },                             // Update Model
+				new GQICell { Value = AnomalyThreshold },                        // Anomaly Threshold
+				new GQICell { Value = MinimumAnomalyDuration },                  // Minimum Anomaly Duration
+				new GQICell { Value = IsMonitored },                             // Is Monitored
+				new GQICell { Value = ParentGroup },                             // Parent Group
+				new GQICell { Value = SubgroupID.ToString() },                   // Subgroup ID
+				new GQICell { Value = IsSharedModelGroup },                      // Is Shared Model Group
+				new GQICell { Value = HasActiveAnomaly },                        // Has Active Anomaly
+				new GQICell { Value = AnomaliesInLast30Days },                   // Anomalies in Last 30 Days
+			};
+			var row = new GQIRow(cells);
+			var parameters = Parameters.Select(p => new ObjectRefMetadata() { Object = p?.ToParamID() })
+				.WhereNotNull();
+			if (parameters != null)
+				row.Metadata = new GenIfRowMetadata(parameters.ToArray());
+
+			return row;
+		}
+
+		private static string ParameterKeyToString(ParameterKey pKey)
+		{
+			if (pKey == null)
+				return string.Empty;
+
+			string result = $"{pKey.DataMinerID}/{pKey.ElementID}/{pKey.ParameterID}";
+			string instance = !string.IsNullOrEmpty(pKey.DisplayInstance) ? pKey.DisplayInstance : pKey.Instance;
+			return string.IsNullOrEmpty(instance) ? result : $"{result}/{instance}";
+		}
+
+		private static string ParameterKeysToString(IEnumerable<ParameterKey> pKeys)
+		{
+			if (pKeys == null)
+				return string.Empty;
+
+			return $"[{string.Join(", ", pKeys.Select(p => ParameterKeyToString(p)))}]";
+		}
+	}
+
 	/// <summary>
-	/// We return a table with the group names, their parameters, updateModel value and AnomalyThreshold for all configured groups.
+	/// Returns a row per subgroup of every configured relational anomaly group.
+	/// Supports optional sorting.
 	/// </summary>
 	[GQIMetaData(Name = "Get Relational Anomaly Groups")]
-	public class RelationalAnomalyGroupsDataSource : IGQIDataSource, IGQIOnInit, IGQIOnPrepareFetch
+	public class RelationalAnomalyGroupsDataSource : IGQIDataSource, IGQIOnInit, IGQIInputArguments
 	{
-		private const int PAGE_SIZE = 1000;
 		private static readonly AnomaliesCache _anomaliesCache = new AnomaliesCache();
+
+		private readonly GQIStringDropdownArgument _sortByArg = new GQIStringDropdownArgument("Sort by", EnumExtensions.GetDescriptions<SortingColumn>())
+		{
+			IsRequired = false,
+		};
+
+		private readonly GQIBooleanArgument _sortDirectionArg = new GQIBooleanArgument("Sort descending")
+		{
+			IsRequired = false,
+			DefaultValue = false,
+		};
+
+		// New filter arguments
+		private readonly GQIBooleanArgument _onlyUnmonitoredArg = new GQIBooleanArgument("Show only unmonitored groups")
+		{
+			IsRequired = false,
+			DefaultValue = false,
+		};
+
+		private readonly GQIBooleanArgument _onlyWithAnomaliesArg = new GQIBooleanArgument("Show only groups with anoamlies")
+		{
+			IsRequired = false,
+			DefaultValue = false,
+		};
+
 		private RadHelper _radHelper;
 		private GQIDMS _dms;
 		private IGQILogger _logger;
-		private IEnumerator<RadGroupInfo> _groupInfoEnumerator;
+
 		private HashSet<Guid> _subgroupsWithActiveAnomaly;
 		private Dictionary<Guid, int> _anomaliesPerSubgroup;
+		private SortingColumn _sortBy;
+		private bool _sortDescending;
+		private bool _onlyUnmonitored;
+		private bool _onlyWithAnomalies;
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
 			_dms = args.DMS;
 			_logger = args.Logger;
 			_radHelper = ConnectionHelper.InitializeRadHelper(_dms, _logger);
+
+			return default;
+		}
+
+		public GQIArgument[] GetInputArguments()
+		{
+			return new GQIArgument[] { _sortByArg, _sortDirectionArg, _onlyUnmonitoredArg, _onlyWithAnomaliesArg };
+		}
+
+		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
+		{
+			if (!args.TryGetArgumentValue(_sortByArg, out string sortByString) || !EnumExtensions.TryParseDescription(sortByString, out _sortBy))
+			{
+				_sortBy = SortingColumn.Name;
+				_sortDescending = false;
+			}
+
+			if (!args.TryGetArgumentValue(_sortDirectionArg, out _sortDescending))
+				_sortDescending = false;
+
+			if (!args.TryGetArgumentValue(_onlyUnmonitoredArg, out _onlyUnmonitored))
+				_onlyUnmonitored = false;
+
+			if (!args.TryGetArgumentValue(_onlyWithAnomaliesArg, out _onlyWithAnomalies))
+				_onlyWithAnomalies = false;
 
 			return default;
 		}
@@ -55,50 +212,51 @@ namespace RadDataSources
 			};
 		}
 
-		public OnPrepareFetchOutputArgs OnPrepareFetch(OnPrepareFetchInputArgs args)
+		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
 			var groupInfos = _radHelper.FetchParameterGroupInfos();
-			_groupInfoEnumerator = groupInfos.GetEnumerator();
+			if (groupInfos == null || groupInfos.Count == 0)
+				return new GQIPage(Array.Empty<GQIRow>());
 
 			_subgroupsWithActiveAnomaly = GetSubgroupsWithActiveAnomaly();
 			_anomaliesPerSubgroup = GetAnomaliesPerSubgroup();
 
-			return default;
-		}
+			IEnumerable<RadGroupRow> rows = groupInfos.Where(g => g != null).SelectMany(g => GetRowsForGroup(g));
 
-		public GQIPage GetNextPage(GetNextPageInputArgs args)
-		{
-			if (_groupInfoEnumerator == null)
-				return new GQIPage(Array.Empty<GQIRow>());
-
-			List<GQIRow> rows = new List<GQIRow>(PAGE_SIZE);
-			bool hasMore = true;
-			while (rows.Count < PAGE_SIZE)
+			// Sorting
+			switch (_sortBy)
 			{
-				if (!_groupInfoEnumerator.MoveNext())
-				{
-					hasMore = false;
+				case SortingColumn.Name:
+					rows = _sortDescending ? rows.OrderByDescending(r => r.Name, StringComparer.OrdinalIgnoreCase) : rows.OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
 					break;
-				}
-
-				var groupInfo = _groupInfoEnumerator.Current;
-				if (groupInfo == null)
-					continue;
-
-				rows.AddRange(GetRowsForGroup(groupInfo));
+				case SortingColumn.AnomaliesInLast30Days:
+					rows = _sortDescending ? rows.OrderByDescending(r => r.AnomaliesInLast30Days).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+						: rows.OrderBy(r => r.AnomaliesInLast30Days).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+					break;
+				case SortingColumn.UpdateModel:
+					rows = _sortDescending ? rows.OrderByDescending(r => r.UpdateModel).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+						: rows.OrderBy(r => r.UpdateModel).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+					break;
+				case SortingColumn.AnomalyThreshold:
+					rows = _sortDescending ? rows.OrderByDescending(r => r.AnomalyThreshold).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+						: rows.OrderBy(r => r.AnomalyThreshold).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+					break;
+				case SortingColumn.MinimumAnomalyDuration:
+					rows = _sortDescending ? rows.OrderByDescending(r => r.MinimumAnomalyDuration.Ticks).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+						: rows.OrderBy(r => r.MinimumAnomalyDuration.Ticks).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+					break;
+				default:
+					break;
 			}
 
-			return new GQIPage(rows.ToArray())
-			{
-				HasNextPage = hasMore,
-			};
+			return new GQIPage(rows.Select(r => r.ToGQIRow()).ToArray());
 		}
 
-		private IEnumerable<GQIRow> GetRowsForGroup(RadGroupInfo groupInfo)
+		private IEnumerable<RadGroupRow> GetRowsForGroup(RadGroupInfo groupInfo)
 		{
 			if (groupInfo == null)
 			{
-				_logger.Error($"Group info is null");
+				_logger.Error("Group info is null");
 				yield break;
 			}
 
@@ -117,14 +275,19 @@ namespace RadDataSources
 					continue;
 				}
 
+				if (_onlyUnmonitored && subgroupInfo.IsMonitored)
+					continue;
+
+				bool hasActiveAnomaly = _subgroupsWithActiveAnomaly.Contains(subgroupInfo.ID);
+				if (_onlyWithAnomalies && !hasActiveAnomaly)
+					continue;
+
 				double anomalyThreshold;
 				int minumumAnomalyDuration;
 				if (subgroupInfo.Options != null)
 				{
-					anomalyThreshold = subgroupInfo.Options.GetAnomalyThresholdOrDefault(_radHelper,
-						groupInfo.Options?.AnomalyThreshold);
-					minumumAnomalyDuration = subgroupInfo.Options.GetMinimalDurationOrDefault(_radHelper,
-						groupInfo.Options?.MinimalDuration);
+					anomalyThreshold = subgroupInfo.Options.GetAnomalyThresholdOrDefault(_radHelper, groupInfo.Options?.AnomalyThreshold);
+					minumumAnomalyDuration = subgroupInfo.Options.GetMinimalDurationOrDefault(_radHelper, groupInfo.Options?.MinimalDuration);
 				}
 				else
 				{
@@ -132,56 +295,20 @@ namespace RadDataSources
 					minumumAnomalyDuration = _radHelper.DefaultMinimumAnomalyDuration;
 				}
 
-				var cells = new GQICell[]
-				{
-					new GQICell() { Value = subgroupInfo.GetName(groupInfo.GroupName) },
-					new GQICell() { Value = groupInfo.DataMinerID },
-					new GQICell() { Value = ParameterKeysToString(subgroupInfo.Parameters?.Select(p => p?.Key)) },
-					new GQICell() { Value = groupInfo.Options?.UpdateModel ?? false },
-					new GQICell() { Value = anomalyThreshold },
-					new GQICell() { Value = TimeSpan.FromMinutes(minumumAnomalyDuration) },
-					new GQICell() { Value = subgroupInfo.IsMonitored },
-					new GQICell() { Value = groupInfo.GroupName }, // Parent group
-					new GQICell() { Value = subgroupInfo.ID.ToString() }, // Subgroup ID
-					new GQICell() { Value = sharedModelGroup }, // Is Shared Model Group
-					new GQICell() { Value = _subgroupsWithActiveAnomaly.Contains(subgroupInfo.ID) }, // Has Active Anomaly
-					new GQICell() { Value = _anomaliesPerSubgroup.TryGetValue(subgroupInfo.ID, out int count) ? count : 0 }, // Anomalies in Last 30 Days
-				};
-				var parameters = subgroupInfo.Parameters?.Where(p => p?.Key != null)
-					.Select(p => new ObjectRefMetadata() { Object = p?.Key?.ToParamID() });
-				var row = new GQIRow(cells);
-				if (parameters != null)
-					row.Metadata = new GenIfRowMetadata(parameters.ToArray());
-
-				yield return row;
+				yield return new RadGroupRow(
+					name: subgroupInfo.GetName(groupInfo.GroupName),
+					dataMinerID: groupInfo.DataMinerID,
+					parameters: subgroupInfo.Parameters?.Select(p => p?.Key).ToList(),
+					updateModel: groupInfo.Options?.UpdateModel ?? false,
+					anomalyThreshold: anomalyThreshold,
+					minimumAnomalyDuration: TimeSpan.FromMinutes(minumumAnomalyDuration),
+					isMonitored: subgroupInfo.IsMonitored,
+					parentGroup: groupInfo.GroupName,
+					subgroupID: subgroupInfo.ID,
+					isSharedModelGroup: sharedModelGroup,
+					hasActiveAnomaly: hasActiveAnomaly,
+					anomaliesInLast30Days: _anomaliesPerSubgroup.TryGetValue(subgroupInfo.ID, out int count) ? count : 0);
 			}
-		}
-
-		private string ParameterKeyToString(ParameterKey pKey)
-		{
-			if (pKey == null)
-				return string.Empty;
-
-			string result = $"{pKey.DataMinerID}/{pKey.ElementID}/{pKey.ParameterID}";
-
-			string instance = string.Empty;
-			if (!string.IsNullOrEmpty(pKey.DisplayInstance))
-				instance = pKey.DisplayInstance;
-			else
-				instance = pKey.Instance;
-
-			if (string.IsNullOrEmpty(instance))
-				return result;
-			else
-				return $"{result}/{instance}";
-		}
-
-		private string ParameterKeysToString(IEnumerable<ParameterKey> pKeys)
-		{
-			if (pKeys == null)
-				return string.Empty;
-
-			return $"[{string.Join(", ", pKeys.Select(p => ParameterKeyToString(p)))}]";
 		}
 
 		private HashSet<Guid> GetSubgroupsWithActiveAnomaly()
@@ -232,6 +359,6 @@ namespace RadDataSources
 				_logger.Error(ex, "Failed to fetch anomaly counts: " + ex.Message);
 				return new Dictionary<Guid, int>();
 			}
-		}//TODO: make filtering options work as well
+		}
 	}
 }

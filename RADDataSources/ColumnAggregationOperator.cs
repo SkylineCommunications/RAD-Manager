@@ -30,7 +30,7 @@
 		};
 
 		// Using a plain string argument (validated manually) to avoid dependency on a dropdown argument type that might not exist in the environment.
-		private readonly GQIStringDropdownArgument _operationArg = new GQIStringDropdownArgument("Operation", GetAggregationOptions())
+		private readonly GQIStringDropdownArgument _operationArg = new GQIStringDropdownArgument("Operation", Enum.GetNames(typeof(ColumnAggregationOperation)))
 		{
 			IsRequired = true,
 		};
@@ -83,17 +83,6 @@
 			object v2 = row.GetValue(_secondColumn.Name);
 
 			row.SetValue(_outputColumn.Name, _aggregationFunc(v1, v2));
-		}
-
-		private static string[] GetAggregationOptions()
-		{
-			var ops = Enum.GetNames(typeof(ColumnAggregationOperation));
-			for (int i = 0; i < ops.Length; i++)
-			{
-				ops[i] = ops[i];
-			}
-
-			return ops;
 		}
 
 		private static Tuple<GQIColumn, AggregationFunc> GetOutputColumnAndAggregationFunc(GQIColumnType firstType, GQIColumnType secondType,
