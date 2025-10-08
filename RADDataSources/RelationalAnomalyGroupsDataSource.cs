@@ -19,9 +19,8 @@ namespace RadDataSources
 	public class RelationalAnomalyGroupsDataSource : IGQIDataSource, IGQIOnInit, IGQIOnPrepareFetch
 	{
 		private const int PAGE_SIZE = 1000;
+		private static readonly AnomaliesCache _anomaliesCache = new AnomaliesCache();
 		private RadHelper _radHelper;
-		private ElementNameCache _elementNames;
-		private ParametersCache _parameters;
 		private GQIDMS _dms;
 		private IGQILogger _logger;
 		private IEnumerator<RadGroupInfo> _groupInfoEnumerator;
@@ -58,9 +57,6 @@ namespace RadDataSources
 
 		public OnPrepareFetchOutputArgs OnPrepareFetch(OnPrepareFetchInputArgs args)
 		{
-			_elementNames = new ElementNameCache(_logger, _dms);
-			_parameters = new ParametersCache(_logger, _dms);
-
 			var groupInfos = _radHelper.FetchParameterGroupInfos();
 			_groupInfoEnumerator = groupInfos.GetEnumerator();
 
@@ -166,13 +162,7 @@ namespace RadDataSources
 			if (pKey == null)
 				return string.Empty;
 
-			string elementName;
-			if (!_elementNames.TryGet(pKey.DataMinerID, pKey.ElementID, out elementName))
-				elementName = $"{pKey.DataMinerID}/{pKey.ElementID}";
-
-			_parameters.TryGet(pKey.DataMinerID, pKey.ElementID, out ParameterInfo[] parameters);
-			var parameter = parameters?.FirstOrDefault(p => p.ID == pKey.ParameterID);
-			var parameterName = parameter?.DisplayName ?? pKey.ParameterID.ToString();
+			string result = $"{pKey.DataMinerID}/{pKey.ElementID}/{pKey.ParameterID}";
 
 			string instance = string.Empty;
 			if (!string.IsNullOrEmpty(pKey.DisplayInstance))
@@ -181,9 +171,9 @@ namespace RadDataSources
 				instance = pKey.Instance;
 
 			if (string.IsNullOrEmpty(instance))
-				return $"{elementName}/{parameterName}";
+				return result;
 			else
-				return $"{elementName}/{parameterName}/{instance}";
+				return $"{result}/{instance}";
 		}
 
 		private string ParameterKeysToString(IEnumerable<ParameterKey> pKeys)
@@ -230,13 +220,7 @@ namespace RadDataSources
 
 			try
 			{
-				var now = DateTime.Now;
-				var anomalies = _radHelper.FetchRelationalAnomalies(now.AddDays(-30), now);
-				if (anomalies == null)
-				{
-					_logger.Error("Failed to fetch historical anomalies.");
-					return new Dictionary<Guid, int>();
-				}
+				var anomalies = _anomaliesCache.GetRelationalAnomalies(_radHelper, _logger);
 
 				return anomalies.Where(a => a != null)
 					.DistinctBy(a => a.AnomalyID)

@@ -37,11 +37,16 @@
 			return UserDomainName == userDomainName && GroupID.Equals(groupID);
 		}
 
+		public bool IsExpired()
+		{
+			return DateTime.UtcNow > CacheTime.AddMinutes(5);
+		}
+
 		public bool IsValidEntry(string userDomainName, IRadGroupID groupID,
 			DateTime startTime, DateTime endTime)
 		{
 			return IsSameUserAndGroup(userDomainName, groupID) &&
-				DateTime.UtcNow <= CacheTime.AddMinutes(5) &&
+				!IsExpired() &&
 				startTime >= RequestStartTime.AddMinutes(-5) &&
 				endTime <= RequestEndTime.AddMinutes(5);
 		}
@@ -93,7 +98,7 @@
 				if (anomalyScores == null)
 					throw new DataMinerCommunicationException("No response or a response of the wrong type received");
 
-				_anomalyScoreData.RemoveAll(p => p.IsSameUserAndGroup(helper.Connection.UserDomainName, groupID));
+				_anomalyScoreData.RemoveAll(p => p.IsSameUserAndGroup(helper.Connection.UserDomainName, groupID) || p.IsExpired());
 				if (_anomalyScoreData.Count >= MAX_CACHE_SIZE)
 					_anomalyScoreData.RemoveAt(0); // Remove the oldest entry if cache size exceeds limit
 
