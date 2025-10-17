@@ -238,37 +238,6 @@
 		}
 
 		/// <summary>
-		/// Fetch the IDs of all RAD groups in the system.
-		/// </summary>
-		/// <param name="engine">The engine.</param>
-		/// <param name="radHelper">The RAD helper to use for fetching the group names.</param>
-		/// <returns>A list of RAD group IDs.</returns>
-		public static List<RadGroupID> FetchRadGroupIDs(IEngine engine, RadHelper radHelper)
-		{
-			var result = new List<RadGroupID>();
-			foreach (var agent in engine.GetDms().GetAgents())
-			{
-				try
-				{
-					var groupNames = radHelper.FetchParameterGroups(agent.Id);
-					if (groupNames == null)
-					{
-						engine.Log("Could not fetch RAD group names: no response or response of the wrong type received", LogType.Error, 5);
-						continue;
-					}
-
-					result.AddRange(groupNames.Select(n => new RadGroupID(agent.Id, n)));
-				}
-				catch (Exception e)
-				{
-					engine.Log($"Could not fetch RAD group names: {e}", LogType.Error, 5);
-				}
-			}
-
-			return result;
-		}
-
-		/// <summary>
 		/// Convert a parameter to a string of the form "ElementName/ParameterName/Instance". If the parameter has no instance, it will be "ElementName/ParameterName".
 		/// </summary>
 		/// <param name="key">The parameter key.</param>

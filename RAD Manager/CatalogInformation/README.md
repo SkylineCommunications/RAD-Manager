@@ -5,7 +5,10 @@
 This app allows you to **easily configure** relational anomaly detection and **visualize** its results.
 
 > [!NOTE]
-> From version 3.0.0 onwards, the RAD Manager app requires the [GQI DxM](https://aka.dataminer.services/gqi-dxm). Make sure the GQI DxM is installed and enabled before installing the RAD Manager, or use RAD Manager version 2.0.4.
+> DataMiner 10.5.11/10.6.0 or higher is only compatible with RAD Manager version 3.1.0 or higher. Using any older version of RAD Manager on this DataMiner server version might lead to unexpected behavior.
+
+> [!NOTE]
+> From version 3.0.0 onwards, the RAD Manager app requires the [GQI DxM](https://aka.dataminer.services/gqi-dxm). Make sure the GQI DxM is installed and enabled before installing the RAD Manager, or use RAD Manager version 2.0.4, if possible.
 
 ![The RAD Manager app](./Images/RAD_Manager.png)
 

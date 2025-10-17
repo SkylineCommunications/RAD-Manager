@@ -19,10 +19,7 @@
 			DataMinerID = dataMinerID;
 			Title = $"Edit Shared Model Group '{groupSettings.GroupName}'";
 
-			var groupNames = RadWidgets.Utils.FetchRadGroupIDs(engine, radHelper)
-				.Select(id => id.GroupName)
-				.Distinct(StringComparer.OrdinalIgnoreCase)
-				.ToList();
+			var groupNames = radHelper.FetchParameterGroups();
 			var parametersCache = new EngineParametersCache(engine);
 			_sharedGroupEditor = new RadSharedModelGroupEditor(engine, radHelper, groupNames, parametersCache, groupSettings, selectedSubgroup);
 			_sharedGroupEditor.ValidationChanged += (sender, args) => OnGroupEditorValidationChanged();

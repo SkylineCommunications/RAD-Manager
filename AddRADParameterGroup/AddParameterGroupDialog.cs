@@ -47,7 +47,7 @@
 			};
 			_addTypeDropDown.Changed += (sender, args) => OnAddTypeChanged();
 
-			var existingGroupNames = Utils.FetchRadGroupIDs(engine, radHelper).Select(id => id.GroupName).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+			var existingGroupNames = radHelper.FetchParameterGroups();
 			var parametersCache = new EngineParametersCache(engine);
 			_groupEditor = new RadGroupEditor(engine, radHelper, existingGroupNames, parametersCache);
 			_groupEditor.ValidationChanged += (sender, args) => OnEditorValidationChanged(_groupEditor.IsValid, _groupEditor.ValidationText);

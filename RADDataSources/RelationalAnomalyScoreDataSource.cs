@@ -48,7 +48,7 @@ namespace RadDataSources
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
 			if (!args.TryGetArgumentValue(DataMinerID, out _dataMinerID))
-				_logger.Error("No DataMiner ID provided");
+				_dataMinerID = -1;
 
 			if (!args.TryGetArgumentValue(GroupName, out _groupName))
 				_logger.Error("No group name provided");
@@ -79,7 +79,6 @@ namespace RadDataSources
 		{
 			if (string.IsNullOrEmpty(_groupName) || _startTime == null || _endTime == null)
 			{
-				_logger.Error("Group name or time range is empty");
 				_anomalyScores = new List<KeyValuePair<DateTime, double>>();
 				return default;
 			}

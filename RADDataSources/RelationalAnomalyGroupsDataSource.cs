@@ -15,12 +15,13 @@ namespace RadDataSources
 	[GQIMetaData(Name = "Get Relational Anomaly Groups")]
 	public class RelationalAnomalyGroupsDataSource : IGQIDataSource, IGQIOnInit, IGQIOnPrepareFetch
 	{
+		private const int PAGE_SIZE = 1000;
 		private RadHelper _radHelper;
 		private ElementNameCache _elementNames;
 		private ParametersCache _parameters;
 		private GQIDMS _dms;
 		private IGQILogger _logger;
-		private IEnumerator<int> _dmaIDEnumerator;
+		private IEnumerator<RadGroupInfo> _groupInfoEnumerator;
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{
@@ -49,64 +50,54 @@ namespace RadDataSources
 
 		public OnPrepareFetchOutputArgs OnPrepareFetch(OnPrepareFetchInputArgs args)
 		{
-			var infoMessages = _dms.SendMessages(new GetInfoMessage(InfoType.DataMinerInfo));
-			_dmaIDEnumerator = infoMessages
-				.OfType<GetDataMinerInfoResponseMessage>()
-				.Select(m => m.ID)
-				.Distinct()
-				.GetEnumerator();
-
 			_elementNames = new ElementNameCache(_logger, _dms);
 			_parameters = new ParametersCache(_logger, _dms);
+
+			var groupInfos = _radHelper.FetchParameterGroupInfos();
+			_groupInfoEnumerator = groupInfos.GetEnumerator();
 
 			return default;
 		}
 
 		public GQIPage GetNextPage(GetNextPageInputArgs args)
 		{
-			if (!_dmaIDEnumerator.MoveNext())
+			if (_groupInfoEnumerator == null)
 				return new GQIPage(Array.Empty<GQIRow>());
 
-			int dataMinerID = _dmaIDEnumerator.Current;
-			var groupNames = _radHelper.FetchParameterGroups(dataMinerID);
-			if (groupNames == null)
+			List<GQIRow> rows = new List<GQIRow>(PAGE_SIZE);
+			bool hasMore = true;
+			while (rows.Count < PAGE_SIZE)
 			{
-				_logger.Error($"Could not fetch RAD group names from agent {dataMinerID}: no response or response of the wrong type received");
-				return new GQIPage(Array.Empty<GQIRow>()) { HasNextPage = true };
+				if (!_groupInfoEnumerator.MoveNext())
+				{
+					hasMore = false;
+					break;
+				}
+
+				var groupInfo = _groupInfoEnumerator.Current;
+				if (groupInfo == null)
+					continue;
+
+				rows.AddRange(GetRowsForGroup(groupInfo));
 			}
 
-			return new GQIPage(groupNames.SelectMany(g => GetRowsForGroup(dataMinerID, g)).ToArray())
+			return new GQIPage(rows.ToArray())
 			{
-				HasNextPage = true,
+				HasNextPage = hasMore,
 			};
 		}
 
-		private IEnumerable<GQIRow> GetRowsForGroup(int dataMinerID, string groupName)
+		private IEnumerable<GQIRow> GetRowsForGroup(RadGroupInfo groupInfo)
 		{
-			RadGroupInfo groupInfo;
-			try
-			{
-				groupInfo = _radHelper.FetchParameterGroupInfo(dataMinerID, groupName);
-			}
-			catch (DataMinerSecurityException)
-			{
-				yield break;
-			}
-			catch (Exception ex)
-			{
-				_logger.Error($"Failed to fetch RAD group info for group '{groupName}' from agent {dataMinerID}: {ex.Message}");
-				throw;
-			}
-
 			if (groupInfo == null)
 			{
-				_logger.Error($"Could not fetch RAD group info for group '{groupName}' from agent {dataMinerID}: no response or response of the wrong type received");
+				_logger.Error($"Group info is null");
 				yield break;
 			}
 
 			if (groupInfo.Subgroups == null || groupInfo.Subgroups.Count == 0)
 			{
-				_logger.Error($"Group '{groupName}' from agent {dataMinerID} has no subgroups defined.");
+				_logger.Error($"Group '{groupInfo.GroupName}' has no subgroups defined.");
 				yield break;
 			}
 
@@ -115,7 +106,7 @@ namespace RadDataSources
 			{
 				if (subgroupInfo == null)
 				{
-					_logger.Error($"Subgroup info for group '{groupName}' is null in agent {dataMinerID}.");
+					_logger.Error($"Subgroup info for group '{groupInfo.GroupName}' is null.");
 					continue;
 				}
 
@@ -137,14 +128,14 @@ namespace RadDataSources
 				yield return new GQIRow(
 					new GQICell[]
 					{
-						new GQICell() { Value = subgroupInfo.GetName(groupName) },
-						new GQICell() { Value = dataMinerID },
+						new GQICell() { Value = subgroupInfo.GetName(groupInfo.GroupName) },
+						new GQICell() { Value = groupInfo.DataMinerID },
 						new GQICell() { Value = ParameterKeysToString(subgroupInfo.Parameters?.Select(p => p?.Key)) },
 						new GQICell() { Value = groupInfo.Options?.UpdateModel ?? false },
 						new GQICell() { Value = anomalyThreshold },
 						new GQICell() { Value = TimeSpan.FromMinutes(minumumAnomalyDuration) },
 						new GQICell() { Value = subgroupInfo.IsMonitored },
-						new GQICell() { Value = groupName }, // Parent group
+						new GQICell() { Value = groupInfo.GroupName }, // Parent group
 						new GQICell() { Value = sharedModelGroup ? subgroupInfo.ID.ToString() : string.Empty }, // Subgroup ID
 					});
 			}

@@ -27,7 +27,7 @@
 
 			logger.Information("Trying to directly connect to DataMiner through GQI.");
 			var radHelper = new RadHelper(dms.GetConnection(), new Logger(s => logger.Error(s)));
-			if (radHelper?.AllowGQISendAnalyticsMessages == true)
+			if (radHelper.AllowGQISendAnalyticsMessages)
 			{
 				logger.Information("Successfully connected to DataMiner through GQI.");
 				return radHelper;

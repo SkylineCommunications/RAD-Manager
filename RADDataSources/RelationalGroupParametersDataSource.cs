@@ -46,7 +46,7 @@ namespace RadDataSources
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
 			if (!args.TryGetArgumentValue(_dataMinerIDArgument, out _dataMinerID))
-				_logger.Error("No DataMiner ID provided");
+				_dataMinerID = -1;
 
 			if (!args.TryGetArgumentValue(_groupNameArgument, out _groupName))
 				_logger.Error("No group name provided");
@@ -67,14 +67,18 @@ namespace RadDataSources
 
 			if (string.IsNullOrEmpty(_groupName))
 			{
-				_logger.Error("Group name is empty");
 				_parameters = new List<RadParameter>();
 				return default;
 			}
 
 			try
 			{
-				var groupInfo = _radHelper.FetchParameterGroupInfo(_dataMinerID, _groupName);
+				RadGroupInfo groupInfo;
+				if (_dataMinerID == -1 && _radHelper.RadGroupInfoEventCacheAvailable)
+					groupInfo = _radHelper.FetchParameterGroupInfo(_groupName);
+				else
+					groupInfo = _radHelper.FetchParameterGroupInfo(_dataMinerID, _groupName);
+
 				if (groupInfo == null)
 					throw new DataMinerCommunicationException($"Group '{_groupName}' not found on DataMiner ID {_dataMinerID}");
 				if (groupInfo.Subgroups == null || groupInfo.Subgroups.Count == 0)
