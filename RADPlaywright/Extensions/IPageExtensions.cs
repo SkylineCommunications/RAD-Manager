@@ -1,7 +1,6 @@
 ﻿namespace RADPlaywright.Extensions
 {
 	using Microsoft.Playwright;
-	using RADPlaywright.Pages;
 
 	public static class IPageExtensions
 	{
