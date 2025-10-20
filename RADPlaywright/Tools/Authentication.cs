@@ -78,14 +78,22 @@
 			if (!loginNeeded.Result)
 				return;
 
-			if(credentials.Username != null)
+			if(credentials.Email != null)
 			{
-				await page.GetByPlaceholder("Email Address").FillAsync(credentials.Username);
+				await page.GetByPlaceholder("Email Address").FillAsync(credentials.Email);
+			}
+			else
+			{
+			    throw new ArgumentNullException(nameof(credentials.Email), "Email must be provided for DAAS login.");
 			}
 
-			if(credentials.Password != null)
+			if (credentials.Password != null)
 			{
 				await page.GetByPlaceholder("Password").FillAsync(credentials.Password);
+			}
+			else
+			{
+				throw new ArgumentNullException(nameof(credentials.Password), "Password must be provided for DAAS login.");
 			}
 
 			await page.GetByRole(AriaRole.Button, new() { Name = "Sign in" }).ClickAsync();
@@ -117,10 +125,18 @@
 			{
 				await userNameTextBox.FillAsync(credentials.Username);
 			}
+			else
+			{
+				throw new ArgumentNullException(nameof(credentials.Username), "Username must be provided for local login.");
+			}
 
-			if(credentials.Password != null)
+			if (credentials.Password != null)
 			{
 				await page.GetByRole(AriaRole.Textbox, new() { Name = "Password" }).FillAsync(credentials.Password);
+			}
+			else
+			{
+				throw new ArgumentNullException(nameof(credentials.Password), "Password must be provided for local login.");
 			}
 
 			var keepMeLoggedIn = page.Locator("dma-switch").Filter(new() { HasTextString = "Keep me logged in" });
@@ -141,22 +157,41 @@
 
 		public class Credentials
 		{
-			public Credentials(string? username, string? password)
+			public Credentials(string? username, string? password, string? email)
 			{
 				if(username != null)
 				{
 					Username = username;
+				}
+				else
+				{
+					throw new ArgumentNullException(nameof(username), "Username must be provided.");
 				}
 
 				if (password != null)
 				{
 					Password = password;
 				}
+				else
+				{
+				    throw new ArgumentNullException(nameof(password), "Password must be provided.");
+				}
+
+				if (email != null)
+				{
+					Email = email;
+				}
+				else
+				{
+					Email = "domain.create.data-analytics@skyline.be";
+				}
 			}
 
 			public string? Username { get; }
 
 			public string? Password { get; }
+
+			public string? Email { get; }
 		}
 	}
 }
