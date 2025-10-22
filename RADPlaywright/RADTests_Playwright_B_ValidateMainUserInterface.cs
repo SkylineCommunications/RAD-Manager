@@ -47,12 +47,12 @@
 			page = await app.NavigateToPageAsync("RAD%20Manager");
 
 			await page.LoginAsync(Config.Credentials);
-			await page.WaitUntilEverythingIsLoadedAsync();
+			//await page.WaitUntilEverythingIsLoadedAsync();
 		}
 
 		private async Task ValidateUserInterfaceComponents(LowCodeAppPage page)
 		{
-			await page.WaitUntilEverythingIsLoadedAsync();
+			//await page.WaitUntilEverythingIsLoadedAsync();
 
 			var radManager = page.GetComponentByText("div", "RAD MANAGER", 3);
 			var addGroupButton = page.GetComponentByTitle("Add Group");
