@@ -8,20 +8,20 @@
 	[GQIMetaData(Name = "Select nth row")]
 	public class NthOperator : IGQIRowOperator, IGQIInputArguments, IGQIOnInit
 	{
-		private Dictionary<List<object>, int> _groupCounts;
-		private GQIColumn[] _groupColumns;
-		private int _nth;
-
-		private GQIColumnListArgument _groupColumnsArg = new GQIColumnListArgument("Group on columns")
+		private readonly GQIColumnListArgument _groupColumnsArg = new GQIColumnListArgument("Group on columns")
 		{
 			IsRequired = true,
 		};
 
-		private GQIIntArgument _nthArg = new GQIIntArgument("Nth row")
+		private readonly GQIIntArgument _nthArg = new GQIIntArgument("Nth row")
 		{
 			DefaultValue = 1,
 			IsRequired = false,
 		};
+
+		private Dictionary<List<object>, int> _groupCounts;
+		private GQIColumn[] _groupColumns;
+		private int _nth;
 
 		public OnInitOutputArgs OnInit(OnInitInputArgs args)
 		{

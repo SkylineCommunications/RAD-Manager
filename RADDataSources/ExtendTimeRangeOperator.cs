@@ -7,7 +7,7 @@
 	[GQIMetaData(Name = "Extend time range")]
 	public class ExtendTimeRangeOperator : IGQIRowOperator, IGQIInputArguments
 	{
-		private GQIDoubleArgument _factorArg = new GQIDoubleArgument("Factor")
+		private readonly GQIDoubleArgument _factorArg = new GQIDoubleArgument("Factor")
 		{
 			DefaultValue = 3,
 			IsRequired = true,
