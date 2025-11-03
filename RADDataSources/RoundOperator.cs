@@ -52,7 +52,7 @@
 			try
 			{
 				double rounded = Math.Round(doubleValue.Value, _decimals);
-				row.SetDisplayValue(_column.Name, rounded.ToString($"G{_decimals + 1}"));
+				row.SetDisplayValue(_column.Name, rounded.ToString($"F{_decimals}"));
 			}
 			catch (ArgumentOutOfRangeException)
 			{
