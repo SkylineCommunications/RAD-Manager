@@ -27,7 +27,7 @@
 			{
 				IsChecked = options?.UpdateModel ?? false,
 				Tooltip = "Whether to continuously update the RAD model when new trend data is available. If not selected, the model will remain static after creation, " +
-				" unless you manually specify a training range.",
+				"unless you manually specify a training range.",
 			};
 
 			_baseOptionsEditor = new RadGroupBaseOptionsEditor(columnCount, radHelper.DefaultAnomalyThreshold, radHelper.DefaultMinimumAnomalyDuration,
