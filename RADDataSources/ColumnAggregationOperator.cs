@@ -302,7 +302,7 @@
 		{
 			double d1, d2;
 			if (TryConvertToDouble(a, out d1) && TryConvertToDouble(b, out d2))
-				return Math.Max(d1, d2);
+				return Math.Min(d1, d2);
 
 			return null;
 		}
