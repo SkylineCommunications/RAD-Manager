@@ -39,7 +39,7 @@
 
 		public bool IsExpired()
 		{
-			return DateTime.UtcNow > CacheTime.AddMinutes(5);
+			return DateTime.UtcNow > CacheTime.AddMinutes(AnomalyScoreCache.CACHE_TIME_MINUTES);
 		}
 
 		public bool IsValidEntry(string userDomainName, IRadGroupID groupID,
@@ -54,7 +54,8 @@
 
 	public class AnomalyScoreCache
 	{
-		private const int MAX_CACHE_SIZE = 5;
+		public const int MAX_CACHE_SIZE = 5;
+		public const int CACHE_TIME_MINUTES = 5;
 		private readonly object _anomalyScoreDataLock = new object();
 		private readonly List<AnomalyScoreData> _anomalyScoreData = new List<AnomalyScoreData>();
 

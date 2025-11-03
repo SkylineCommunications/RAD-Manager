@@ -142,7 +142,7 @@ namespace RadDataSources
 			DefaultValue = false,
 		};
 
-		private readonly GQIBooleanArgument _onlyWithAnomaliesArg = new GQIBooleanArgument("Show only groups with anoamlies")
+		private readonly GQIBooleanArgument _onlyWithAnomaliesArg = new GQIBooleanArgument("Show only groups with an active anomaly")
 		{
 			IsRequired = false,
 			DefaultValue = false,
@@ -152,8 +152,6 @@ namespace RadDataSources
 		private GQIDMS _dms;
 		private IGQILogger _logger;
 
-		private HashSet<Guid> _subgroupsWithActiveAnomaly;
-		private Dictionary<Guid, int> _anomaliesPerSubgroup;
 		private SortingColumn _sortBy;
 		private bool _sortDescending;
 		private bool _onlyUnmonitored;
@@ -176,10 +174,7 @@ namespace RadDataSources
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
 			if (!args.TryGetArgumentValue(_sortByArg, out string sortByString) || !EnumExtensions.TryParseDescription(sortByString, out _sortBy))
-			{
 				_sortBy = SortingColumn.Name;
-				_sortDescending = false;
-			}
 
 			if (!args.TryGetArgumentValue(_sortDirectionArg, out _sortDescending))
 				_sortDescending = false;
@@ -218,10 +213,10 @@ namespace RadDataSources
 			if (groupInfos == null || groupInfos.Count == 0)
 				return new GQIPage(Array.Empty<GQIRow>());
 
-			_subgroupsWithActiveAnomaly = GetSubgroupsWithActiveAnomaly();
-			_anomaliesPerSubgroup = GetAnomaliesPerSubgroup();
+			var subgroupsWithActiveAnomaly = GetSubgroupsWithActiveAnomaly();
+			var anomaliesPerSubgroup = GetAnomaliesPerSubgroup();
 
-			IEnumerable<RadGroupRow> rows = groupInfos.Where(g => g != null).SelectMany(g => GetRowsForGroup(g));
+			IEnumerable<RadGroupRow> rows = groupInfos.Where(g => g != null).SelectMany(g => GetRowsForGroup(g, subgroupsWithActiveAnomaly, anomaliesPerSubgroup));
 
 			// Sorting
 			switch (_sortBy)
@@ -252,7 +247,7 @@ namespace RadDataSources
 			return new GQIPage(rows.Select(r => r.ToGQIRow()).ToArray());
 		}
 
-		private IEnumerable<RadGroupRow> GetRowsForGroup(RadGroupInfo groupInfo)
+		private IEnumerable<RadGroupRow> GetRowsForGroup(RadGroupInfo groupInfo, HashSet<Guid> subgroupsWithActiveAnomaly, Dictionary<Guid, int> anomaliesPerSubgroup)
 		{
 			if (groupInfo == null)
 			{
@@ -278,7 +273,7 @@ namespace RadDataSources
 				if (_onlyUnmonitored && subgroupInfo.IsMonitored)
 					continue;
 
-				bool hasActiveAnomaly = _subgroupsWithActiveAnomaly.Contains(subgroupInfo.ID);
+				bool hasActiveAnomaly = subgroupsWithActiveAnomaly.Contains(subgroupInfo.ID);
 				if (_onlyWithAnomalies && !hasActiveAnomaly)
 					continue;
 
@@ -307,7 +302,7 @@ namespace RadDataSources
 					subgroupID: subgroupInfo.ID,
 					isSharedModelGroup: sharedModelGroup,
 					hasActiveAnomaly: hasActiveAnomaly,
-					anomaliesInLast30Days: _anomaliesPerSubgroup.TryGetValue(subgroupInfo.ID, out int count) ? count : 0);
+					anomaliesInLast30Days: anomaliesPerSubgroup.TryGetValue(subgroupInfo.ID, out int count) ? count : 0);
 			}
 		}
 
@@ -326,12 +321,14 @@ namespace RadDataSources
 					return new HashSet<Guid>();
 				}
 
-				return activeSuggestionsResponse.ActiveAlarms?
-					.Where(a => a != null)
-					.Select(a => a.MetaData as MultivariateAnomalyMetaData)
+				if (activeSuggestionsResponse.ActiveAlarms == null)
+					return new HashSet<Guid>();
+
+				return activeSuggestionsResponse.ActiveAlarms
+					.Select(a => a?.MetaData as MultivariateAnomalyMetaData)
 					.Where(m => m != null)
 					.Select(m => m.ParameterGroupID)
-					.ToHashSet() ?? new HashSet<Guid>();
+					.ToHashSet();
 			}
 			catch (Exception ex)
 			{
@@ -347,7 +344,7 @@ namespace RadDataSources
 
 			try
 			{
-				var anomalies = _anomaliesCache.GetRelationalAnomalies(_radHelper, _logger);
+				var anomalies = _anomaliesCache.GetRelationalAnomalies(_radHelper);
 
 				return anomalies.Where(a => a != null)
 					.DistinctBy(a => a.AnomalyID)

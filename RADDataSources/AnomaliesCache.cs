@@ -45,19 +45,15 @@
 		private readonly object _cachedDataLock = new object();
 		private readonly List<AnomaliesData> _cachedData = new List<AnomaliesData>();
 
-		public List<RelationalAnomaly> GetRelationalAnomalies(RadHelper radHelper, IGQILogger logger)
+		public List<RelationalAnomaly> GetRelationalAnomalies(RadHelper radHelper)
 		{
 			lock (_cachedDataLock)
 			{
 				var now = DateTime.UtcNow;
 				var cachedData = _cachedData.FirstOrDefault(d => d.IsValidEntry(radHelper.Connection.UserDomainName, now));
 				if (cachedData != null)
-				{
-					logger.Information("Using cached historical anomalies.");//TODO: remove logger
 					return cachedData.Anomalies;
-				}
 
-				logger.Information("Fetching historical anomalies from RAD.");
 				var anomalies = Fetch(radHelper, now);
 
 				_cachedData.RemoveAll(p => p.IsSameUser(radHelper.Connection.UserDomainName) || p.IsExpired(now));

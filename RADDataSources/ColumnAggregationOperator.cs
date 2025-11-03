@@ -29,7 +29,6 @@
 			Types = new[] { GQIColumnType.Int, GQIColumnType.Double, GQIColumnType.DateTime, GQIColumnType.TimeSpan },
 		};
 
-		// Using a plain string argument (validated manually) to avoid dependency on a dropdown argument type that might not exist in the environment.
 		private readonly GQIStringDropdownArgument _operationArg = new GQIStringDropdownArgument("Operation", Enum.GetNames(typeof(ColumnAggregationOperation)))
 		{
 			IsRequired = true,
@@ -111,7 +110,7 @@
 					{
 						// First is TimeSpan now
 						if (secondType != GQIColumnType.TimeSpan)
-							throw new ArgumentException("Can only sum one TimeSpan column with another TimeSpan column");
+							throw new ArgumentException("Can only sum a TimeSpan column with another TimeSpan column");
 
 						return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), SumTimeSpans);
 					}
@@ -288,10 +287,7 @@
 
 		private static object ProductNumericWithTimeSpan(object a, object b)
 		{
-			if (b is TimeSpan ts && TryConvertToDouble(a, out double d))
-				return TimeSpan.FromMinutes(ts.TotalMinutes * d);
-
-			return null;
+			return ProductTimeSpanWithNumeric(b, a);
 		}
 
 		private static object MinInts(object a, object b)
