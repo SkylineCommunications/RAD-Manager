@@ -13,7 +13,7 @@
 			IsRequired = true,
 		};
 
-		private GQIDoubleArgument _minimumHoursArg = new GQIDoubleArgument("Minimum duration in hours")
+		private readonly GQIDoubleArgument _minimumHoursArg = new GQIDoubleArgument("Minimum duration in hours")
 		{
 			DefaultValue = 0,
 			IsRequired = false,
