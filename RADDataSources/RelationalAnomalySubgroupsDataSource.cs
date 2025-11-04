@@ -2,7 +2,6 @@ namespace RadDataSources
 {
 	using System;
 	using System.Collections.Generic;
-	using System.ComponentModel;
 	using System.Linq;
 	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Analytics.GenericInterface;
@@ -13,23 +12,9 @@ namespace RadDataSources
 	using Skyline.DataMiner.Net.MetaData.DataClass;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
-	public enum SortingColumn
+	public class RadSubgroupRow
 	{
-		[Description("Name")]
-		Name,
-		[Description("Number of anomalies in Last 30 Days")]
-		AnomaliesInLast30Days,
-		[Description("Adaptive / Static model")]
-		UpdateModel,
-		[Description("Anomaly Threshold")]
-		AnomalyThreshold,
-		[Description("Minimum Anomaly Duration")]
-		MinimumAnomalyDuration,
-	}
-
-	public class RadGroupRow
-	{
-		public RadGroupRow(RadHelper radHelper, RadGroupInfo groupInfo, RadSubgroupInfo subgroupInfo, bool hasActiveAnomaly, int anomaliesInLast30Days)
+		public RadSubgroupRow(RadHelper radHelper, RadGroupInfo groupInfo, RadSubgroupInfo subgroupInfo, bool hasActiveAnomaly, int anomaliesInLast30Days)
 		{
 			Name = subgroupInfo.GetName(groupInfo.GroupName);
 			DataMinerID = groupInfo.DataMinerID;
@@ -130,8 +115,8 @@ namespace RadDataSources
 	/// Returns a row per subgroup of every configured relational anomaly group.
 	/// Supports optional sorting.
 	/// </summary>
-	[GQIMetaData(Name = "Get Relational Anomaly Groups")]
-	public class RelationalAnomalyGroupsDataSource : IGQIDataSource, IGQIOnInit, IGQIInputArguments
+	[GQIMetaData(Name = "Get Relational Anomaly Subgroups")]
+	public class RelationalAnomalySubgroupsDataSource : IGQIDataSource, IGQIOnInit, IGQIInputArguments
 	{
 		private static readonly AnomaliesCache _anomaliesCache = new AnomaliesCache();
 
@@ -227,7 +212,7 @@ namespace RadDataSources
 			var subgroupsWithActiveAnomaly = GetSubgroupsWithActiveAnomaly();
 			var anomaliesPerSubgroup = GetAnomaliesPerSubgroup();
 
-			IEnumerable<RadGroupRow> rows = groupInfos.Where(g => g != null).SelectMany(g => GetRowsForGroup(g, subgroupsWithActiveAnomaly, anomaliesPerSubgroup));
+			IEnumerable<RadSubgroupRow> rows = groupInfos.Where(g => g != null).SelectMany(g => GetRowsForGroup(g, subgroupsWithActiveAnomaly, anomaliesPerSubgroup));
 
 			// Sorting
 			switch (_sortBy)
@@ -259,7 +244,7 @@ namespace RadDataSources
 			return new GQIPage(rows.Select(r => r.ToGQIRow()).ToArray());
 		}
 
-		private IEnumerable<RadGroupRow> GetRowsForGroup(RadGroupInfo groupInfo, HashSet<Guid> subgroupsWithActiveAnomaly, Dictionary<Guid, int> anomaliesPerSubgroup)
+		private IEnumerable<RadSubgroupRow> GetRowsForGroup(RadGroupInfo groupInfo, HashSet<Guid> subgroupsWithActiveAnomaly, Dictionary<Guid, int> anomaliesPerSubgroup)
 		{
 			if (groupInfo == null)
 			{
@@ -288,7 +273,7 @@ namespace RadDataSources
 				if (_onlyWithAnomalies && !hasActiveAnomaly)
 					continue;
 
-				yield return new RadGroupRow(_radHelper, groupInfo, subgroupInfo, hasActiveAnomaly,
+				yield return new RadSubgroupRow(_radHelper, groupInfo, subgroupInfo, hasActiveAnomaly,
 					anomaliesPerSubgroup.TryGetValue(subgroupInfo.ID, out int count) ? count : 0);
 			}
 		}
