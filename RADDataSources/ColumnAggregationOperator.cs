@@ -84,130 +84,148 @@
 			row.SetValue(_outputColumn.Name, _aggregationFunc(v1, v2));
 		}
 
-		private static Tuple<GQIColumn, AggregationFunc> GetOutputColumnAndAggregationFunc(GQIColumnType firstType, GQIColumnType secondType,
-			ColumnAggregationOperation operation, string columnName)
+		private static Tuple<GQIColumn, AggregationFunc> GetSumOutputColumnAggregationFunc(GQIColumnType firstType, GQIColumnType secondType, string columnName)
+		{
+			if (firstType == GQIColumnType.DateTime || secondType == GQIColumnType.DateTime)
+				throw new ArgumentException("Cannot sum DateTime columns");
+
+			if (firstType == GQIColumnType.Int || firstType == GQIColumnType.Double)
+			{
+				if (secondType != GQIColumnType.Int && secondType != GQIColumnType.Double)
+					throw new ArgumentException("Can only sum a numeric column with another numeric column");
+
+				if (firstType == GQIColumnType.Int && secondType == GQIColumnType.Int)
+					return Tuple.Create<GQIColumn, AggregationFunc>(new GQIIntColumn(columnName), SumInts);
+				else
+					return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDoubleColumn(columnName), SumNumerics);
+			}
+			else
+			{
+				// First is TimeSpan now
+				if (secondType != GQIColumnType.TimeSpan)
+					throw new ArgumentException("Can only sum a TimeSpan column with another TimeSpan column");
+
+				return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), SumTimeSpans);
+			}
+		}
+
+		private static Tuple<GQIColumn, AggregationFunc> GetProductOutputColumnAggregationFunc(GQIColumnType firstType, GQIColumnType secondType, string columnName)
+		{
+			if (firstType == GQIColumnType.DateTime || secondType == GQIColumnType.DateTime)
+				throw new ArgumentException("Cannot multiply DateTime columns");
+
+			if ((firstType == GQIColumnType.Int || firstType == GQIColumnType.Double) && (secondType == GQIColumnType.Int || secondType == GQIColumnType.Double))
+			{
+				if (firstType == GQIColumnType.Int && secondType == GQIColumnType.Int)
+					return Tuple.Create<GQIColumn, AggregationFunc>(new GQIIntColumn(columnName), ProductInts);
+				else
+					return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDoubleColumn(columnName), ProductNumerics);
+			}
+			else
+			{
+				// At least one is TimeSpan
+				if (firstType == GQIColumnType.TimeSpan)
+				{
+					if (secondType == GQIColumnType.TimeSpan)
+						throw new ArgumentException("Cannot multiply two TimeSpan columns");
+
+					return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), ProductTimeSpanWithNumeric);
+				}
+				else
+				{
+					// Second is TimeSpan now
+					return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), ProductNumericWithTimeSpan);
+				}
+			}
+		}
+
+		private static Tuple<GQIColumn, AggregationFunc> GetMinMaxOutputColumnAggregationFunc(GQIColumnType firstType, GQIColumnType secondType, string columnName,
+			bool min)
 		{
 			bool firstNumeric = firstType == GQIColumnType.Int || firstType == GQIColumnType.Double;
 			bool secondNumeric = secondType == GQIColumnType.Int || secondType == GQIColumnType.Double;
 
+			if (firstType == GQIColumnType.DateTime || secondType == GQIColumnType.DateTime)
+			{
+				if (!(firstType == GQIColumnType.DateTime && secondType == GQIColumnType.DateTime))
+					throw new ArgumentException("Can only find min or max between two DateTime columns");
+
+				if (min)
+					return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDateTimeColumn(columnName), MinDateTimes);
+				else
+					return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDateTimeColumn(columnName), MaxDateTimes);
+			}
+			else if (firstNumeric || secondNumeric)
+			{
+				if (!(firstNumeric && secondNumeric))
+					throw new ArgumentException("Can only find min or max between two numeric columns");
+
+				if (firstType == GQIColumnType.Int && secondType == GQIColumnType.Int)
+				{
+					if (min)
+						return Tuple.Create<GQIColumn, AggregationFunc>(new GQIIntColumn(columnName), MinInts);
+					else
+						return Tuple.Create<GQIColumn, AggregationFunc>(new GQIIntColumn(columnName), MaxInts);
+				}
+				else
+				{
+					if (min)
+						return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDoubleColumn(columnName), MinNumerics);
+					else
+						return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDoubleColumn(columnName), MaxNumerics);
+				}
+			}
+			else
+			{
+				// Both are TimeSpan now
+				if (min)
+					return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), MinTimeSpans);
+				else
+					return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), MaxTimeSpans);
+			}
+		}
+
+		private static Tuple<GQIColumn, AggregationFunc> GetAverageOutputColumnAggregationFunc(GQIColumnType firstType, GQIColumnType secondType, string columnName)
+		{
+			if (firstType == GQIColumnType.DateTime || secondType == GQIColumnType.DateTime)
+			{
+				if (!(firstType == GQIColumnType.DateTime && secondType == GQIColumnType.DateTime))
+					throw new ArgumentException("Can only find average between two DateTime columns");
+
+				return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDateTimeColumn(columnName), AverageDateTimes);
+			}
+
+			if (firstType == GQIColumnType.Int || firstType == GQIColumnType.Double)
+			{
+				if (secondType != GQIColumnType.Int && secondType != GQIColumnType.Double)
+					throw new ArgumentException("Can only average a numeric column with another numeric column");
+
+				return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDoubleColumn(columnName), AverageNumerics);
+			}
+			else
+			{
+				// First is TimeSpan now
+				if (secondType != GQIColumnType.TimeSpan)
+					throw new ArgumentException("Can only average one TimeSpan column with another TimeSpan column");
+
+				return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), AverageTimeSpans);
+			}
+		}
+
+		private static Tuple<GQIColumn, AggregationFunc> GetOutputColumnAndAggregationFunc(GQIColumnType firstType, GQIColumnType secondType,
+			ColumnAggregationOperation operation, string columnName)
+		{
 			switch (operation)
 			{
 				case ColumnAggregationOperation.Sum:
-					if (firstType == GQIColumnType.DateTime || secondType == GQIColumnType.DateTime)
-						throw new ArgumentException("Cannot sum DateTime columns");
-
-					if (firstNumeric)
-					{
-						if (!secondNumeric)
-							throw new ArgumentException("Can only sum a numeric column with another numeric column");
-
-						if (firstType == GQIColumnType.Int && secondType == GQIColumnType.Int)
-							return Tuple.Create<GQIColumn, AggregationFunc>(new GQIIntColumn(columnName), SumInts);
-						else
-							return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDoubleColumn(columnName), SumNumerics);
-					}
-					else
-					{
-						// First is TimeSpan now
-						if (secondType != GQIColumnType.TimeSpan)
-							throw new ArgumentException("Can only sum a TimeSpan column with another TimeSpan column");
-
-						return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), SumTimeSpans);
-					}
-
+					return GetSumOutputColumnAggregationFunc(firstType, secondType, columnName);
 				case ColumnAggregationOperation.Product:
-					if (firstType == GQIColumnType.DateTime || secondType == GQIColumnType.DateTime)
-						throw new ArgumentException("Cannot multiply DateTime columns");
-
-					if (firstNumeric && secondNumeric)
-					{
-						if (firstType == GQIColumnType.Int && secondType == GQIColumnType.Int)
-							return Tuple.Create<GQIColumn, AggregationFunc>(new GQIIntColumn(columnName), ProductInts);
-						else
-							return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDoubleColumn(columnName), ProductNumerics);
-					}
-					else
-					{
-						// At least one is TimeSpan
-						if (firstType == GQIColumnType.TimeSpan)
-						{
-							if (secondType == GQIColumnType.TimeSpan)
-								throw new ArgumentException("Cannot multiply two TimeSpan columns");
-
-							return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), ProductTimeSpanWithNumeric);
-						}
-						else
-						{
-							// Second is TimeSpan now
-							return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), ProductNumericWithTimeSpan);
-						}
-					}
-
+					return GetProductOutputColumnAggregationFunc(firstType, secondType, columnName);
 				case ColumnAggregationOperation.Min:
 				case ColumnAggregationOperation.Max:
-					if (firstType == GQIColumnType.DateTime || secondType == GQIColumnType.DateTime)
-					{
-						 if (!(firstType == GQIColumnType.DateTime && secondType == GQIColumnType.DateTime))
-							throw new ArgumentException("Can only find min or max between two DateTime columns");
-
-						 if (operation == ColumnAggregationOperation.Min)
-							 return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDateTimeColumn(columnName), MinDateTimes);
-						 else
-						  	 return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDateTimeColumn(columnName), MaxDateTimes);
-					}
-					else if (firstNumeric || secondNumeric)
-					{
-						if (!(firstNumeric && secondNumeric))
-							throw new ArgumentException("Can only find min or max between two numeric columns");
-						if (firstType == GQIColumnType.Int && secondType == GQIColumnType.Int)
-						{
-							if (operation == ColumnAggregationOperation.Min)
-								return Tuple.Create<GQIColumn, AggregationFunc>(new GQIIntColumn(columnName), MinInts);
-							else
-								return Tuple.Create<GQIColumn, AggregationFunc>(new GQIIntColumn(columnName), MaxInts);
-						}
-						else
-						{
-							if (operation == ColumnAggregationOperation.Min)
-								return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDoubleColumn(columnName), MinNumerics);
-							else
-								return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDoubleColumn(columnName), MaxNumerics);
-						}
-					}
-					else
-					{
-						// Both are TimeSpan now
-						if (operation == ColumnAggregationOperation.Min)
-							return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), MinTimeSpans);
-						else
-							return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), MaxTimeSpans);
-					}
-
+					return GetMinMaxOutputColumnAggregationFunc(firstType, secondType, columnName, operation == ColumnAggregationOperation.Min);
 				case ColumnAggregationOperation.Average:
-					if (firstType == GQIColumnType.DateTime || secondType == GQIColumnType.DateTime)
-					{
-						if (!(firstType == GQIColumnType.DateTime && secondType == GQIColumnType.DateTime))
-							throw new ArgumentException("Can only find average between two DateTime columns");
-
-						return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDateTimeColumn(columnName), AverageDateTimes);
-					}
-
-					if (firstNumeric)
-					{
-						if (!secondNumeric)
-							throw new ArgumentException("Can only average a numeric column with another numeric column");
-
-						return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDoubleColumn(columnName), AverageNumerics);
-					}
-					else
-					{
-						// First is TimeSpan now
-						if (secondType != GQIColumnType.TimeSpan)
-							throw new ArgumentException("Can only average one TimeSpan column with another TimeSpan column");
-
-						return Tuple.Create<GQIColumn, AggregationFunc>(new GQITimeSpanColumn(columnName), AverageTimeSpans);
-					}
-
+					return GetAverageOutputColumnAggregationFunc(firstType, secondType, columnName);
 				default:
 					throw new ArgumentException($"Unsupported operation '{operation}'");
 			}
@@ -277,17 +295,17 @@
 			return d1 * d2;
 		}
 
-		private static object ProductTimeSpanWithNumeric(object a, object b)
+		private static object ProductTimeSpanWithNumeric(object timeSpan, object numeric)
 		{
-			if (a is TimeSpan ts && TryConvertToDouble(b, out double d))
+			if (timeSpan is TimeSpan ts && TryConvertToDouble(numeric, out double d))
 				return TimeSpan.FromMinutes(ts.TotalMinutes * d);
 
 			return null;
 		}
 
-		private static object ProductNumericWithTimeSpan(object a, object b)
+		private static object ProductNumericWithTimeSpan(object numeric, object timeSpan)
 		{
-			return ProductTimeSpanWithNumeric(b, a);
+			return ProductTimeSpanWithNumeric(timeSpan, numeric);
 		}
 
 		private static object MinInts(object a, object b)

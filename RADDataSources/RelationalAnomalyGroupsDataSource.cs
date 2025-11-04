@@ -29,21 +29,32 @@ namespace RadDataSources
 
 	public class RadGroupRow
 	{
-		public RadGroupRow(string name, int dataMinerID, List<ParameterKey> parameters, bool updateModel, double anomalyThreshold, TimeSpan minimumAnomalyDuration, bool isMonitored, string parentGroup,
-			Guid subgroupID, bool isSharedModelGroup, bool hasActiveAnomaly, int anomaliesInLast30Days)
+		public RadGroupRow(RadHelper radHelper, RadGroupInfo groupInfo, RadSubgroupInfo subgroupInfo, bool hasActiveAnomaly, int anomaliesInLast30Days)
 		{
-			Name = name;
-			DataMinerID = dataMinerID;
-			Parameters = parameters;
-			UpdateModel = updateModel;
-			AnomalyThreshold = anomalyThreshold;
-			MinimumAnomalyDuration = minimumAnomalyDuration;
-			IsMonitored = isMonitored;
-			ParentGroup = parentGroup;
-			SubgroupID = subgroupID;
-			IsSharedModelGroup = isSharedModelGroup;
+			Name = subgroupInfo.GetName(groupInfo.GroupName);
+			DataMinerID = groupInfo.DataMinerID;
+			Parameters = subgroupInfo.Parameters?.Select(p => p?.Key).Where(p => p != null).ToList();
+			UpdateModel = groupInfo.Options?.UpdateModel ?? false;
+			IsMonitored = subgroupInfo.IsMonitored;
+			ParentGroup = groupInfo.GroupName;
+			SubgroupID = subgroupInfo.ID;
+			IsSharedModelGroup = groupInfo.Subgroups.Count > 1;
 			HasActiveAnomaly = hasActiveAnomaly;
 			AnomaliesInLast30Days = anomaliesInLast30Days;
+
+			int minimumAnomalyDurationMinutes;
+			if (subgroupInfo.Options != null)
+			{
+				AnomalyThreshold = subgroupInfo.Options.GetAnomalyThresholdOrDefault(radHelper, groupInfo.Options?.AnomalyThreshold);
+				minimumAnomalyDurationMinutes = subgroupInfo.Options.GetMinimalDurationOrDefault(radHelper, groupInfo.Options?.MinimalDuration);
+			}
+			else
+			{
+				AnomalyThreshold = radHelper.DefaultAnomalyThreshold;
+				minimumAnomalyDurationMinutes = radHelper.DefaultMinimumAnomalyDuration;
+			}
+
+			MinimumAnomalyDuration = TimeSpan.FromMinutes(minimumAnomalyDurationMinutes);
 		}
 
 		public string Name { get; set; }
@@ -261,7 +272,6 @@ namespace RadDataSources
 				yield break;
 			}
 
-			bool sharedModelGroup = groupInfo.Subgroups.Count > 1;
 			foreach (var subgroupInfo in groupInfo.Subgroups)
 			{
 				if (subgroupInfo == null)
@@ -277,32 +287,8 @@ namespace RadDataSources
 				if (_onlyWithAnomalies && !hasActiveAnomaly)
 					continue;
 
-				double anomalyThreshold;
-				int minumumAnomalyDuration;
-				if (subgroupInfo.Options != null)
-				{
-					anomalyThreshold = subgroupInfo.Options.GetAnomalyThresholdOrDefault(_radHelper, groupInfo.Options?.AnomalyThreshold);
-					minumumAnomalyDuration = subgroupInfo.Options.GetMinimalDurationOrDefault(_radHelper, groupInfo.Options?.MinimalDuration);
-				}
-				else
-				{
-					anomalyThreshold = _radHelper.DefaultAnomalyThreshold;
-					minumumAnomalyDuration = _radHelper.DefaultMinimumAnomalyDuration;
-				}
-
-				yield return new RadGroupRow(
-					name: subgroupInfo.GetName(groupInfo.GroupName),
-					dataMinerID: groupInfo.DataMinerID,
-					parameters: subgroupInfo.Parameters?.Select(p => p?.Key).ToList(),
-					updateModel: groupInfo.Options?.UpdateModel ?? false,
-					anomalyThreshold: anomalyThreshold,
-					minimumAnomalyDuration: TimeSpan.FromMinutes(minumumAnomalyDuration),
-					isMonitored: subgroupInfo.IsMonitored,
-					parentGroup: groupInfo.GroupName,
-					subgroupID: subgroupInfo.ID,
-					isSharedModelGroup: sharedModelGroup,
-					hasActiveAnomaly: hasActiveAnomaly,
-					anomaliesInLast30Days: anomaliesPerSubgroup.TryGetValue(subgroupInfo.ID, out int count) ? count : 0);
+				yield return new RadGroupRow(_radHelper, groupInfo, subgroupInfo, hasActiveAnomaly,
+					anomaliesPerSubgroup.TryGetValue(subgroupInfo.ID, out int count) ? count : 0);
 			}
 		}
 
