@@ -181,7 +181,7 @@
 			{
 				var groupInfo = FetchGroupInfo(group.Key);
 				var subgroupIDs = group.OfType<RadSubgroupID>();
-				if (groupInfo?.Subgroups?.Count > 1 && subgroupIDs.Count() > 0)
+				if (groupInfo?.Subgroups?.Count > 1 && subgroupIDs.Any())
 				{
 					var matchingSubgroups = GetMatchingSubgroups(groupInfo, subgroupIDs);
 					var section = new SharedModelRemoveCheckBox(group.Key, matchingSubgroups, matchingSubgroups.Count == groupInfo.Subgroups.Count, 4, TextWrapWidth, TextWrapIndentWidth);
