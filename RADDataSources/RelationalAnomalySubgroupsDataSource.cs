@@ -5,7 +5,6 @@ namespace RadDataSources
     using System.Linq;
     using Skyline.DataMiner.Analytics.DataTypes;
     using Skyline.DataMiner.Analytics.GenericInterface;
-    using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Utils.RadToolkit;
 
     public class RadSubgroupRow : RadGroupBaseRow
@@ -14,26 +13,24 @@ namespace RadDataSources
             : base(name: subgroupInfo.GetName(groupInfo.GroupName),
                  dataMinerID: groupInfo.DataMinerID,
                  hasError: !subgroupInfo.IsMonitored,
+                 parameters: subgroupInfo.Parameters?.Select(p => p?.Key).WhereNotNull().ToList() ?? new List<ParameterKey>(),
                  updateModel: groupInfo.Options?.UpdateModel ?? false,
                  anomalyThreshold: subgroupInfo.Options?.GetAnomalyThresholdOrDefault(radHelper, groupInfo.Options?.AnomalyThreshold) ?? radHelper.DefaultAnomalyThreshold,
                  minimumAnomalyDuration: TimeSpan.FromMinutes(subgroupInfo.Options?.GetMinimalDurationOrDefault(radHelper, groupInfo.Options?.MinimalDuration) ?? radHelper.DefaultMinimumAnomalyDuration),
                  hasActiveAnomaly: hasActiveAnomaly,
                  anomaliesInLast30Days: anomaliesInLast30Days)
         {
-            Parameters = subgroupInfo.Parameters?.Select(p => p?.Key).WhereNotNull().ToList() ?? new List<ParameterKey>();
             ParentGroup = groupInfo.GroupName;
             SubgroupID = subgroupInfo.ID;
         }
-
-        public List<ParameterKey> Parameters { get; set; }
 
         public string ParentGroup { get; set; }
 
         public Guid SubgroupID { get; set; }
 
-        public override GQIRow ToGQIRow()
+        public override GQICell[] GetGQICells()
         {
-            var cells = new GQICell[]
+            return new GQICell[]
             {
                 new GQICell { Value = Name },                                    // Name
                 new GQICell { Value = DataMinerID },                             // DataMiner Id
@@ -42,18 +39,11 @@ namespace RadDataSources
                 new GQICell { Value = AnomalyThreshold },                        // Anomaly Threshold
                 new GQICell { Value = MinimumAnomalyDuration },                  // Minimum Anomaly Duration
                 new GQICell { Value = HasError },                                // Has Error
-                new GQICell { Value = ParentGroup },                             // Parent Group
-                new GQICell { Value = SubgroupID.ToString() },                   // Subgroup ID
                 new GQICell { Value = HasActiveAnomaly },                        // Has Active Anomaly
                 new GQICell { Value = AnomaliesInLast30Days },                   // Anomalies in Last 30 Days
+                new GQICell { Value = ParentGroup },                             // Parent Group
+                new GQICell { Value = SubgroupID.ToString() },                   // Subgroup ID
             };
-            var row = new GQIRow(cells);
-            var parameters = Parameters.Select(p => new ObjectRefMetadata() { Object = p?.ToParamID() })
-                .WhereNotNull();
-            if (parameters != null)
-                row.Metadata = new GenIfRowMetadata(parameters.ToArray());
-
-            return row;
         }
     }
 
@@ -75,10 +65,10 @@ namespace RadDataSources
                 new GQIDoubleColumn("Anomaly Threshold"),
                 new GQITimeSpanColumn("Minimum Anomaly Duration"),
                 new GQIBooleanColumn("Has Error"),
-                new GQIStringColumn("Parent Group"),
-                new GQIStringColumn("Subgroup ID"),
                 new GQIBooleanColumn("Has Active Anomaly"),
                 new GQIIntColumn("Anomalies in Last 30 Days"),
+                new GQIStringColumn("Parent Group"),
+                new GQIStringColumn("Subgroup ID"),
             };
         }
 

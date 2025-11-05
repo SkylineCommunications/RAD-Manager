@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Skyline.DataMiner.Analytics.DataTypes;
     using Skyline.DataMiner.Analytics.GenericInterface;
     using Skyline.DataMiner.Utils.RadToolkit;
 
@@ -11,6 +12,7 @@
         public RadGroupRow(RadHelper radHelper, RadGroupInfo groupInfo, bool hasError, bool hasActiveAnomaly, int anomaliesInLast30Days)
             : base(name: groupInfo.GroupName,
                   dataMinerID: groupInfo.DataMinerID,
+                  parameters: new List<ParameterKey>(),
                   updateModel: groupInfo.Options?.UpdateModel ?? false,
                   hasError: hasError,
                   hasActiveAnomaly: hasActiveAnomaly,
@@ -18,26 +20,32 @@
                   anomalyThreshold: groupInfo.Options?.GetAnomalyThresholdOrDefault(radHelper) ?? radHelper.DefaultAnomalyThreshold,
                   minimumAnomalyDuration: TimeSpan.FromMinutes(groupInfo.Options?.GetMinimalDurationOrDefault(radHelper) ?? radHelper.DefaultMinimumAnomalyDuration))
         {
-            IsSharedModelGroup = groupInfo.Subgroups.Count > 1;
+            IsSharedModelGroup = groupInfo.Subgroups?.Count > 1;
+            if (!IsSharedModelGroup)
+            {
+                var subgroup = groupInfo.Subgroups.FirstOrDefault();
+                if (subgroup != null)
+                    Parameters = subgroup.Parameters?.Select(p => p?.Key).Where(p => p != null).ToList() ?? new List<ParameterKey>();
+            }
         }
 
         public bool IsSharedModelGroup { get; set; }
 
-        public override GQIRow ToGQIRow()
+        public override GQICell[] GetGQICells()
         {
-            var cells = new GQICell[]
+            return new GQICell[]
             {
                 new GQICell { Value = Name },                                    // Name
                 new GQICell { Value = DataMinerID },                             // DataMiner Id
+                new GQICell { Value = Utils.ParameterKeysToString(Parameters) }, // Parameters
                 new GQICell { Value = UpdateModel },                             // Update Model
                 new GQICell { Value = AnomalyThreshold },                        // Anomaly Threshold
                 new GQICell { Value = MinimumAnomalyDuration },                  // Minimum Anomaly Duration
                 new GQICell { Value = HasError },                                // Has Error
-                new GQICell { Value = IsSharedModelGroup },                      // Is Shared Model Group
                 new GQICell { Value = HasActiveAnomaly },                        // Has Active Anomaly
                 new GQICell { Value = AnomaliesInLast30Days },                   // Anomalies in Last 30 Days
+                new GQICell { Value = IsSharedModelGroup },                      // Is Shared Model Group
             };
-            return new GQIRow(cells);
         }
     }
 
@@ -54,13 +62,14 @@
             {
                 new GQIStringColumn("Name"),
                 new GQIIntColumn("DataMiner Id"),
+                new GQIStringColumn("Parameters"),
                 new GQIBooleanColumn("Update Model"),
                 new GQIDoubleColumn("Anomaly Threshold"),
                 new GQITimeSpanColumn("Minimum Anomaly Duration"),
                 new GQIBooleanColumn("Has Error"),
-                new GQIBooleanColumn("Is Shared Model Group"),
                 new GQIBooleanColumn("Has Active Anomaly"),
                 new GQIIntColumn("Anomalies in Last 30 Days"),
+                new GQIBooleanColumn("Is Shared Model Group"),
             };
         }
 

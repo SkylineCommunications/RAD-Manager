@@ -14,11 +14,12 @@
 
     public abstract class RadGroupBaseRow
     {
-        public RadGroupBaseRow(string name, int dataMinerID,
+        public RadGroupBaseRow(string name, int dataMinerID, List<ParameterKey> parameters,
             bool hasError, bool updateModel, double anomalyThreshold, TimeSpan minimumAnomalyDuration, bool hasActiveAnomaly, int anomaliesInLast30Days)
         {
             Name = name;
             DataMinerID = dataMinerID;
+            Parameters = parameters;
             HasError = hasError;
             UpdateModel = updateModel;
             AnomalyThreshold = anomalyThreshold;
@@ -30,6 +31,8 @@
         public string Name { get; set; }
 
         public int DataMinerID { get; set; }
+
+        public List<ParameterKey> Parameters { get; set; }
 
         public bool HasError { get; set; }
 
@@ -43,7 +46,18 @@
 
         public int AnomaliesInLast30Days { get; set; }
 
-        public abstract GQIRow ToGQIRow();
+        public abstract GQICell[] GetGQICells();
+
+        public GQIRow ToGQIRow()
+        {
+            var row = new GQIRow(GetGQICells());
+            var parameters = Parameters?.Select(p => new ObjectRefMetadata() { Object = p?.ToParamID() })
+                .WhereNotNull().ToArray();
+            if (parameters?.Length > 0)
+                row.Metadata = new GenIfRowMetadata(parameters.ToArray());
+
+            return row;
+        }
     }
 
     public abstract class RelationalAnomalyGroupsBaseDataSource<T> : IGQIDataSource, IGQIOnInit, IGQIInputArguments where T : RadGroupBaseRow
