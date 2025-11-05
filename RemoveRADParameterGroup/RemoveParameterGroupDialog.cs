@@ -140,7 +140,7 @@
 			_groupRemoveWidgets = new List<AGroupRemoveSection>();
 			_extraGroupsToRemove = new List<RadGroupID>();
 
-			if (groupInfo == null || groupInfo.Subgroups == null || groupInfo.Subgroups.Count <= 1 || subgroupIDs.Count() == 0)
+			if (groupInfo == null || groupInfo.Subgroups == null || groupInfo.Subgroups.Count <= 1 || !subgroupIDs.Any())
 			{
 				_label.Text = $"Are you sure you want to remove the relational anomaly group '{groupID.GroupName}'?";
 				SetYesNoButtonsVisible();
