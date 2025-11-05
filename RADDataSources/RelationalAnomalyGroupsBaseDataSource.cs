@@ -54,7 +54,7 @@
             var parameters = Parameters?.Select(p => new ObjectRefMetadata() { Object = p?.ToParamID() })
                 .WhereNotNull().ToArray();
             if (parameters?.Length > 0)
-                row.Metadata = new GenIfRowMetadata(parameters.ToArray());
+                row.Metadata = new GenIfRowMetadata(parameters);
 
             return row;
         }
