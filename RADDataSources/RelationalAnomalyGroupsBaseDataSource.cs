@@ -14,18 +14,15 @@
 
     public abstract class RadGroupBaseRow
     {
-        public RadGroupBaseRow(string name, int dataMinerID, List<ParameterKey> parameters,
-            bool hasError, bool updateModel, double anomalyThreshold, TimeSpan minimumAnomalyDuration, bool hasActiveAnomaly, int anomaliesInLast30Days)
+        protected RadGroupBaseRow(string name, int dataMinerID, List<ParameterKey> parameters, bool updateModel, double anomalyThreshold,
+            TimeSpan minimumAnomalyDuration)
         {
             Name = name;
             DataMinerID = dataMinerID;
             Parameters = parameters;
-            HasError = hasError;
             UpdateModel = updateModel;
             AnomalyThreshold = anomalyThreshold;
             MinimumAnomalyDuration = minimumAnomalyDuration;
-            HasActiveAnomaly = hasActiveAnomaly;
-            AnomaliesInLast30Days = anomaliesInLast30Days;
         }
 
         public string Name { get; set; }
@@ -34,7 +31,7 @@
 
         public List<ParameterKey> Parameters { get; set; }
 
-        public bool HasError { get; set; }
+        public bool HasError { get; set; } = false;
 
         public bool UpdateModel { get; set; }
 
@@ -42,9 +39,9 @@
 
         public TimeSpan MinimumAnomalyDuration { get; set; }
 
-        public bool HasActiveAnomaly { get; set; }
+        public bool HasActiveAnomaly { get; set; } = false;
 
-        public int AnomaliesInLast30Days { get; set; }
+        public int AnomaliesInLast30Days { get; set; } = 0;
 
         public abstract GQICell[] GetGQICells();
 
@@ -60,10 +57,13 @@
         }
     }
 
-    public abstract class RelationalAnomalyGroupsBaseDataSource<T> : IGQIDataSource, IGQIOnInit, IGQIInputArguments where T : RadGroupBaseRow
+    public abstract class RelationalAnomalyGroupsBaseDataSource
     {
-        private static readonly AnomaliesCache _anomaliesCache = new AnomaliesCache();
+        protected static readonly AnomaliesCache _anomaliesCache = new AnomaliesCache();
+    }
 
+    public abstract class RelationalAnomalyGroupsBaseDataSource<T> : RelationalAnomalyGroupsBaseDataSource, IGQIDataSource, IGQIOnInit, IGQIInputArguments where T : RadGroupBaseRow
+    {
         private readonly GQIStringDropdownArgument _sortByArg = new GQIStringDropdownArgument("Sort by", EnumExtensions.GetDescriptions<SortingColumn>())
         {
             IsRequired = false,

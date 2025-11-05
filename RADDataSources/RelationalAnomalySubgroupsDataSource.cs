@@ -9,19 +9,17 @@ namespace RadDataSources
 
     public class RadSubgroupRow : RadGroupBaseRow
     {
-        public RadSubgroupRow(RadHelper radHelper, RadGroupInfo groupInfo, RadSubgroupInfo subgroupInfo, bool hasActiveAnomaly, int anomaliesInLast30Days)
+        public RadSubgroupRow(RadHelper radHelper, RadGroupInfo groupInfo, RadSubgroupInfo subgroupInfo)
             : base(name: subgroupInfo.GetName(groupInfo.GroupName),
                  dataMinerID: groupInfo.DataMinerID,
-                 hasError: !subgroupInfo.IsMonitored,
                  parameters: subgroupInfo.Parameters?.Select(p => p?.Key).WhereNotNull().ToList() ?? new List<ParameterKey>(),
                  updateModel: groupInfo.Options?.UpdateModel ?? false,
                  anomalyThreshold: subgroupInfo.Options?.GetAnomalyThresholdOrDefault(radHelper, groupInfo.Options?.AnomalyThreshold) ?? radHelper.DefaultAnomalyThreshold,
-                 minimumAnomalyDuration: TimeSpan.FromMinutes(subgroupInfo.Options?.GetMinimalDurationOrDefault(radHelper, groupInfo.Options?.MinimalDuration) ?? radHelper.DefaultMinimumAnomalyDuration),
-                 hasActiveAnomaly: hasActiveAnomaly,
-                 anomaliesInLast30Days: anomaliesInLast30Days)
+                 minimumAnomalyDuration: TimeSpan.FromMinutes(subgroupInfo.Options?.GetMinimalDurationOrDefault(radHelper, groupInfo.Options?.MinimalDuration) ?? radHelper.DefaultMinimumAnomalyDuration))
         {
             ParentGroup = groupInfo.GroupName;
             SubgroupID = subgroupInfo.ID;
+            HasError = !subgroupInfo.IsMonitored;
         }
 
         public string ParentGroup { get; set; }
@@ -95,9 +93,11 @@ namespace RadDataSources
                     continue;
                 }
 
-                bool hasActiveAnomaly = subgroupsWithActiveAnomaly.Contains(subgroupInfo.ID);
-                yield return new RadSubgroupRow(RadHelper, groupInfo, subgroupInfo, hasActiveAnomaly,
-                    anomaliesPerSubgroup.TryGetValue(subgroupInfo.ID, out int count) ? count : 0);
+                yield return new RadSubgroupRow(RadHelper, groupInfo, subgroupInfo)
+                {
+                    HasActiveAnomaly = subgroupsWithActiveAnomaly.Contains(subgroupInfo.ID),
+                    AnomaliesInLast30Days = anomaliesPerSubgroup.TryGetValue(subgroupInfo.ID, out int count) ? count : 0,
+                };
             }
         }
     }

@@ -9,17 +9,15 @@
 
     public class RadGroupRow : RadGroupBaseRow
     {
-        public RadGroupRow(RadHelper radHelper, RadGroupInfo groupInfo, bool hasError, bool hasActiveAnomaly, int anomaliesInLast30Days)
+        public RadGroupRow(RadHelper radHelper, RadGroupInfo groupInfo)
             : base(name: groupInfo.GroupName,
                   dataMinerID: groupInfo.DataMinerID,
                   parameters: new List<ParameterKey>(),
                   updateModel: groupInfo.Options?.UpdateModel ?? false,
-                  hasError: hasError,
-                  hasActiveAnomaly: hasActiveAnomaly,
-                  anomaliesInLast30Days: anomaliesInLast30Days,
                   anomalyThreshold: groupInfo.Options?.GetAnomalyThresholdOrDefault(radHelper) ?? radHelper.DefaultAnomalyThreshold,
                   minimumAnomalyDuration: TimeSpan.FromMinutes(groupInfo.Options?.GetMinimalDurationOrDefault(radHelper) ?? radHelper.DefaultMinimumAnomalyDuration))
         {
+            HasError = groupInfo.Subgroups.Any(sg => !sg.IsMonitored);
             IsSharedModelGroup = groupInfo.Subgroups?.Count > 1;
             if (!IsSharedModelGroup)
             {
@@ -88,11 +86,11 @@
                 yield break;
             }
 
-            bool hasError = groupInfo.Subgroups.Any(sg => !sg.IsMonitored);
-            bool hasActiveAnomaly = groupInfo.Subgroups.Any(sg => subgroupsWithActiveAnomaly.Contains(sg.ID));
-            int anomaliesInLast30Days = groupInfo.Subgroups.Sum(sg => anomaliesPerSubgroup.TryGetValue(sg.ID, out int count) ? count : 0);
-
-            yield return new RadGroupRow(RadHelper, groupInfo, hasError, hasActiveAnomaly, anomaliesInLast30Days);
+            yield return new RadGroupRow(RadHelper, groupInfo)
+            {
+                HasActiveAnomaly = groupInfo.Subgroups.Any(sg => subgroupsWithActiveAnomaly.Contains(sg.ID)),
+                AnomaliesInLast30Days = groupInfo.Subgroups.Sum(sg => anomaliesPerSubgroup.TryGetValue(sg.ID, out int count) ? count : 0),
+            };
         }
     }
 }
