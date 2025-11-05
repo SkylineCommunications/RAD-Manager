@@ -139,9 +139,8 @@
 			var groupInfo = FetchGroupInfo(groupID);
 			_groupRemoveWidgets = new List<AGroupRemoveSection>();
 			_extraGroupsToRemove = new List<RadGroupID>();
-			var matchingSubgroups = GetMatchingSubgroups(groupInfo, subgroupIDs);
 
-			if (groupInfo == null || groupInfo.Subgroups == null || groupInfo.Subgroups.Count <= 1 || matchingSubgroups.Count == 0)
+			if (groupInfo == null || groupInfo.Subgroups == null || groupInfo.Subgroups.Count <= 1 || subgroupIDs.Count() == 0)
 			{
 				_label.Text = $"Are you sure you want to remove the relational anomaly group '{groupID.GroupName}'?";
 				SetYesNoButtonsVisible();
@@ -149,6 +148,7 @@
 				return;
 			}
 
+			var matchingSubgroups = GetMatchingSubgroups(groupInfo, subgroupIDs);
 			if (matchingSubgroups.Count == 1)
 			{
 				var subgroup = matchingSubgroups.First();
