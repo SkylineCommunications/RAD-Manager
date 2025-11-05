@@ -91,7 +91,6 @@
             bool hasError = groupInfo.Subgroups.Any(sg => !sg.IsMonitored);
             bool hasActiveAnomaly = groupInfo.Subgroups.Any(sg => subgroupsWithActiveAnomaly.Contains(sg.ID));
             int anomaliesInLast30Days = groupInfo.Subgroups.Sum(sg => anomaliesPerSubgroup.TryGetValue(sg.ID, out int count) ? count : 0);
-            //TODO: average this per subgroup?
 
             yield return new RadGroupRow(RadHelper, groupInfo, hasError, hasActiveAnomaly, anomaliesInLast30Days);
         }

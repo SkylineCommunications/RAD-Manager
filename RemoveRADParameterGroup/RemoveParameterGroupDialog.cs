@@ -180,10 +180,11 @@
 			foreach (var group in parameterGroups)
 			{
 				var groupInfo = FetchGroupInfo(group.Key);
-				var subgroups = GetMatchingSubgroups(groupInfo, group.OfType<RadSubgroupID>());
-				if (subgroups.Count > 0)
+				var subgroupIDs = group.OfType<RadSubgroupID>();
+				if (groupInfo?.Subgroups?.Count > 1 && subgroupIDs.Count() > 0)
 				{
-					var section = new SharedModelRemoveCheckBox(group.Key, subgroups, subgroups.Count == groupInfo.Subgroups.Count, 4, TextWrapWidth, TextWrapIndentWidth);
+					var matchingSubgroups = GetMatchingSubgroups(groupInfo, subgroupIDs);
+					var section = new SharedModelRemoveCheckBox(group.Key, matchingSubgroups, matchingSubgroups.Count == groupInfo.Subgroups.Count, 4, TextWrapWidth, TextWrapIndentWidth);
 					_groupRemoveWidgets.Add(section);
 				}
 				else
