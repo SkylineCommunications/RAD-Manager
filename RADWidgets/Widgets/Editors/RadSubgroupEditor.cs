@@ -31,6 +31,10 @@
 			if (settings != null)
 				_otherSubgroups = _otherSubgroups.Where(s => s.ID != settings.ID).ToList();
 
+			var elementsLabel = new Label("Element");
+			var parametersLabel = new Label("Parameter");
+			var instanceLabel = new Label("Display key");
+
 			_parameterSelectors = new List<Tuple<Label, ParameterInstanceSelector>>(_parameterLabels.Count);
 			for (int i = 0; i < _parameterLabels.Count; i++)
 			{
@@ -62,6 +66,11 @@
 			int row = 0;
 			AddSection(_groupNameSection, row, 0);
 			row += _groupNameSection.RowCount;
+
+			AddWidget(elementsLabel, row, 1);
+			AddWidget(parametersLabel, row, 2);
+			AddWidget(instanceLabel, row, 3);
+			row++;
 
 			foreach (var (label, parameterSelector) in _parameterSelectors)
 			{
