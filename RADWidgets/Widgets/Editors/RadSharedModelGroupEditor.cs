@@ -18,7 +18,9 @@
 		private readonly RadGroupOptionsEditor _optionsEditor;
 		private readonly Numeric _parametersCountNumeric;
 		private readonly RadSubgroupSelector _subgroupSelector;
+		private readonly TrainingConfigurationButton _trainingButton;
 		private readonly MarginLabel _detailsLabel;
+		private readonly List<RadSubgroupInfo> _originalSubgroups;
 		private List<string> _parameterLabels;
 		private List<string> _oldParameterLabels;
 		private List<string> _duplicatedParameterLabels;
@@ -29,6 +31,16 @@
 			RadGroupInfo settings = null, Guid? selectedSubgroup = null)
 		{
 			_engine = engine;
+			_originalSubgroups = new List<RadSubgroupInfo>();
+			if (settings?.Subgroups != null)
+			{
+				foreach (var subgroup in settings.Subgroups)
+				{
+					subgroup.NormalizeParameters();
+					_originalSubgroups.Add(subgroup);
+				}
+			}
+
 			_groupNameSection = new GroupNameSection(settings?.GroupName, existingGroupNames, 2);
 			_groupNameSection.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
@@ -72,6 +84,9 @@
 
 			_subgroupSelector = new RadSubgroupSelector(engine, radHelper, _optionsEditor.Options, _parameterLabels, parametersCache, settings?.Subgroups, selectedSubgroup);
 			_subgroupSelector.ValidationChanged += (sender, args) => OnSubgroupSelectorValidationChanged();
+			_subgroupSelector.Changed += (sender, args) => OnSubgroupSelectorChanged();
+
+			_trainingButton = new TrainingConfigurationButton(engine, _subgroupSelector.ColumnCount, settings == null, _subgroupSelector.GetSubgroupSelectorItems());
 
 			_detailsLabel = new MarginLabel(string.Empty, 3, 10)
 			{
@@ -97,6 +112,9 @@
 			AddSection(_optionsEditor, row, 0);
 			row += _optionsEditor.RowCount;
 
+			AddSection(_trainingButton, row, 0);
+			row += _trainingButton.RowCount;
+
 			AddSection(_detailsLabel, row, 0, GetDetailsLabelVisible);
 		}
 
@@ -106,9 +124,43 @@
 
 		public string ValidationText { get; private set; }
 
-		public RadGroupSettings GetSettings()
+		public TrainingConfiguration TrainingConfiguration => _trainingButton.Configuration;
+
+		public RadGroupSettings GetSettings(out List<RadSubgroupSettings> addedSubgroups, out List<Guid> removedSubgroups)
 		{
-			return new RadGroupSettings(_groupNameSection.GroupName, _optionsEditor.Options, _subgroupSelector.GetSubgroups());
+			var newSubgroups = _subgroupSelector.GetSubgroups();
+
+			bool[] matchedOriginalSubgroups = new bool[_originalSubgroups.Count];
+			addedSubgroups = new List<RadSubgroupSettings>();
+			removedSubgroups = new List<Guid>();
+			foreach (var subgroup in newSubgroups)
+			{
+				bool matched = false;
+
+				subgroup.NormalizeParameters();
+				for (int i = 0; i < _originalSubgroups.Count; ++i)
+				{
+					if (matchedOriginalSubgroups[i])
+						continue;
+					if (_originalSubgroups[i].HasSameOrderedParameters(subgroup))
+					{
+						matchedOriginalSubgroups[i] = true;
+						matched = true;
+						break;
+					}
+				}
+
+				if (!matched)
+					addedSubgroups.Add(subgroup);
+			}
+
+			for (int i = 0; i < matchedOriginalSubgroups.Length; ++i)
+			{
+				if (!matchedOriginalSubgroups[i])
+					removedSubgroups.Add(_originalSubgroups[i].ID);
+			}
+
+			return new RadGroupSettings(_groupNameSection.GroupName, _optionsEditor.Options, newSubgroups);
 		}
 
 		private void UpdateParameterLabelsValid()
@@ -194,6 +246,19 @@
 			UpdateIsValid();
 		}
 
+		private bool HasPreservedSubgroups()
+		{
+			var newSubgroups = _subgroupSelector.GetSubgroups();
+			foreach (var newSubgroup in newSubgroups)
+			{
+				newSubgroup.NormalizeParameters();
+				if (_originalSubgroups.Any(s => s.HasSameOrderedParameters(newSubgroup)))
+					return true;
+			}
+
+			return false;
+		}
+
 		private void OnEditLabelsButtonPressed()
 		{
 			InteractiveController app = new InteractiveController(_engine);
@@ -250,6 +315,11 @@
 		{
 			UpdateDetailsLabel();
 			UpdateIsValid();
+		}
+
+		private void OnSubgroupSelectorChanged()
+		{
+			_trainingButton.SetSubgroups(!HasPreservedSubgroups(), _subgroupSelector.GetSubgroupSelectorItems());
 		}
 	}
 }

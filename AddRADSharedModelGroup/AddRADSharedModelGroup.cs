@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using AddRadSharedModelGroup;
 using RadWidgets;
 using Skyline.DataMiner.Automation;
@@ -70,7 +71,14 @@ public class Script
 		var settings = dialog.GetSettings();
 		try
 		{
+			var trainingConfig = dialog.TrainingConfiguration;
+
 			_radHelper.AddParameterGroup(settings);
+			if (trainingConfig != null)
+			{
+				_radHelper.RetrainParameterGroup(-1, settings.GroupName, trainingConfig.SelectedTimeRanges.Select(tr => tr.TimeRange),
+					trainingConfig.ExcludedSubgroupIDs);
+			}
 		}
 		catch (Exception ex)
 		{

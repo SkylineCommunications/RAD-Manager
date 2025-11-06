@@ -1,13 +1,14 @@
-﻿namespace RetrainRADModel
+﻿namespace RadWidgets.Widgets
 {
 	using System;
 	using System.Globalization;
+	using RadWidgets.Widgets.Dialogs;
 	using RadWidgets.Widgets.Generic;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
-	public class TimeRangeItem : SelectorItem
+	public class TimeRangeItem : SelectorItem, IEquatable<TimeRangeItem>
 	{
 		public TimeRangeItem(TimeRange range)
 		{
@@ -25,6 +26,30 @@
 		{
 			return $"From {TimeRange.Start} to {TimeRange.End}";
 		}
+
+		public override bool Equals(object obj)
+		{
+			if (obj is TimeRangeItem other)
+				return Equals(other);
+
+			return false;
+		}
+
+		public bool Equals(TimeRangeItem other)
+		{
+			if (other == null)
+				return false;
+
+			return other.TimeRange.Start == this.TimeRange.Start && other.TimeRange.End == this.TimeRange.End;
+		}
+
+		public override int GetHashCode()
+		{
+			var hash = TimeRange.Start.GetHashCode();
+			hash ^= TimeRange.End.GetHashCode();
+
+			return hash;
+		}
 	}
 
 	public class TimeRangeSelector : MultiSelectorItemSelector<TimeRangeItem>
@@ -32,14 +57,14 @@
 		private readonly DateTimePicker _startTimePicker;
 		private readonly DateTimePicker _endTimePicker;
 
-		public TimeRangeSelector(IEngine engine)
+		public TimeRangeSelector(IEngine engine, DateTime startTime, DateTime endTime)
 		{
 			var fromLabel = new Label("From");
 
 			_startTimePicker = new DateTimePicker()
 			{
 				Maximum = DateTime.Now,
-				DateTime = DateTime.Now - TimeSpan.FromDays(30),
+				DateTime = startTime,
 			};
 			_startTimePicker.Changed += (sender, args) => OnStartTimeSelectorChanged();
 
@@ -48,7 +73,7 @@
 			_endTimePicker = new DateTimePicker()
 			{
 				Maximum = DateTime.Now,
-				DateTime = DateTime.Now,
+				DateTime = endTime,
 			};
 			_endTimePicker.Changed += (sender, args) => OnEndTimeSelectorChanged();
 
@@ -89,7 +114,8 @@
 
 	public class MultiTimeRangeSelector : MultiSelector<TimeRangeItem>
 	{
-		public MultiTimeRangeSelector(IEngine engine) : base(new TimeRangeSelector(engine), null, "No time ranges selected")
+		public MultiTimeRangeSelector(IEngine engine, DateTime initialStartTime, DateTime initialEndTime, string emptyText) :
+			base(new TimeRangeSelector(engine, initialStartTime, initialEndTime), null, emptyText)
 		{
 			AddButtonTooltip = "Add the range specified on the left to the ranges with normal behavior.";
 			RemoveButtonTooltip = "Remove the range(s) selected on the left from the ranges with normal behavior.";

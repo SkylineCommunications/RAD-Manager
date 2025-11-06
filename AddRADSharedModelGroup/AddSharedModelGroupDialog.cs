@@ -2,6 +2,7 @@
 {
 	using System;
 	using RadWidgets;
+	using RadWidgets.Widgets;
 	using RadWidgets.Widgets.Editors;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -47,7 +48,9 @@
 
 		public event EventHandler Cancelled;
 
-		public RadGroupSettings GetSettings() => _groupEditor.GetSettings();
+		public TrainingConfiguration TrainingConfiguration => _groupEditor.TrainingConfiguration;
+
+		public RadGroupSettings GetSettings() => _groupEditor.GetSettings(out var _, out var _);
 
 		private void OnEditorValidationChanged()
 		{

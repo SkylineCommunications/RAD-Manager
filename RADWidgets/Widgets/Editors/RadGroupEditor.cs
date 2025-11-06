@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	using RadUtils;
+	using RadWidgets.Widgets.Dialogs;
 	using RadWidgets.Widgets.Generic;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.RadToolkit;
@@ -15,6 +16,7 @@
 		private readonly GroupNameSection _groupNameSection;
 		private readonly MultiParameterSelector _parameterSelector;
 		private readonly RadGroupOptionsEditor _optionsEditor;
+		private readonly TrainingConfigurationButton _trainingButton;
 		private readonly MarginLabel _detailsLabel;
 		private bool _moreThanMinParametersSelected = false;
 		private bool _lessThanMaxParametersSelected = false;
@@ -39,6 +41,8 @@
 			_optionsEditor = new RadGroupOptionsEditor(radHelper, _parameterSelector.ColumnCount, options);
 			_optionsEditor.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
+			_trainingButton = new TrainingConfigurationButton(engine, _parameterSelector.ColumnCount, settings == null);
+
 			_detailsLabel = new MarginLabel(string.Empty, _parameterSelector.ColumnCount, 10);
 
 			UpdateParametersSelectedInRange();
@@ -55,6 +59,9 @@
 			AddSection(_optionsEditor, row, 0);
 			row += _optionsEditor.RowCount;
 
+			AddSection(_trainingButton, row, 0);
+			row += _trainingButton.RowCount;
+
 			AddSection(_detailsLabel, row, 0, GetDetailsLabelVisible);
 		}
 
@@ -69,6 +76,8 @@
 				return new RadGroupSettings(_groupNameSection.GroupName, _optionsEditor.Options, new List<RadSubgroupSettings> { subgroup });
 			}
 		}
+
+		public TrainingConfiguration TrainingConfiguration => _trainingButton.Configuration;
 
 		public bool IsValid { get; private set; }
 
