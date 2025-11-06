@@ -308,6 +308,23 @@
 		}
 
 		/// <summary>
+		/// Gets the subgroups from <paramref name="groupSettings"/> that have the same parameters as any of the subgroups in <paramref name="subgroupsToFind"/>.
+		/// </summary>
+		/// <param name="groupSettings">The group settings.</param>
+		/// <param name="subgroupsToFind">The subgroups to look for.</param>
+		/// <returns>The list of matching subgroups.</returns>
+		public static List<RadSubgroupInfo> GetSubgroupsWithSameParameters(RadGroupInfo groupSettings, List<RadSubgroupSettings> subgroupsToFind)
+		{
+			if (subgroupsToFind == null || groupSettings?.Subgroups == null)
+				return new List<RadSubgroupInfo>();
+
+			foreach (var subgroup in subgroupsToFind)
+				subgroup.NormalizeParameters();
+
+			return groupSettings.Subgroups.Where(g => subgroupsToFind.Any(s => g.HasSameOrderedParameters(s))).ToList();
+		}
+
+		/// <summary>
 		/// Join list of strings into a human readable string. E.g. ["a", "b", "c"] -> "a, b and c".
 		/// </summary>
 		/// <param name="l">A list of strings.</param>

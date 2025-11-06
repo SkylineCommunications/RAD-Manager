@@ -212,8 +212,20 @@ public class Script
 			var trainingConfig = dialog.TrainingConfiguration;
 			if (trainingConfig != null)
 			{
-				_radHelper.RetrainParameterGroup(-1, newSettings.GroupName, trainingConfig.SelectedTimeRanges.Select(tr => tr.TimeRange),
-					trainingConfig.ExcludedSubgroupIDs);
+				// The IDs of newly added subgroups do not necessarily match with the IDs we receive from the dialog, so we need to find them based on their parameters.
+				var excludedSubgroupsFromDialog = newSettings.Subgroups.Where(s => trainingConfig.ExcludedSubgroupIDs.Contains(s.ID)).ToList();
+				var addedGroup = _radHelper.FetchParameterGroupInfo(newSettings.GroupName);
+				if (addedGroup == null)
+				{
+					_app.Engine.GenerateInformation($"Could not find newly added relational anomaly group '{newSettings.GroupName}'");
+				}
+				else
+				{
+					var excludedSubgroupsFromInfo = RadWidgets.Utils.GetSubgroupsWithSameParameters(addedGroup, excludedSubgroupsFromDialog);
+					var excludedSubgroupIDs = excludedSubgroupsFromInfo.Select(s => s.ID).ToList();
+					_radHelper.RetrainParameterGroup(-1, newSettings.GroupName, trainingConfig.SelectedTimeRanges.Select(tr => tr.TimeRange),
+						excludedSubgroupIDs);
+				}
 			}
 		}
 		catch (Exception ex)
