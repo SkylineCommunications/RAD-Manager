@@ -5,6 +5,7 @@ namespace RadDataSources
     using System.Linq;
     using Skyline.DataMiner.Analytics.DataTypes;
     using Skyline.DataMiner.Analytics.GenericInterface;
+    using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Utils.RadToolkit;
 
     public class RadSubgroupRow : RadGroupBaseRow
