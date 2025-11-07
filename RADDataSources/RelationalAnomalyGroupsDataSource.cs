@@ -240,8 +240,9 @@ namespace RadDataSources
 						: rows.OrderBy(r => r.AnomaliesInLast30Days).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
 					break;
 				case SortingColumn.UpdateModel:
-					rows = _sortDescending ? rows.OrderByDescending(r => r.UpdateModel).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
-						: rows.OrderBy(r => r.UpdateModel).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+					// Order by and order by descending are inverted since 'adaptive' (i.e. true) should come before 'static' (i.e. false)
+					rows = _sortDescending ? rows.OrderBy(r => r.UpdateModel).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+						: rows.OrderByDescending(r => r.UpdateModel).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
 					break;
 				case SortingColumn.AnomalyThreshold:
 					rows = _sortDescending ? rows.OrderByDescending(r => r.AnomalyThreshold).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
