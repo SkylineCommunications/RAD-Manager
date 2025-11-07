@@ -17,7 +17,7 @@ namespace RadDataSources
 	{
 		[Description("Name")]
 		Name,
-		[Description("Anomalies in Last 30 Days")]
+		[Description("Number of anomalies in Last 30 Days")]
 		AnomaliesInLast30Days,
 		[Description("Update Model")]
 		UpdateModel,
@@ -33,7 +33,7 @@ namespace RadDataSources
 		{
 			Name = subgroupInfo.GetName(groupInfo.GroupName);
 			DataMinerID = groupInfo.DataMinerID;
-			Parameters = subgroupInfo.Parameters?.Select(p => p?.Key).Where(p => p != null).ToList();
+			Parameters = subgroupInfo.Parameters?.Select(p => p?.Key).WhereNotNull().ToList() ?? new List<ParameterKey>();
 			UpdateModel = groupInfo.Options?.UpdateModel ?? false;
 			IsMonitored = subgroupInfo.IsMonitored;
 			ParentGroup = groupInfo.GroupName;

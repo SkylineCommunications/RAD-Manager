@@ -34,7 +34,7 @@
 
 		public bool IsSameUserAndGroup(string userDomainName, IRadGroupID groupID)
 		{
-			return UserDomainName == userDomainName && GroupID.Equals(groupID);
+			return string.Equals(UserDomainName, userDomainName, StringComparison.OrdinalIgnoreCase) && GroupID.Equals(groupID);
 		}
 
 		public bool IsExpired()

@@ -24,7 +24,7 @@
 
 		public bool IsSameUser(string userDomainName)
 		{
-			return UserDomainName == userDomainName;
+			return string.Equals(UserDomainName, userDomainName, StringComparison.OrdinalIgnoreCase);
 		}
 
 		public bool IsExpired(DateTime utcNow)
