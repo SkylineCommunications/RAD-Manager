@@ -19,7 +19,7 @@ namespace RadDataSources
 		Name,
 		[Description("Number of anomalies in Last 30 Days")]
 		AnomaliesInLast30Days,
-		[Description("Update Model")]
+		[Description("Adaptive / Static model")]
 		UpdateModel,
 		[Description("Anomaly Threshold")]
 		AnomalyThreshold,
