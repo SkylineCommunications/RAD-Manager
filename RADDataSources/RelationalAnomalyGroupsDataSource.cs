@@ -23,7 +23,14 @@
             {
                 var subgroup = groupInfo.Subgroups.FirstOrDefault();
                 if (subgroup != null)
-                    Parameters = subgroup.Parameters?.Select(p => p?.Key).Where(p => p != null).ToList() ?? new List<ParameterKey>();
+				{
+					Parameters = subgroup.Parameters?.Select(p => p?.Key).Where(p => p != null).ToList() ?? new List<ParameterKey>();
+					if (subgroup.Options != null)
+					{
+						AnomalyThreshold = subgroup.Options.GetAnomalyThresholdOrDefault(radHelper, groupInfo.Options?.AnomalyThreshold);
+						MinimumAnomalyDuration = TimeSpan.FromMinutes(subgroup.Options.GetMinimalDurationOrDefault(radHelper, groupInfo.Options?.MinimalDuration));
+					}
+				}
             }
         }
 
