@@ -10,8 +10,8 @@ namespace RadDataSources
 
     public class RadSubgroupRow : RadGroupBaseRow
     {
-        public RadSubgroupRow(RadHelper radHelper, RadGroupInfo groupInfo, RadSubgroupInfo subgroupInfo)
-            : base(name: subgroupInfo.GetName(groupInfo.GroupName),
+        public RadSubgroupRow(RadHelper radHelper, RadGroupInfo groupInfo, RadSubgroupInfo subgroupInfo, string subgroupName)
+            : base(name: subgroupName,
                  dataMinerID: groupInfo.DataMinerID,
                  parameters: subgroupInfo.Parameters?.Select(p => p?.Key).WhereNotNull().ToList() ?? new List<ParameterKey>(),
                  updateModel: groupInfo.Options?.UpdateModel ?? false,
@@ -86,6 +86,7 @@ namespace RadDataSources
                 yield break;
             }
 
+            int unnamedSubgroupCount = 0;
             foreach (var subgroupInfo in groupInfo.Subgroups)
             {
                 if (subgroupInfo == null)
@@ -94,7 +95,8 @@ namespace RadDataSources
                     continue;
                 }
 
-                yield return new RadSubgroupRow(RadHelper, groupInfo, subgroupInfo)
+                string subgroupDisplayName = string.IsNullOrEmpty(subgroupInfo.Name) ? RadUtils.Utils.GetSubgroupPlaceHolderName(++unnamedSubgroupCount) : subgroupInfo.Name;
+                yield return new RadSubgroupRow(RadHelper, groupInfo, subgroupInfo, subgroupDisplayName)
                 {
                     HasActiveAnomaly = subgroupsWithActiveAnomaly.Contains(subgroupInfo.ID),
                     AnomaliesInLast30Days = anomaliesPerSubgroup.TryGetValue(subgroupInfo.ID, out int count) ? count : 0,

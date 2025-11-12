@@ -1,7 +1,6 @@
 ﻿namespace RadUtils
 {
 	using Skyline.DataMiner.Net.Messages;
-	using Skyline.DataMiner.Utils.RadToolkit;
 
 	public static class Utils
 	{
@@ -21,6 +20,11 @@
 		public static bool HasTrending(this ParameterInfo info)
 		{
 			return info.RealTimeTrending || info.AverageTrending;
+		}
+
+		public static string GetSubgroupPlaceHolderName(int unnamedSubgroupCount)
+		{
+			return $"Unnamed subgroup {unnamedSubgroupCount}";
 		}
 	}
 }
