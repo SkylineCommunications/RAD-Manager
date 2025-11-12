@@ -225,6 +225,7 @@ public class Script
 					var excludedSubgroupIDs = excludedSubgroupsFromInfo.Select(s => s.ID).ToList();
 					_radHelper.RetrainParameterGroup(-1, newSettings.GroupName, trainingConfig.SelectedTimeRanges.Select(tr => tr.TimeRange),
 						excludedSubgroupIDs);
+					//TODO: probably try to solve this in SLAnalytics as well
 				}
 			}
 		}
