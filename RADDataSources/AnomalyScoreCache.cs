@@ -34,14 +34,19 @@
 
 		public bool IsSameUserAndGroup(string userDomainName, IRadGroupID groupID)
 		{
-			return UserDomainName == userDomainName && GroupID.Equals(groupID);
+			return string.Equals(UserDomainName, userDomainName, StringComparison.OrdinalIgnoreCase) && GroupID.Equals(groupID);
+		}
+
+		public bool IsExpired()
+		{
+			return DateTime.UtcNow > CacheTime.AddMinutes(AnomalyScoreCache.CACHE_TIME_MINUTES);
 		}
 
 		public bool IsValidEntry(string userDomainName, IRadGroupID groupID,
 			DateTime startTime, DateTime endTime)
 		{
 			return IsSameUserAndGroup(userDomainName, groupID) &&
-				DateTime.UtcNow <= CacheTime.AddMinutes(5) &&
+				!IsExpired() &&
 				startTime >= RequestStartTime.AddMinutes(-5) &&
 				endTime <= RequestEndTime.AddMinutes(5);
 		}
@@ -49,7 +54,8 @@
 
 	public class AnomalyScoreCache
 	{
-		private const int MAX_CACHE_SIZE = 5;
+		public const int MAX_CACHE_SIZE = 5;
+		public const int CACHE_TIME_MINUTES = 5;
 		private readonly object _anomalyScoreDataLock = new object();
 		private readonly List<AnomalyScoreData> _anomalyScoreData = new List<AnomalyScoreData>();
 
@@ -93,7 +99,7 @@
 				if (anomalyScores == null)
 					throw new DataMinerCommunicationException("No response or a response of the wrong type received");
 
-				_anomalyScoreData.RemoveAll(p => p.IsSameUserAndGroup(helper.Connection.UserDomainName, groupID));
+				_anomalyScoreData.RemoveAll(p => p.IsSameUserAndGroup(helper.Connection.UserDomainName, groupID) || p.IsExpired());
 				if (_anomalyScoreData.Count >= MAX_CACHE_SIZE)
 					_anomalyScoreData.RemoveAt(0); // Remove the oldest entry if cache size exceeds limit
 
