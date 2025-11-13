@@ -329,7 +329,7 @@
 					catch (Exception ex)
 					{
 						app.Engine.GenerateInformation($"Failed to retrain relational anomaly group '{settings.GroupName}' after adding it: {ex}");
-						Utils.ShowExceptionDialog(app, $"Failed to retrain group with name {settings.GroupName} after adding it", ex, parent);
+						ShowExceptionDialog(app, $"Failed to retrain group with name {settings.GroupName} after adding it", ex, parent);
 					}
 				}
 			}
