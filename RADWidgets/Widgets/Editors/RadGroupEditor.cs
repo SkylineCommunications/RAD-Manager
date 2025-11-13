@@ -4,10 +4,8 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	using RadUtils;
-	using RadWidgets.Widgets.Dialogs;
 	using RadWidgets.Widgets.Generic;
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Net.Helper;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
 	public class RadGroupEditor : VisibilitySection
