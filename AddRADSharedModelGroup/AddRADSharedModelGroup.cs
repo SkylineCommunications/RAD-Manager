@@ -71,26 +71,7 @@ public class Script
 		dialog.GetSettings(out var settings, out var trainingConfiguration);
 		try
 		{
-			if (_radHelper.TrainingConfigInAddGroupMessageAvailable)
-			{
-				_radHelper.AddParameterGroup(settings, trainingConfiguration);
-			}
-			else
-			{
-				_radHelper.AddParameterGroup(settings);
-				if (trainingConfiguration != null)
-				{
-					try
-					{
-						Utils.Retrain(_radHelper, settings.GroupName, trainingConfiguration.TimeRanges, trainingConfiguration.ExcludedSubgroups.Select(i => settings.Subgroups[i]).ToList());
-					}
-					catch (Exception ex)
-					{
-						_app.Engine.GenerateInformation($"Failed to retrain relational anomaly group '{settings.GroupName}' after adding it: {ex}");
-						Utils.ShowExceptionDialog(_app, $"Failed to retrain group with name {settings.GroupName} after adding it", ex, dialog);
-					}
-				}
-			}
+			Utils.AddParameterGroup(_app, _radHelper, settings, trainingConfiguration, dialog);
 		}
 		catch (Exception ex)
 		{

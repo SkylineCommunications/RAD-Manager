@@ -50,9 +50,10 @@
 
 		public int DataMinerID { get; private set; }
 
-		public RadGroupSettings GroupSettings => _groupEditor.Settings;
-
-		public TrainingConfiguration TrainingConfiguration => _groupEditor.TrainingConfiguration;
+		public void GetSettings(out RadGroupSettings settings, out Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration trainingConfiguration)
+		{
+			_groupEditor.GetSettings(out settings, out trainingConfiguration);
+		}
 
 		private void OnGroupEditorValidationChanged()
 		{

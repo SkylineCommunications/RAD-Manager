@@ -51,11 +51,10 @@
 
 		public int DataMinerID { get; private set; }
 
-		public TrainingConfiguration TrainingConfiguration => _sharedGroupEditor.TrainingConfiguration;
-
-		public RadGroupSettings GetGroupSettings(out List<RadSubgroupSettings> addedSubgroups, out List<Guid> removedSubgroups)
+		public void GetGroupSettings(out RadGroupSettings settings, out List<RadSubgroupSettings> addedSubgroups, out List<Guid> removedSubgroups,
+			out Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration trainingConfiguration)
 		{
-			return _sharedGroupEditor.GetSettings(out addedSubgroups, out removedSubgroups);
+			_sharedGroupEditor.GetSettings(out settings, out addedSubgroups, out removedSubgroups, out trainingConfiguration);
 		}
 
 		private void OnGroupEditorValidationChanged()

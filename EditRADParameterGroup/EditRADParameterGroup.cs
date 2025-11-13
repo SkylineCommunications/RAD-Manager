@@ -5,9 +5,11 @@ using System.Runtime;
 using EditRADParameterGroup;
 using RadUtils;
 using RadWidgets;
+using RadWidgets.Widgets;
 using Skyline.DataMiner.Automation;
 using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 using Skyline.DataMiner.Utils.RadToolkit;
+using SLDataGateway.API.Types.Tracing;
 
 public class Script
 {
@@ -130,9 +132,7 @@ public class Script
 	{
 		if (dialog == null)
 			throw new ArgumentException("Invalid sender type");
-		var newSettings = dialog.GroupSettings;
-		if (newSettings == null)
-			throw new ArgumentException($"{nameof(dialog.GroupSettings)} should not return null", nameof(dialog));
+		dialog.GetSettings(out var newSettings, out var trainingConfiguration);
 
 		try
 		{
@@ -165,11 +165,7 @@ public class Script
 				_radHelper.RemoveParameterGroup(dialog.DataMinerID, originalSettings.GroupName);
 			}
 
-			_radHelper.AddParameterGroup(newSettings);
-
-			var trainingConfig = dialog.TrainingConfiguration;
-			if (trainingConfig != null)
-				_radHelper.RetrainParameterGroup(-1, newSettings.GroupName, trainingConfig.SelectedTimeRanges.Select(tr => tr.TimeRange));
+			RadWidgets.Utils.AddParameterGroup(_app, _radHelper, newSettings, trainingConfiguration, dialog);
 		}
 		catch (Exception ex)
 		{
@@ -184,9 +180,7 @@ public class Script
 	{
 		if (dialog == null)
 			throw new ArgumentNullException(nameof(dialog), "Invalid sender type");
-		var newSettings = dialog.GetGroupSettings(out var addedSubgroups, out var removedSubgroupIDs);
-		if (newSettings == null)
-			throw new ArgumentException($"{nameof(dialog.GetGroupSettings)} should not return null", nameof(dialog));
+		dialog.GetGroupSettings(out var newSettings, out var addedSubgroups, out var removedSubgroupIDs, out var trainingConfiguration);
 
 		try
 		{
@@ -207,27 +201,7 @@ public class Script
 					_radHelper.AddSubgroup(dialog.DataMinerID, newSettings.GroupName, addedSubgroup);
 			}
 
-			_radHelper.AddParameterGroup(newSettings);
-
-			var trainingConfig = dialog.TrainingConfiguration;
-			if (trainingConfig != null)
-			{
-				// The IDs of newly added subgroups do not necessarily match with the IDs we receive from the dialog, so we need to find them based on their parameters.
-				var excludedSubgroupsFromDialog = newSettings.Subgroups.Where(s => trainingConfig.ExcludedSubgroupIDs.Contains(s.ID)).ToList();
-				var addedGroup = _radHelper.FetchParameterGroupInfo(newSettings.GroupName);
-				if (addedGroup == null)
-				{
-					_app.Engine.GenerateInformation($"Could not find newly added relational anomaly group '{newSettings.GroupName}'");
-				}
-				else
-				{
-					var excludedSubgroupsFromInfo = RadWidgets.Utils.GetSubgroupsWithSameParameters(addedGroup, excludedSubgroupsFromDialog);
-					var excludedSubgroupIDs = excludedSubgroupsFromInfo.Select(s => s.ID).ToList();
-					_radHelper.RetrainParameterGroup(-1, newSettings.GroupName, trainingConfig.SelectedTimeRanges.Select(tr => tr.TimeRange),
-						excludedSubgroupIDs);
-					//TODO: probably try to solve this in SLAnalytics as well
-				}
-			}
+			RadWidgets.Utils.AddParameterGroup(_app, _radHelper, newSettings, trainingConfiguration, dialog);
 		}
 		catch (Exception ex)
 		{

@@ -3,9 +3,11 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using System.Runtime;
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RadUtils;
+	using RadWidgets.Widgets;
 	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Exceptions;
@@ -308,25 +310,29 @@
 				settings.Parameters = settings.Parameters.OrderBy(p => p?.Label, StringComparer.OrdinalIgnoreCase).ToList();
 		}
 
-		/// <summary>
-		/// Retrain the given group, excluding the subgroups with the same parameters as those in <paramref name="excludedSubgroups"/>. Note that this method will ignore the ID of
-		/// the subgroups to exclude, and will only compare the parameters.
-		/// </summary>
-		/// <param name="radHelper">The RAD helper.</param>
-		/// <param name="groupName">The name of the group to retrain.</param>
-		/// <param name="timeRanges">The time ranges to use for retraining.</param>
-		/// <param name="excludedSubgroups">The subgroups to exclude from retraining.</param>
-		/// <exception cref="DataMinerCommunicationException">Thrown when the group could not be found.</exception>
-		public static void Retrain(RadHelper radHelper, string groupName, List<TimeRange> timeRanges, List<RadSubgroupSettings> excludedSubgroups)
+		public static void AddParameterGroup(InteractiveController app, RadHelper radHelper, RadGroupSettings settings,
+			Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration trainingConfiguration, Dialog parent)
 		{
-			// The IDs of the subgroups do not match with the IDs we receive from the dialog, so we need to find them based on their parameters.
-			var addedGroup = radHelper.FetchParameterGroupInfo(groupName);
-			if (addedGroup == null)
-				throw new DataMinerCommunicationException($"Could not find newly added relational anomaly group '{groupName}'");
-
-			var excludedSubgroupsFromInfo = GetSubgroupsWithSameParameters(addedGroup, excludedSubgroups);
-			var excludedSubgroupIDs = excludedSubgroupsFromInfo.Select(s => s.ID).ToList();
-			radHelper.RetrainParameterGroup(-1, groupName, timeRanges, excludedSubgroupIDs);
+			if (radHelper.TrainingConfigInAddGroupMessageAvailable)
+			{
+				radHelper.AddParameterGroup(settings, trainingConfiguration);
+			}
+			else
+			{
+				radHelper.AddParameterGroup(settings);
+				if (trainingConfiguration != null)
+				{
+					try
+					{
+						Retrain(radHelper, settings.GroupName, trainingConfiguration.TimeRanges, trainingConfiguration.ExcludedSubgroups.Select(i => settings.Subgroups[i]).ToList());
+					}
+					catch (Exception ex)
+					{
+						app.Engine.GenerateInformation($"Failed to retrain relational anomaly group '{settings.GroupName}' after adding it: {ex}");
+						Utils.ShowExceptionDialog(app, $"Failed to retrain group with name {settings.GroupName} after adding it", ex, parent);
+					}
+				}
+			}
 		}
 
 		/// <summary>
@@ -473,6 +479,27 @@
 				engine.Log($"Could not fetch primary keys for element {dataMinerID}/{elementID} parameter {tableParameterID} with filter '{displayKeyFilter ?? string.Empty}': {e}", LogType.Error, 5);
 				return Array.Empty<DynamicTableIndex>();
 			}
+		}
+
+		/// <summary>
+		/// Retrain the given group, excluding the subgroups with the same parameters as those in <paramref name="excludedSubgroups"/>. Note that this method will ignore the ID of
+		/// the subgroups to exclude, and will only compare the parameters.
+		/// </summary>
+		/// <param name="radHelper">The RAD helper.</param>
+		/// <param name="groupName">The name of the group to retrain.</param>
+		/// <param name="timeRanges">The time ranges to use for retraining.</param>
+		/// <param name="excludedSubgroups">The subgroups to exclude from retraining.</param>
+		/// <exception cref="DataMinerCommunicationException">Thrown when the group could not be found.</exception>
+		private static void Retrain(RadHelper radHelper, string groupName, List<TimeRange> timeRanges, List<RadSubgroupSettings> excludedSubgroups)
+		{
+			// The IDs of the subgroups do not match with the IDs we receive from the dialog, so we need to find them based on their parameters.
+			var addedGroup = radHelper.FetchParameterGroupInfo(groupName);
+			if (addedGroup == null)
+				throw new DataMinerCommunicationException($"Could not find newly added relational anomaly group '{groupName}'");
+
+			var excludedSubgroupsFromInfo = GetSubgroupsWithSameParameters(addedGroup, excludedSubgroups);
+			var excludedSubgroupIDs = excludedSubgroupsFromInfo.Select(s => s.ID).ToList();
+			radHelper.RetrainParameterGroup(-1, groupName, timeRanges, excludedSubgroupIDs);
 		}
 	}
 }

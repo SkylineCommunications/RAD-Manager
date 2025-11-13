@@ -72,21 +72,12 @@ public class Script
 
 		try
 		{
-			if (_radHelper.TrainingConfigInAddGroupMessageAvailable)
-			{
-				_radHelper.AddParameterGroup(settings, trainingConfig);
-			}
-			else
-			{
-				_radHelper.AddParameterGroup(settings);
-				if (trainingConfig != null)
-					_radHelper.RetrainParameterGroup(-1, settings.GroupName, trainingConfig.TimeRanges);
-			}
+			Utils.AddParameterGroup(_app, _radHelper, settings, trainingConfig, dialog);
 		}
 		catch (Exception ex)
 		{
-			_app.Engine.GenerateInformation($"Failed to add relational anomaly group '{dialog.GroupSettings.GroupName}': {ex}");
-			Utils.ShowExceptionDialog(_app, $"Failed to create group with name {dialog.GroupSettings.GroupName}", ex, dialog);
+			_app.Engine.GenerateInformation($"Failed to add relational anomaly group '{settings.GroupName}': {ex}");
+			Utils.ShowExceptionDialog(_app, $"Failed to create group with name {settings.GroupName}", ex, dialog);
 			return;
 		}
 
