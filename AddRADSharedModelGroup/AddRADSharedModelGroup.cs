@@ -68,27 +68,27 @@ public class Script
 		if (dialog == null)
 			throw new ArgumentException("Invalid sender type");
 
-		var settings = dialog.GetSettings();
+		dialog.GetSettings(out var settings, out var trainingConfiguration);
 		try
 		{
-			var trainingConfig = dialog.TrainingConfiguration;
-
-			_radHelper.AddParameterGroup(settings);
-			if (trainingConfig != null)
+			if (_radHelper.TrainingConfigInAddGroupMessageAvailable)
 			{
-				// The IDs of the subgroups do not match with the IDs we receive from the dialog, so we need to find them based on their parameters.
-				var excludedSubgroupsFromDialog = settings.Subgroups.Where(s => trainingConfig.ExcludedSubgroupIDs.Contains(s.ID)).ToList();
-				var addedGroup = _radHelper.FetchParameterGroupInfo(settings.GroupName);
-				if (addedGroup == null)
+				_radHelper.AddParameterGroup(settings, trainingConfiguration);
+			}
+			else
+			{
+				_radHelper.AddParameterGroup(settings);
+				if (trainingConfiguration != null)
 				{
-					_app.Engine.GenerateInformation($"Could not find newly added relational anomaly group '{settings.GroupName}'");
-				}
-				else
-				{
-					var excludedSubgroupsFromInfo = Utils.GetSubgroupsWithSameParameters(addedGroup, excludedSubgroupsFromDialog);
-					var excludedSubgroupIDs = excludedSubgroupsFromInfo.Select(s => s.ID).ToList();
-					_radHelper.RetrainParameterGroup(-1, settings.GroupName, trainingConfig.SelectedTimeRanges.Select(tr => tr.TimeRange),
-						excludedSubgroupIDs);
+					try
+					{
+						Utils.Retrain(_radHelper, settings.GroupName, trainingConfiguration.TimeRanges, trainingConfiguration.ExcludedSubgroups.Select(i => settings.Subgroups[i]).ToList());
+					}
+					catch (Exception ex)
+					{
+						_app.Engine.GenerateInformation($"Failed to retrain relational anomaly group '{settings.GroupName}' after adding it: {ex}");
+						Utils.ShowExceptionDialog(_app, $"Failed to retrain group with name {settings.GroupName} after adding it", ex, dialog);
+					}
 				}
 			}
 		}

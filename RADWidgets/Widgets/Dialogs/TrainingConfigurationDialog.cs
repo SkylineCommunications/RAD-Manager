@@ -20,7 +20,7 @@
 		private readonly Button _resetButton;
 
 		public TrainingConfigurationDialog(IEngine engine, bool forceTraining, List<RadSubgroupSelectorItem> subgroups = null,
-			TrainingConfiguration configuration = null) : base(engine)
+			Widgets.TrainingConfiguration configuration = null) : base(engine)
 		{
 			ShowScriptAbortPopup = false;
 			_forceTraining = forceTraining;
@@ -106,7 +106,7 @@
 
 		public event EventHandler Cancelled;
 
-		public TrainingConfiguration GetConfiguration()
+		public Widgets.TrainingConfiguration GetConfiguration()
 		{
 			var selectedTimeRanges = _timeRangeSelector.GetSelected().ToList();
 			var excludedSubgroupIDs = _excludedSubgroupsList?.GetChecked().ToList() ?? new List<Guid>();
@@ -115,7 +115,7 @@
 			if (excludedSubgroupIDs.Count == 0 && comparer.Equals(selectedTimeRanges, _defaultTimeRanges))
 				return null;
 
-			return new TrainingConfiguration(selectedTimeRanges, excludedSubgroupIDs);
+			return new Widgets.TrainingConfiguration(selectedTimeRanges, excludedSubgroupIDs);
 		}
 
 		private void UpdateIsValid()

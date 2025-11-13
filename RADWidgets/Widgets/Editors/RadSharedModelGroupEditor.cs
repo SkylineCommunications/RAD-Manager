@@ -124,12 +124,17 @@
 
 		public string ValidationText { get; private set; }
 
-		public TrainingConfiguration TrainingConfiguration => _trainingButton.Configuration;
-
-		public RadGroupSettings GetSettings(out List<RadSubgroupSettings> addedSubgroups, out List<Guid> removedSubgroups)
+		public void GetSettings(out RadGroupSettings settings, out List<RadSubgroupSettings> addedSubgroups, out List<Guid> removedSubgroups,
+			out Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration trainingConfiguration)
 		{
 			var newSubgroups = _subgroupSelector.GetSubgroups();
+			settings = new RadGroupSettings(_groupNameSection.GroupName, _optionsEditor.Options, newSubgroups);
+			GetAddedAndRemovedSubgroups(newSubgroups, out addedSubgroups, out removedSubgroups);
+			trainingConfiguration = GetTrainingConfiguration(newSubgroups);
+		}
 
+		private void GetAddedAndRemovedSubgroups(List<RadSubgroupSettings> newSubgroups, out List<RadSubgroupSettings> addedSubgroups, out List<Guid> removedSubgroups)
+		{
 			bool[] matchedOriginalSubgroups = new bool[_originalSubgroups.Count];
 			addedSubgroups = new List<RadSubgroupSettings>();
 			removedSubgroups = new List<Guid>();
@@ -159,8 +164,23 @@
 				if (!matchedOriginalSubgroups[i])
 					removedSubgroups.Add(_originalSubgroups[i].ID);
 			}
+		}
 
-			return new RadGroupSettings(_groupNameSection.GroupName, _optionsEditor.Options, newSubgroups);
+		private Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration GetTrainingConfiguration(List<RadSubgroupSettings> subgroups)
+		{
+			var trainingConfig = _trainingButton.Configuration;
+			if (trainingConfig == null)
+				return null;
+
+			var timeRanges = trainingConfig.SelectedTimeRanges.Select(tr => tr.TimeRange).ToList();
+			List<int> excludedSubgroups = new List<int>();
+			for (int i = 0; i < subgroups.Count; ++i)
+			{
+				if (_trainingButton.Configuration.ExcludedSubgroupIDs.Contains(subgroups[i].ID))
+					excludedSubgroups.Add(i);
+			}
+
+			return new Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration(timeRanges, excludedSubgroups);
 		}
 
 		private void UpdateParameterLabelsValid()

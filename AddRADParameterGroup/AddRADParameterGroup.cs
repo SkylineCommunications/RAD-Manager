@@ -68,14 +68,20 @@ public class Script
 		if (dialog == null)
 			throw new ArgumentException("Invalid sender type");
 
+		dialog.GetSettings(out RadGroupSettings settings, out TrainingConfiguration trainingConfig);
+
 		try
 		{
-			var settings = dialog.GroupSettings;
-			var trainingConfig = dialog.TrainingConfiguration;
-
-			_radHelper.AddParameterGroup(settings);
-			if (trainingConfig != null)
-				_radHelper.RetrainParameterGroup(-1, settings.GroupName, trainingConfig.SelectedTimeRanges.Select(tr => tr.TimeRange));
+			if (_radHelper.TrainingConfigInAddGroupMessageAvailable)
+			{
+				_radHelper.AddParameterGroup(settings, trainingConfig);
+			}
+			else
+			{
+				_radHelper.AddParameterGroup(settings);
+				if (trainingConfig != null)
+					_radHelper.RetrainParameterGroup(-1, settings.GroupName, trainingConfig.TimeRanges);
+			}
 		}
 		catch (Exception ex)
 		{

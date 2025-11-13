@@ -48,9 +48,10 @@
 
 		public event EventHandler Cancelled;
 
-		public TrainingConfiguration TrainingConfiguration => _groupEditor.TrainingConfiguration;
-
-		public RadGroupSettings GetSettings() => _groupEditor.GetSettings(out var _, out var _);
+		public void GetSettings(out RadGroupSettings settings, out Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration trainingConfiguration)
+		{
+			_groupEditor.GetSettings(out settings, out var _, out var _, out trainingConfiguration);
+		}
 
 		private void OnEditorValidationChanged()
 		{

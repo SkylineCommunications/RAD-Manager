@@ -7,6 +7,7 @@
 	using RadWidgets.Widgets.Dialogs;
 	using RadWidgets.Widgets.Generic;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Helper;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
 	public class RadGroupEditor : VisibilitySection
@@ -67,21 +68,26 @@
 
 		public event EventHandler<EventArgs> ValidationChanged;
 
-		public RadGroupSettings Settings
-		{
-			get
-			{
-				var parameters = _parameterSelector.GetSelectedParameters().Select(p => new RadParameter(p, string.Empty)).ToList();
-				var subgroup = new RadSubgroupSettings(_groupNameSection.GroupName, Guid.NewGuid(), parameters, new RadSubgroupOptions());
-				return new RadGroupSettings(_groupNameSection.GroupName, _optionsEditor.Options, new List<RadSubgroupSettings> { subgroup });
-			}
-		}
-
-		public TrainingConfiguration TrainingConfiguration => _trainingButton.Configuration;
-
 		public bool IsValid { get; private set; }
 
 		public string ValidationText { get; private set; }
+
+		public void GetSettings(out RadGroupSettings settings, out TrainingConfiguration trainingConfiguration)
+		{
+			var parameters = _parameterSelector.GetSelectedParameters().Select(p => new RadParameter(p, string.Empty)).ToList();
+			var subgroup = new RadSubgroupSettings(_groupNameSection.GroupName, Guid.NewGuid(), parameters, new RadSubgroupOptions());
+			settings = new RadGroupSettings(_groupNameSection.GroupName, _optionsEditor.Options, new List<RadSubgroupSettings> { subgroup });
+
+			if (_trainingButton.Configuration != null)
+			{
+				var timeRanges = _trainingButton.Configuration.SelectedTimeRanges.Select(tr => tr.TimeRange).ToList();
+				trainingConfiguration = new TrainingConfiguration(timeRanges, null);
+			}
+			else
+			{
+				trainingConfiguration = null;
+			}
+		}
 
 		private void UpdateIsValid()
 		{

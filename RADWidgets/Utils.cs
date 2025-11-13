@@ -8,6 +8,7 @@
 	using RadUtils;
 	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Exceptions;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.RadToolkit;
@@ -308,20 +309,24 @@
 		}
 
 		/// <summary>
-		/// Gets the subgroups from <paramref name="groupSettings"/> that have the same parameters as any of the subgroups in <paramref name="subgroupsToFind"/>.
+		/// Retrain the given group, excluding the subgroups with the same parameters as those in <paramref name="excludedSubgroups"/>. Note that this method will ignore the ID of
+		/// the subgroups to exclude, and will only compare the parameters.
 		/// </summary>
-		/// <param name="groupSettings">The group settings.</param>
-		/// <param name="subgroupsToFind">The subgroups to look for.</param>
-		/// <returns>The list of matching subgroups.</returns>
-		public static List<RadSubgroupInfo> GetSubgroupsWithSameParameters(RadGroupInfo groupSettings, List<RadSubgroupSettings> subgroupsToFind)
+		/// <param name="radHelper">The RAD helper.</param>
+		/// <param name="groupName">The name of the group to retrain.</param>
+		/// <param name="timeRanges">The time ranges to use for retraining.</param>
+		/// <param name="excludedSubgroups">The subgroups to exclude from retraining.</param>
+		/// <exception cref="DataMinerCommunicationException">Thrown when the group could not be found.</exception>
+		public static void Retrain(RadHelper radHelper, string groupName, List<TimeRange> timeRanges, List<RadSubgroupSettings> excludedSubgroups)
 		{
-			if (subgroupsToFind == null || groupSettings?.Subgroups == null)
-				return new List<RadSubgroupInfo>();
+			// The IDs of the subgroups do not match with the IDs we receive from the dialog, so we need to find them based on their parameters.
+			var addedGroup = radHelper.FetchParameterGroupInfo(groupName);
+			if (addedGroup == null)
+				throw new DataMinerCommunicationException($"Could not find newly added relational anomaly group '{groupName}'");
 
-			foreach (var subgroup in subgroupsToFind)
-				subgroup.NormalizeParameters();
-
-			return groupSettings.Subgroups.Where(g => subgroupsToFind.Any(s => g.HasSameOrderedParameters(s))).ToList();
+			var excludedSubgroupsFromInfo = GetSubgroupsWithSameParameters(addedGroup, excludedSubgroups);
+			var excludedSubgroupIDs = excludedSubgroupsFromInfo.Select(s => s.ID).ToList();
+			radHelper.RetrainParameterGroup(-1, groupName, timeRanges, excludedSubgroupIDs);
 		}
 
 		/// <summary>
@@ -420,6 +425,23 @@
 				throw new ArgumentNullException(nameof(engine));
 
 			return new RadHelper(Engine.SLNetRaw, new Logger(s => engine.Log(s, LogType.Error, 0)));
+		}
+
+		/// <summary>
+		/// Gets the subgroups from <paramref name="groupSettings"/> that have the same parameters as any of the subgroups in <paramref name="subgroupsToFind"/>.
+		/// </summary>
+		/// <param name="groupSettings">The group settings.</param>
+		/// <param name="subgroupsToFind">The subgroups to look for.</param>
+		/// <returns>The list of matching subgroups.</returns>
+		private static List<RadSubgroupInfo> GetSubgroupsWithSameParameters(RadGroupInfo groupSettings, List<RadSubgroupSettings> subgroupsToFind)
+		{
+			if (subgroupsToFind == null || groupSettings?.Subgroups == null)
+				return new List<RadSubgroupInfo>();
+
+			foreach (var subgroup in subgroupsToFind)
+				subgroup.NormalizeParameters();
+
+			return groupSettings.Subgroups.Where(g => subgroupsToFind.Any(s => g.HasSameOrderedParameters(s))).ToList();
 		}
 
 		private static DynamicTableIndex[] FetchInstances(IEngine engine, int dataMinerID, int elementID, int tableParameterID, string displayKeyFilter = null)
