@@ -2,9 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Linq;
 	using RadWidgets;
-	using RadWidgets.Widgets;
 	using RadWidgets.Widgets.Editors;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -52,7 +50,7 @@
 		public int DataMinerID { get; private set; }
 
 		public void GetGroupSettings(out RadGroupSettings settings, out List<RadSubgroupSettings> addedSubgroups, out List<Guid> removedSubgroups,
-			out Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration trainingConfiguration)
+			out TrainingConfiguration trainingConfiguration)
 		{
 			_sharedGroupEditor.GetSettings(out settings, out addedSubgroups, out removedSubgroups, out trainingConfiguration);
 		}

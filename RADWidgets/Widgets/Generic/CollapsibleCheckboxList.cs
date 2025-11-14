@@ -98,6 +98,10 @@
 					checkBox.IsChecked = true;
 					expand = true;
 				}
+				else
+				{
+					checkBox.IsChecked = false;
+				}
 			}
 
 			if (_collapseButton.IsCollapsed && expand)

@@ -147,7 +147,6 @@
 
 			bool[] matchedOriginalSubgroups = new bool[_originalSubgroups.Count];
 			addedSubgroups = new List<RadSubgroupSettings>();
-			removedSubgroups = new List<Guid>();
 			foreach (var subgroup in newSubgroups)
 			{
 				bool matched = false;
@@ -169,6 +168,7 @@
 					addedSubgroups.Add(subgroup);
 			}
 
+			removedSubgroups = new List<Guid>();
 			for (int i = 0; i < matchedOriginalSubgroups.Length; ++i)
 			{
 				if (!matchedOriginalSubgroups[i])
@@ -183,10 +183,11 @@
 				return null;
 
 			var timeRanges = trainingConfig.SelectedTimeRanges.Select(tr => tr.TimeRange).ToList();
+			var excludedSubgroupIDs = trainingConfig.ExcludedSubgroupIDs;
 			List<int> excludedSubgroups = new List<int>();
 			for (int i = 0; i < subgroups.Count; ++i)
 			{
-				if (_trainingButton.Configuration.ExcludedSubgroupIDs.Contains(subgroups[i].ID))
+				if (excludedSubgroupIDs.Contains(subgroups[i].ID))
 					excludedSubgroups.Add(i);
 			}
 

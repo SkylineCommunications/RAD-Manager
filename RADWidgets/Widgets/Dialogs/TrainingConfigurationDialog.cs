@@ -22,7 +22,6 @@
 		public TrainingConfigurationDialog(IEngine engine, bool forceTraining, List<RadSubgroupSelectorItem> subgroups = null,
 			Widgets.TrainingConfiguration configuration = null) : base(engine)
 		{
-			ShowScriptAbortPopup = false;
 			_forceTraining = forceTraining;
 			_defaultTimeRanges = new List<TimeRangeItem>();
 			var endTime = DateTime.Now;
@@ -54,7 +53,7 @@
 				_excludedSubgroupsList = new CollapsibleCheckboxList<Guid>(options, _timeRangeSelector.ColumnCount)
 				{
 					Text = "Exclude specific subgroups",
-					Tooltip = "Data from the selected subgroups will not be taken into account while retraining the model. " +
+					Tooltip = "Data from the selected subgroups will not be taken into account when training the model. " +
 						"This can be used to exclude subgroups that had anomalous behavior during the selected time range.",
 					ExpandText = "Select",
 					CollapseText = "Unselect all",
@@ -66,9 +65,17 @@
 
 			_resetButton = new Button("Reset to default");
 			if (_forceTraining)
-				_resetButton.Tooltip = "Reset the time ranges and excluded subgroups to their default values.";
+			{
+				if (subgroups != null)
+					_resetButton.Tooltip = "Reset the time ranges and excluded subgroups to their default values.";
+				else
+					_resetButton.Tooltip = "Reset the time ranges to their default values.";
+			}
 			else
+			{
 				_resetButton.Tooltip = "Keep the existing model unchanged instead of retraining.";
+			}
+
 			_resetButton.Pressed += (sender, args) => OnResetButtonPressed();
 
 			_okButton = new Button("Apply")
@@ -123,15 +130,18 @@
 			bool timeRangeSelected = _timeRangeSelector.GetSelected().Any();
 			bool subgroupExcluded = _excludedSubgroupsList != null && _excludedSubgroupsList.GetChecked().Any();
 
-			if (!timeRangeSelected && !subgroupExcluded && !_forceTraining)
+			if (!timeRangeSelected)
 			{
-				_okButton.Tooltip = "The existing model will be kept unchanged.";
-				_okButton.IsEnabled = true;
-			}
-			else if (!timeRangeSelected)
-			{
-				_okButton.Tooltip = "Select at least one time range to train the model.";
-				_okButton.IsEnabled = false;
+				if (!subgroupExcluded && !_forceTraining)
+				{
+					_okButton.Tooltip = "The existing model will be kept unchanged.";
+					_okButton.IsEnabled = true;
+				}
+				else
+				{
+					_okButton.Tooltip = "Select at least one time range to train the model.";
+					_okButton.IsEnabled = false;
+				}
 			}
 			else if (_excludedSubgroupsList != null && !_excludedSubgroupsList.GetUnchecked().Any())
 			{

@@ -8,7 +8,7 @@
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
-	public class TimeRangeItem : SelectorItem, IEquatable<TimeRangeItem>
+	public class TimeRangeItem : SelectorItem
 	{
 		public TimeRangeItem(TimeRange range)
 		{
@@ -30,17 +30,9 @@
 		public override bool Equals(object obj)
 		{
 			if (obj is TimeRangeItem other)
-				return Equals(other);
+				return other.TimeRange.Start == this.TimeRange.Start && other.TimeRange.End == this.TimeRange.End;
 
 			return false;
-		}
-
-		public bool Equals(TimeRangeItem other)
-		{
-			if (other == null)
-				return false;
-
-			return other.TimeRange.Start == this.TimeRange.Start && other.TimeRange.End == this.TimeRange.End;
 		}
 
 		public override int GetHashCode()

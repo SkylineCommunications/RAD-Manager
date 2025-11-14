@@ -1,15 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime;
 using EditRADParameterGroup;
 using RadUtils;
 using RadWidgets;
-using RadWidgets.Widgets;
 using Skyline.DataMiner.Automation;
 using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 using Skyline.DataMiner.Utils.RadToolkit;
-using SLDataGateway.API.Types.Tracing;
 
 public class Script
 {

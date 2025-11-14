@@ -3,11 +3,9 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Runtime;
 	using System.Text;
 	using System.Text.RegularExpressions;
 	using RadUtils;
-	using RadWidgets.Widgets;
 	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Exceptions;
@@ -311,7 +309,7 @@
 		}
 
 		public static void AddParameterGroup(InteractiveController app, RadHelper radHelper, RadGroupSettings settings,
-			Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration trainingConfiguration, Dialog parent)
+			TrainingConfiguration trainingConfiguration, Dialog parent)
 		{
 			if (radHelper.TrainingConfigInAddGroupMessageAvailable)
 			{
@@ -483,7 +481,8 @@
 
 		/// <summary>
 		/// Retrain the given group, excluding the subgroups with the same parameters as those in <paramref name="excludedSubgroups"/>. Note that this method will ignore the ID of
-		/// the subgroups to exclude, and will only compare the parameters.
+		/// the subgroups to exclude, and will only compare the parameters (this is needed since this method is used when adding parameter groups, in which case the subgroup ID we get
+		/// from the dialog does not match the actual IDs).
 		/// </summary>
 		/// <param name="radHelper">The RAD helper.</param>
 		/// <param name="groupName">The name of the group to retrain.</param>
@@ -492,7 +491,6 @@
 		/// <exception cref="DataMinerCommunicationException">Thrown when the group could not be found.</exception>
 		private static void Retrain(RadHelper radHelper, string groupName, List<TimeRange> timeRanges, List<RadSubgroupSettings> excludedSubgroups)
 		{
-			// The IDs of the subgroups do not match with the IDs we receive from the dialog, so we need to find them based on their parameters.
 			var addedGroup = radHelper.FetchParameterGroupInfo(groupName);
 			if (addedGroup == null)
 				throw new DataMinerCommunicationException($"Could not find newly added relational anomaly group '{groupName}'");
