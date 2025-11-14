@@ -97,7 +97,7 @@
 				if (Configuration.SelectedTimeRanges.Count > 2)
 					lines.Add($"\tand {Configuration.SelectedTimeRanges.Count - 2} more...");
 
-				if (Configuration.ExcludedSubgroupIDs.Count > 0)
+				if (Configuration.ExcludedSubgroupIDs?.Count > 0)
 				{
 					lines.Add("Excluding data from the following subgroups:");
 					lines.AddRange(_subgroups.Where(s => Configuration.ExcludedSubgroupIDs.Contains(s.ID)).Select(s => $"\t{s.DisplayName}").Take(2));
