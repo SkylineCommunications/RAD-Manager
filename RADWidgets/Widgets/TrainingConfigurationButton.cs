@@ -46,6 +46,8 @@
 
 			AddWidget(_configureButton, 0, 0);
 			AddWidget(_detailsLabel, 0, 1, 1, columnSpan - 1);
+			//TODO: improve lay-out
+			//TODO: press edit -> specify retraining -> change number of params -> reset training: can not press apply (seems something with excluded subgroups)
 		}
 
 		public TrainingConfiguration Configuration { get; private set; } = null;
@@ -56,7 +58,7 @@
 			_subgroups = subgroups;
 
 			if (Configuration != null)
-			 Configuration.ExcludedSubgroupIDs = Configuration.ExcludedSubgroupIDs?.Where(id => subgroups.Any(s => s.ID == id)).ToList();
+				Configuration.ExcludedSubgroupIDs = Configuration.ExcludedSubgroupIDs?.Where(id => subgroups.Any(s => s.ID == id)).ToList();
 			UpdateDetailsLabel();
 		}
 

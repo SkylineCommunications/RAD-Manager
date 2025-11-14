@@ -20,6 +20,7 @@
 		private readonly RadSubgroupSelector _subgroupSelector;
 		private readonly TrainingConfigurationButton _trainingButton;
 		private readonly MarginLabel _detailsLabel;
+		private readonly int? _originalParameterCount;
 		private readonly List<RadSubgroupInfo> _originalSubgroups;
 		private List<string> _parameterLabels;
 		private List<string> _oldParameterLabels;
@@ -31,9 +32,11 @@
 			RadGroupInfo settings = null, Guid? selectedSubgroup = null)
 		{
 			_engine = engine;
+			_originalParameterCount = null;
 			_originalSubgroups = new List<RadSubgroupInfo>();
 			if (settings?.Subgroups != null)
 			{
+				_originalParameterCount = settings.Subgroups.FirstOrDefault()?.Parameters?.Count;
 				foreach (var subgroup in settings.Subgroups)
 				{
 					subgroup.NormalizeParameters();
@@ -135,6 +138,13 @@
 
 		private void GetAddedAndRemovedSubgroups(List<RadSubgroupSettings> newSubgroups, out List<RadSubgroupSettings> addedSubgroups, out List<Guid> removedSubgroups)
 		{
+			if (_originalParameterCount != _parametersCountNumeric.Value)
+			{
+				addedSubgroups = newSubgroups;
+				removedSubgroups = _originalSubgroups.Select(s => s.ID).ToList();
+				return;
+			}
+
 			bool[] matchedOriginalSubgroups = new bool[_originalSubgroups.Count];
 			addedSubgroups = new List<RadSubgroupSettings>();
 			removedSubgroups = new List<Guid>();
@@ -266,8 +276,16 @@
 			UpdateIsValid();
 		}
 
+		private void UpdateTrainingButton()
+		{
+			_trainingButton.SetSubgroups(!HasPreservedSubgroups(), _subgroupSelector.GetSubgroupSelectorItems());
+		}
+
 		private bool HasPreservedSubgroups()
 		{
+			if (_originalParameterCount != _parametersCountNumeric.Value)
+				return false;
+
 			var newSubgroups = _subgroupSelector.GetSubgroups();
 			foreach (var newSubgroup in newSubgroups)
 			{
@@ -329,6 +347,7 @@
 			UpdateParameterLabelsValid();
 			UpdateDetailsLabel();
 			UpdateIsValid();
+			UpdateTrainingButton();
 		}
 
 		private void OnSubgroupSelectorValidationChanged()
@@ -339,7 +358,7 @@
 
 		private void OnSubgroupSelectorChanged()
 		{
-			_trainingButton.SetSubgroups(!HasPreservedSubgroups(), _subgroupSelector.GetSubgroupSelectorItems());
+			UpdateTrainingButton();
 		}
 	}
 }

@@ -83,17 +83,6 @@
 			return _optionCheckBoxes.Where(t => !t.Item2.IsChecked).Select(t => t.Item1.Value).ToList();
 		}
 
-		public void UncheckAll()
-		{
-			foreach (var (_, checkBox) in _optionCheckBoxes)
-			{
-				checkBox.IsChecked = false;
-			}
-
-			if (!_collapseButton.IsCollapsed)
-				_collapseButton.IsCollapsed = true;
-		}
-
 		public void SetChecked(IEnumerable<T> valuesToCheck)
 		{
 			if (valuesToCheck == null)
@@ -113,6 +102,21 @@
 
 			if (_collapseButton.IsCollapsed && expand)
 				_collapseButton.IsCollapsed = false;
+
+			Changed?.Invoke(this, EventArgs.Empty);
+		}
+
+		public void UncheckAll()
+		{
+			foreach (var (_, checkBox) in _optionCheckBoxes)
+			{
+				checkBox.IsChecked = false;
+			}
+
+			if (!_collapseButton.IsCollapsed)
+				_collapseButton.IsCollapsed = true;
+
+			Changed?.Invoke(this, EventArgs.Empty);
 		}
 
 		public void CheckAll()
@@ -124,6 +128,8 @@
 
 			if (_collapseButton.IsCollapsed && _optionCheckBoxes.Any())
 				_collapseButton.IsCollapsed = false;
+
+			Changed?.Invoke(this, EventArgs.Empty);
 		}
 	}
 }
