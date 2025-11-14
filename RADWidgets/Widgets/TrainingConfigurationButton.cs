@@ -44,10 +44,8 @@
 
 			UpdateDetailsLabel();
 
-			AddWidget(_configureButton, 0, 0);
+			AddWidget(_configureButton, 0, 0, verticalAlignment: VerticalAlignment.Top);
 			AddWidget(_detailsLabel, 0, 1, 1, columnSpan - 1);
-			//TODO: improve lay-out
-			//TODO: press edit -> specify retraining -> change number of params -> reset training: can not press apply (seems something with excluded subgroups)
 		}
 
 		public TrainingConfiguration Configuration { get; private set; } = null;
