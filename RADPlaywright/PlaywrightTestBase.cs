@@ -6,6 +6,7 @@
 	using Microsoft.Playwright;
 	using Microsoft.Playwright.TestAdapter;
 	using RADPlaywright.Tools;
+	using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
 
 	public abstract class PlaywrightTestBase
 	{
@@ -97,7 +98,7 @@
 
 			if (TestContext.CurrentTestOutcome != UnitTestOutcome.Passed || Debugger.IsAttached)
 			{
-				var tracePath = Path.Combine(
+				var tracePath = SecurePath.ConstructSecurePath(
 					Directory.GetCurrentDirectory(),
 					"playwright-traces",
 					$"{TestContext.FullyQualifiedTestClassName}.{TestContext.TestName}.zip");

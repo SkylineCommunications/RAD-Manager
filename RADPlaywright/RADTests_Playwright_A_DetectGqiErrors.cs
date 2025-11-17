@@ -34,7 +34,6 @@
 
 		private static async Task CheckGqiErrors(LowCodeAppPage page)
 		{
-			//await page.WaitUntilEverythingIsLoadedAsync();
 			await Expect(page.GetComponentByText("div", "RAD MANAGER", 3)).ToBeVisibleAsync(); // make sure RAD Manager is loaded
 
 			var errorListLocator = page.Locator("dma-vr-error-list");
@@ -47,7 +46,6 @@
 			var initialPage = await app.NavigateToPageAsync("RAD%20Manager");
 
 			await initialPage.LoginAsync(Config.Credentials);
-			//await initialPage.WaitUntilEverythingIsLoadedAsync();
 
 			await CheckGqiErrors(initialPage);
 

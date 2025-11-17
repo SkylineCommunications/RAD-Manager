@@ -139,7 +139,8 @@
 			var groupInfo = FetchGroupInfo(groupID);
 			_groupRemoveWidgets = new List<AGroupRemoveSection>();
 			_extraGroupsToRemove = new List<RadGroupID>();
-			if (groupInfo == null || groupInfo.Subgroups == null || groupInfo.Subgroups.Count <= 1)
+
+			if (groupInfo == null || groupInfo.Subgroups == null || groupInfo.Subgroups.Count <= 1 || !subgroupIDs.Any())
 			{
 				_label.Text = $"Are you sure you want to remove the relational anomaly group '{groupID.GroupName}'?";
 				SetYesNoButtonsVisible();
@@ -148,7 +149,6 @@
 			}
 
 			var matchingSubgroups = GetMatchingSubgroups(groupInfo, subgroupIDs);
-
 			if (matchingSubgroups.Count == 1)
 			{
 				var subgroup = matchingSubgroups.First();
@@ -180,10 +180,11 @@
 			foreach (var group in parameterGroups)
 			{
 				var groupInfo = FetchGroupInfo(group.Key);
-				if (groupInfo?.Subgroups?.Count > 1)
+				var subgroupIDs = group.OfType<RadSubgroupID>();
+				if (groupInfo?.Subgroups?.Count > 1 && subgroupIDs.Any())
 				{
-					var subgroups = GetMatchingSubgroups(groupInfo, group.OfType<RadSubgroupID>());
-					var section = new SharedModelRemoveCheckBox(group.Key, subgroups, subgroups.Count == groupInfo.Subgroups.Count, 4, TextWrapWidth, TextWrapIndentWidth);
+					var matchingSubgroups = GetMatchingSubgroups(groupInfo, subgroupIDs);
+					var section = new SharedModelRemoveCheckBox(group.Key, matchingSubgroups, matchingSubgroups.Count == groupInfo.Subgroups.Count, 4, TextWrapWidth, TextWrapIndentWidth);
 					_groupRemoveWidgets.Add(section);
 				}
 				else

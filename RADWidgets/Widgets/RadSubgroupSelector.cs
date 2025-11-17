@@ -223,11 +223,6 @@
 			_subgroupDetailsView.SetParentOptions(parentOptions);
 		}
 
-		private string GetSubgroupPlaceHolderName(int count)
-		{
-			return $"Unnamed subgroup {count}";
-		}
-
 		private void SetSubgroups(List<RadSubgroupInfo> subgroups, Guid? selectedSubgroup)
 		{
 			List<RadSubgroupSelectorItem> items = new List<RadSubgroupSelectorItem>(subgroups?.Count ?? 0);
@@ -253,7 +248,7 @@
 					});
 				}
 
-				string displayName = string.IsNullOrEmpty(subgroup.Name) ? GetSubgroupPlaceHolderName(++_unnamedSubgroupCount) : subgroup.Name;
+				string displayName = string.IsNullOrEmpty(subgroup.Name) ? RadUtils.Utils.GetSubgroupPlaceHolderName(++_unnamedSubgroupCount) : subgroup.Name;
 				items.Add(new RadSubgroupSelectorItem(subgroup.ID, subgroup.Name, subgroup.Options, parameters, displayName, _parameterLabels));
 			}
 
@@ -513,7 +508,7 @@
 			var settings = _subgroupViewer.GetSelected();
 			if (settings == null)
 				return;
-			var placeHolderName = string.IsNullOrEmpty(settings.Name) ? settings.DisplayName : GetSubgroupPlaceHolderName(_unnamedSubgroupCount + 1);
+			var placeHolderName = string.IsNullOrEmpty(settings.Name) ? settings.DisplayName : RadUtils.Utils.GetSubgroupPlaceHolderName(_unnamedSubgroupCount + 1);
 
 			InteractiveController app = new InteractiveController(_engine);
 			EditSubgroupDialog dialog = new EditSubgroupDialog(_engine, _radHelper, _subgroupViewer.GetItems().ToList(), _parameterLabels, settings, placeHolderName, _parentOptions);
@@ -552,7 +547,7 @@
 
 		private void OnAddButtonPressed()
 		{
-			var placeHolderName = GetSubgroupPlaceHolderName(_unnamedSubgroupCount + 1);
+			var placeHolderName = RadUtils.Utils.GetSubgroupPlaceHolderName(_unnamedSubgroupCount + 1);
 			InteractiveController app = new InteractiveController(_engine);
 			AddSubgroupDialog dialog = new AddSubgroupDialog(_engine, _radHelper, _subgroupViewer.GetItems().ToList(), _parameterLabels, _parentOptions, placeHolderName);
 			dialog.Accepted += (sender, args) =>

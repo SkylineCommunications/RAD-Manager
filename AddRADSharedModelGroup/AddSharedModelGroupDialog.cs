@@ -1,4 +1,4 @@
-﻿namespace AddRadParameterGroup
+﻿namespace AddRadSharedModelGroup
 {
 	using System;
 	using RadWidgets;
@@ -7,20 +7,20 @@
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
-	public class AddParameterGroupDialog : Dialog
+	public class AddSharedModelGroupDialog : Dialog
 	{
-		private const string OK_BUTTON_TOOLTIP = "Add the relational anomaly group specified above to the RAD configuration";
-		private readonly RadGroupEditor _groupEditor;
+		private const string OK_BUTTON_TOOLTIP = "Add a relational anomaly group with multiple subgroups that share a single model.";
+		private readonly RadSharedModelGroupEditor _groupEditor;
 		private readonly Button _okButton;
 
-		public AddParameterGroupDialog(IEngine engine, RadHelper radHelper) : base(engine)
+		public AddSharedModelGroupDialog(IEngine engine, RadHelper radHelper) : base(engine)
 		{
 			ShowScriptAbortPopup = false;
-			Title = "Add Relational Anomaly Group";
+			Title = "Add Relational Anomaly Group With Shared Model";
 
 			var existingGroupNames = radHelper.FetchParameterGroups();
 			var parametersCache = new EngineParametersCache(engine);
-			_groupEditor = new RadGroupEditor(engine, radHelper, existingGroupNames, parametersCache);
+			_groupEditor = new RadSharedModelGroupEditor(engine, radHelper, existingGroupNames, parametersCache);
 			_groupEditor.ValidationChanged += (sender, args) => OnEditorValidationChanged();
 
 			_okButton = new Button("Add group")
@@ -47,7 +47,7 @@
 
 		public event EventHandler Cancelled;
 
-		public RadGroupSettings GroupSettings => _groupEditor.Settings;
+		public RadGroupSettings GetSettings() => _groupEditor.GetSettings();
 
 		private void OnEditorValidationChanged()
 		{

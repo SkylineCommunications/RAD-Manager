@@ -110,7 +110,7 @@
 			}
 			catch (Exception ex)
 			{
-				throw new DataMinerCommunicationException("Failed to fetch RAD data", ex);
+				throw new DataMinerCommunicationException("Failed to fetch anomaly scores", ex);
 			}
 		}
 

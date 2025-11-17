@@ -1,5 +1,5 @@
 using System;
-using AddRadParameterGroup;
+using AddRadSharedModelGroup;
 using RadWidgets;
 using Skyline.DataMiner.Automation;
 using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -28,7 +28,7 @@ public class Script
 			_app = new InteractiveController(engine);
 			_radHelper = RadWidgets.Utils.GetRadHelper(engine);
 
-			var dialog = new AddParameterGroupDialog(engine, _radHelper);
+			var dialog = new AddSharedModelGroupDialog(engine, _radHelper);
 			dialog.Accepted += Dialog_Accepted;
 			dialog.Cancelled += Dialog_Cancelled;
 
@@ -63,18 +63,19 @@ public class Script
 
 	private void Dialog_Accepted(object sender, EventArgs e)
 	{
-		var dialog = sender as AddParameterGroupDialog;
+		var dialog = sender as AddSharedModelGroupDialog;
 		if (dialog == null)
 			throw new ArgumentException("Invalid sender type");
 
+		var settings = dialog.GetSettings();
 		try
 		{
-			_radHelper.AddParameterGroup(dialog.GroupSettings);
+			_radHelper.AddParameterGroup(settings);
 		}
 		catch (Exception ex)
 		{
-			_app.Engine.GenerateInformation($"Failed to add relational anomaly group '{dialog.GroupSettings.GroupName}': {ex}");
-			Utils.ShowExceptionDialog(_app, $"Failed to create group with name {dialog.GroupSettings.GroupName}", ex, dialog);
+			_app.Engine.GenerateInformation($"Failed to add relational anomaly group '{settings.GroupName}': {ex}");
+			Utils.ShowExceptionDialog(_app, $"Failed to create group with name {settings.GroupName}", ex, dialog);
 			return;
 		}
 
