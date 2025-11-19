@@ -5,6 +5,7 @@ namespace RadDataSources
 	using System.Linq;
 	using RadUtils;
 	using Skyline.DataMiner.Analytics.GenericInterface;
+	using Skyline.DataMiner.Net.Exceptions;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
 	/// <summary>
@@ -20,7 +21,9 @@ namespace RadDataSources
 		private static readonly GQIDateTimeArgument StartTime = new GQIDateTimeArgument("Start Time");
 		private static readonly GQIDateTimeArgument EndTime = new GQIDateTimeArgument("End Time");
 		private static readonly GQIBooleanArgument SkipCache = new GQIBooleanArgument("Skip Cache");
-		private static readonly AnomalyScoreCache _anomalyScoreCache = new AnomalyScoreCache();
+#pragma warning disable CS0618 // Type or member is obsolete
+		private static AnomalyScoreCache _anomalyScoreCache;
+#pragma warning restore CS0618 // Type or member is obsolete
 		private RadHelper _radHelper;
 		private List<KeyValuePair<DateTime, double>> _anomalyScores = new List<KeyValuePair<DateTime, double>>();
 		private int _dataMinerID = -1;
@@ -36,6 +39,12 @@ namespace RadDataSources
 		{
 			_logger = args.Logger;
 			_radHelper = ConnectionHelper.InitializeRadHelper(args.DMS, _logger);
+#pragma warning disable CS0618 // Type or member is obsolete
+			if (!_radHelper.AnomalyScoreCacheAvailable)
+				_anomalyScoreCache = new AnomalyScoreCache();
+			else
+				_anomalyScoreCache = null;
+#pragma warning restore CS0618 // Type or member is obsolete
 
 			return default;
 		}
@@ -83,22 +92,34 @@ namespace RadDataSources
 				return default;
 			}
 
-			IRadGroupID groupID;
-			if (_subGroupID != Guid.Empty)
-				groupID = new RadSubgroupID(_dataMinerID, _groupName, _subGroupID);
-			else if (!string.IsNullOrEmpty(_subGroupName))
-				groupID = new RadSubgroupID(_dataMinerID, _groupName, _subGroupName);
-			else
-				groupID = new RadGroupID(_dataMinerID, _groupName);
-
 			try
 			{
-				_anomalyScores = _anomalyScoreCache.GetAnomalyScores(_radHelper, groupID, _startTime.Value, _endTime.Value, _skipCache);
+				if (_anomalyScoreCache != null)
+				{
+					IRadGroupID groupID;
+					if (_subGroupID != Guid.Empty)
+						groupID = new RadSubgroupID(_dataMinerID, _groupName, _subGroupID);
+					else if (!string.IsNullOrEmpty(_subGroupName))
+						groupID = new RadSubgroupID(_dataMinerID, _groupName, _subGroupName);
+					else
+						groupID = new RadGroupID(_dataMinerID, _groupName);
+
+					_anomalyScores = _anomalyScoreCache.GetAnomalyScores(_radHelper, groupID, _startTime.Value, _endTime.Value, _skipCache);
+				}
+				else
+				{
+					if (_subGroupID != Guid.Empty)
+						_anomalyScores = _radHelper.FetchAnomalyScoreData(_dataMinerID, _groupName, _subGroupID, _startTime.Value, _endTime.Value);
+					else if (!string.IsNullOrEmpty(_subGroupName))
+						_anomalyScores = _radHelper.FetchAnomalyScoreData(_dataMinerID, _groupName, _subGroupName, _startTime.Value, _endTime.Value);
+					else
+						_anomalyScores = _radHelper.FetchAnomalyScoreData(_dataMinerID, _groupName, _startTime.Value, _endTime.Value);
+				}
 			}
 			catch (Exception e)
 			{
 				_logger.Error($"Failed to fetch anomaly scores: {e}");
-				throw;
+				throw new DataMinerCommunicationException("Failed to fetch anomaly scores", e);
 			}
 
 			return default;
