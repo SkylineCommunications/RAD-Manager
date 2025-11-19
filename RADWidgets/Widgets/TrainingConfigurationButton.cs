@@ -23,7 +23,6 @@
 	public class TrainingConfigurationButton : Section
 	{
 		private readonly IEngine _engine;
-		private readonly Button _configureButton;
 		private readonly Label _detailsLabel;
 		private List<RadSubgroupSelectorItem> _subgroups;
 		private bool _forceTraining;
@@ -34,17 +33,17 @@
 			_subgroups = subgroups;
 			_forceTraining = forceTraining;
 
-			_configureButton = new Button("Configure model training...")
+			var configureButton = new Button("Configure model training...")
 			{
 				Tooltip = "Configure the time ranges and subgroups to use for training the model",
 			};
-			_configureButton.Pressed += (sender, args) => OnConfigureButtonPressed();
+			configureButton.Pressed += (sender, args) => OnConfigureButtonPressed();
 
 			_detailsLabel = new Label();
 
 			UpdateDetailsLabel();
 
-			AddWidget(_configureButton, 0, 0, verticalAlignment: VerticalAlignment.Top);
+			AddWidget(configureButton, 0, 0, verticalAlignment: VerticalAlignment.Top);
 			AddWidget(_detailsLabel, 0, 1, 1, columnSpan - 1);
 		}
 
