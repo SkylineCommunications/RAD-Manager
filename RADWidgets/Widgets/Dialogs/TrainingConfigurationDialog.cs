@@ -12,38 +12,23 @@
 	public class TrainingConfigurationDialog : Dialog
 	{
 		private readonly Button _okButton;
-		private readonly bool _forceTraining;
-		private readonly List<TimeRangeItem> _defaultTimeRanges;
 		private readonly MultiTimeRangeSelector _timeRangeSelector;
 		private readonly CollapsibleCheckboxList<Guid> _excludedSubgroupsList = null;
-		private readonly Button _resetButton;
 
-		public TrainingConfigurationDialog(IEngine engine, RadHelper radHelper, bool forceTraining, List<RadSubgroupSelectorItem> subgroups = null,
+		public TrainingConfigurationDialog(IEngine engine, RadHelper radHelper, List<RadSubgroupSelectorItem> subgroups = null,
 			Widgets.TrainingConfiguration configuration = null) : base(engine)
 		{
-			_forceTraining = forceTraining;
-			_defaultTimeRanges = new List<TimeRangeItem>();
 			var endTime = DateTime.Now;
 			var startTime = endTime - TimeSpan.FromDays(radHelper.DefaultTrainingDays);
-			if (_forceTraining)
-			{
-				_defaultTimeRanges.Add(new TimeRangeItem(new TimeRange(startTime, endTime)));
-			}
 
 			Title = $"Configure Model Training";
 
 			var label = new Label($"Train the model using data from the following time ranges with normal behavior:");
 
-			string emptyText;
-			if (_forceTraining)
-				emptyText = "No time ranges selected. Select at least one time range above and press 'Add'.";
-			else
-				emptyText = "No time ranges selected. We will keep the existing model unchanged.";
+			string emptyText = "No time ranges selected. Select at least one time range above and press 'Add'.";
 			_timeRangeSelector = new MultiTimeRangeSelector(engine, startTime, endTime, emptyText);
 			if (configuration?.SelectedTimeRanges != null)
 				_timeRangeSelector.SetSelected(configuration.SelectedTimeRanges);
-			else
-				_timeRangeSelector.SetSelected(_defaultTimeRanges);
 			_timeRangeSelector.Changed += (sender, args) => UpdateIsValid();
 
 			if (subgroups != null)
@@ -61,21 +46,6 @@
 					_excludedSubgroupsList.SetChecked(configuration.ExcludedSubgroupIDs);
 				_excludedSubgroupsList.Changed += (sender, args) => UpdateIsValid();
 			}
-
-			_resetButton = new Button("Reset to default");
-			if (_forceTraining)
-			{
-				if (subgroups != null)
-					_resetButton.Tooltip = "Reset the time ranges and excluded subgroups to their default values.";
-				else
-					_resetButton.Tooltip = "Reset the time ranges to their default values.";
-			}
-			else
-			{
-				_resetButton.Tooltip = "Keep the existing model unchanged instead of retraining.";
-			}
-
-			_resetButton.Pressed += (sender, args) => OnResetButtonPressed();
 
 			_okButton = new Button("Apply")
 			{
@@ -101,9 +71,6 @@
 				row += _excludedSubgroupsList.RowCount;
 			}
 
-			AddWidget(_resetButton, row, _timeRangeSelector.ColumnCount - 1);
-			row++;
-
 			AddWidget(cancelButton, row, 0, 1, 2);
 			AddWidget(_okButton, row, 2, 1, _timeRangeSelector.ColumnCount - 2);
 		}
@@ -117,30 +84,15 @@
 			var selectedTimeRanges = _timeRangeSelector.GetSelected().ToList();
 			var excludedSubgroupIDs = _excludedSubgroupsList?.GetChecked().ToList() ?? new List<Guid>();
 
-			var comparer = new TimeRangeItemListEqualityComparer();
-			if (excludedSubgroupIDs.Count == 0 && comparer.Equals(selectedTimeRanges, _defaultTimeRanges))
-				return null;
-
 			return new Widgets.TrainingConfiguration(selectedTimeRanges, excludedSubgroupIDs);
 		}
 
 		private void UpdateIsValid()
 		{
-			bool timeRangeSelected = _timeRangeSelector.GetSelected().Any();
-			bool subgroupExcluded = _excludedSubgroupsList != null && _excludedSubgroupsList.GetChecked().Any();
-
-			if (!timeRangeSelected)
+			if (!_timeRangeSelector.GetSelected().Any())
 			{
-				if (!subgroupExcluded && !_forceTraining)
-				{
-					_okButton.Tooltip = "The existing model will be kept unchanged.";
-					_okButton.IsEnabled = true;
-				}
-				else
-				{
-					_okButton.Tooltip = "Select at least one time range to train the model.";
-					_okButton.IsEnabled = false;
-				}
+				_okButton.Tooltip = "Select at least one time range to train the model.";
+				_okButton.IsEnabled = false;
 			}
 			else if (_excludedSubgroupsList != null && !_excludedSubgroupsList.GetUnchecked().Any())
 			{
@@ -152,12 +104,6 @@
 				_okButton.Tooltip = "Train the selected relational anomaly group using the trend data in the time ranges selected above.";
 				_okButton.IsEnabled = true;
 			}
-		}
-
-		private void OnResetButtonPressed()
-		{
-			_timeRangeSelector.SetSelected(_defaultTimeRanges);
-			_excludedSubgroupsList?.UncheckAll();
 		}
 	}
 }
