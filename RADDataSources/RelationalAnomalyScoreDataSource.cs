@@ -22,7 +22,7 @@ namespace RadDataSources
 		private static readonly GQIDateTimeArgument EndTime = new GQIDateTimeArgument("End Time");
 		private static readonly GQIBooleanArgument SkipCache = new GQIBooleanArgument("Skip Cache");
 #pragma warning disable CS0618 // Type or member is obsolete
-		private static AnomalyScoreCache _anomalyScoreCache;
+		private static readonly AnomalyScoreCache _anomalyScoreCache = new AnomalyScoreCache();
 #pragma warning restore CS0618 // Type or member is obsolete
 		private RadHelper _radHelper;
 		private List<KeyValuePair<DateTime, double>> _anomalyScores = new List<KeyValuePair<DateTime, double>>();
@@ -39,12 +39,6 @@ namespace RadDataSources
 		{
 			_logger = args.Logger;
 			_radHelper = ConnectionHelper.InitializeRadHelper(args.DMS, _logger);
-#pragma warning disable CS0618 // Type or member is obsolete
-			if (!_radHelper.AnomalyScoreCacheAvailable)
-				_anomalyScoreCache = new AnomalyScoreCache();
-			else
-				_anomalyScoreCache = null;
-#pragma warning restore CS0618 // Type or member is obsolete
 
 			return default;
 		}
