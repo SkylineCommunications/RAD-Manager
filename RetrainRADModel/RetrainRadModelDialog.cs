@@ -71,7 +71,10 @@
 			{
 				AddSection(_excludedSubgroupsList, row, 0);
 				row += _excludedSubgroupsList.RowCount;
+			}
 
+			if (delayInfoLabel != null)
+			{
 				AddSection(delayInfoLabel, row, 0);
 				row += delayInfoLabel.RowCount;
 			}
