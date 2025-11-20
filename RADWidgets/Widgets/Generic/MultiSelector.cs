@@ -144,7 +144,7 @@ namespace RadWidgets.Widgets.Generic
 					_selectedItems.Add(key, item);
 			}
 
-			_selectedItemsView.Items = _selectedItems.Select(p => new TreeViewItem(p.Value.GetDisplayValue(), p.Key)).ToList();
+			_selectedItemsView.Items = _selectedItems.Select(p => GetTreeViewItem(p.Value.GetDisplayValue(), p.Key)).ToList();
 			Changed?.Invoke(this, EventArgs.Empty);
 		}
 
@@ -155,11 +155,19 @@ namespace RadWidgets.Widgets.Generic
 				return false;
 
 			_selectedItems.Add(key, item);
-			var treeViewItem = new TreeViewItem(item.GetDisplayValue(), key);
+			var treeViewItem = GetTreeViewItem(item.GetDisplayValue(), key);
 			_selectedItemsView.Items = _selectedItemsView.Items.Concat(new List<TreeViewItem>() { treeViewItem }).ToList();
 			Changed?.Invoke(this, EventArgs.Empty);
 
 			return true;
+		}
+
+		private TreeViewItem GetTreeViewItem(string displayKey, string key)
+		{
+			return new TreeViewItem(displayKey, key)
+			{
+				ItemType = TreeViewItem.TreeViewItemType.CheckBox,
+			};
 		}
 
 		private bool GetTreeViewVisible()
