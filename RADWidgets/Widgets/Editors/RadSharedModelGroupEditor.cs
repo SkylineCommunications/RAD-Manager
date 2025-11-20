@@ -89,7 +89,7 @@
 			_subgroupSelector.ValidationChanged += (sender, args) => OnSubgroupSelectorValidationChanged();
 			_subgroupSelector.Changed += (sender, args) => OnSubgroupSelectorChanged();
 
-			_trainingButton = new TrainingConfigurationButton(engine, _subgroupSelector.ColumnCount, settings == null, _subgroupSelector.GetSubgroupSelectorItems());
+			_trainingButton = new TrainingConfigurationButton(engine, radHelper, _subgroupSelector.ColumnCount, settings == null, _subgroupSelector.GetSubgroupSelectorItems());
 
 			_detailsLabel = new MarginLabel(string.Empty, 3, 10)
 			{

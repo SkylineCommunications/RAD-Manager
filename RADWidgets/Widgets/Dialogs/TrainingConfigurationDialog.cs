@@ -11,7 +11,6 @@
 
 	public class TrainingConfigurationDialog : Dialog
 	{
-		private const int DEFAULT_TRAINING_DAYS = 60;
 		private readonly Button _okButton;
 		private readonly bool _forceTraining;
 		private readonly List<TimeRangeItem> _defaultTimeRanges;
@@ -19,13 +18,13 @@
 		private readonly CollapsibleCheckboxList<Guid> _excludedSubgroupsList = null;
 		private readonly Button _resetButton;
 
-		public TrainingConfigurationDialog(IEngine engine, bool forceTraining, List<RadSubgroupSelectorItem> subgroups = null,
+		public TrainingConfigurationDialog(IEngine engine, RadHelper radHelper, bool forceTraining, List<RadSubgroupSelectorItem> subgroups = null,
 			Widgets.TrainingConfiguration configuration = null) : base(engine)
 		{
 			_forceTraining = forceTraining;
 			_defaultTimeRanges = new List<TimeRangeItem>();
 			var endTime = DateTime.Now;
-			var startTime = endTime - TimeSpan.FromDays(DEFAULT_TRAINING_DAYS);
+			var startTime = endTime - TimeSpan.FromDays(radHelper.DefaultTrainingDays);
 			if (_forceTraining)
 			{
 				_defaultTimeRanges.Add(new TimeRangeItem(new TimeRange(startTime, endTime)));

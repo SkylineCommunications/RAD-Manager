@@ -6,6 +6,7 @@
 	using RadWidgets.Widgets.Dialogs;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.RadToolkit;
 
 	public class TrainingConfiguration
 	{
@@ -23,13 +24,15 @@
 	public class TrainingConfigurationButton : Section
 	{
 		private readonly IEngine _engine;
+		private readonly RadHelper _radHelper;
 		private readonly Label _detailsLabel;
 		private List<RadSubgroupSelectorItem> _subgroups;
 		private bool _forceTraining;
 
-		public TrainingConfigurationButton(IEngine engine, int columnSpan, bool forceTraining, List<RadSubgroupSelectorItem> subgroups = null)
+		public TrainingConfigurationButton(IEngine engine, RadHelper radHelper, int columnSpan, bool forceTraining, List<RadSubgroupSelectorItem> subgroups = null)
 		{
 			_engine = engine;
+			_radHelper = radHelper;
 			_subgroups = subgroups;
 			_forceTraining = forceTraining;
 
@@ -63,7 +66,7 @@
 		{
 			var app = new InteractiveController(_engine);
 
-			var dialog = new TrainingConfigurationDialog(_engine, _forceTraining, _subgroups, Configuration);
+			var dialog = new TrainingConfigurationDialog(_engine, _radHelper, _forceTraining, _subgroups, Configuration);
 			dialog.Accepted += (sender, args) =>
 			{
 				Configuration = dialog.GetConfiguration();
