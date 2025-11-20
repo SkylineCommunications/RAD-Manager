@@ -40,7 +40,7 @@
 			_optionsEditor = new RadGroupOptionsEditor(radHelper, _parameterSelector.ColumnCount, options);
 			_optionsEditor.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
-			_trainingButton = new TrainingConfigurationButton(engine, radHelper, _parameterSelector.ColumnCount, settings == null);
+			_trainingButton = new TrainingConfigurationButton(engine, radHelper, settings == null);
 
 			_detailsLabel = new MarginLabel(string.Empty, _parameterSelector.ColumnCount, 10);
 

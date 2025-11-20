@@ -30,7 +30,7 @@
 				_defaultTimeRanges.Add(new TimeRangeItem(new TimeRange(startTime, endTime)));
 			}
 
-			Title = $"Specify Training Range";
+			Title = $"Configure Model Training";
 
 			var label = new Label($"Train the model using data from the following time ranges with normal behavior:");
 

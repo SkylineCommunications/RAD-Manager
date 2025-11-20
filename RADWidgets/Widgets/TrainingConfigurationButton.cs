@@ -25,11 +25,10 @@
 	{
 		private readonly IEngine _engine;
 		private readonly RadHelper _radHelper;
-		private readonly Label _detailsLabel;
 		private List<RadSubgroupSelectorItem> _subgroups;
 		private bool _forceTraining;
 
-		public TrainingConfigurationButton(IEngine engine, RadHelper radHelper, int columnSpan, bool forceTraining, List<RadSubgroupSelectorItem> subgroups = null)
+		public TrainingConfigurationButton(IEngine engine, RadHelper radHelper, bool forceTraining, List<RadSubgroupSelectorItem> subgroups = null)
 		{
 			_engine = engine;
 			_radHelper = radHelper;
@@ -42,12 +41,7 @@
 			};
 			configureButton.Pressed += (sender, args) => OnConfigureButtonPressed();
 
-			_detailsLabel = new Label();
-
-			UpdateDetailsLabel();
-
-			AddWidget(configureButton, 0, 0, verticalAlignment: VerticalAlignment.Top);
-			AddWidget(_detailsLabel, 0, 1, 1, columnSpan - 1);
+			AddWidget(configureButton, 0, 0);
 		}
 
 		public TrainingConfiguration Configuration { get; private set; } = null;
@@ -59,7 +53,6 @@
 
 			if (Configuration != null)
 				Configuration.ExcludedSubgroupIDs = Configuration.ExcludedSubgroupIDs?.Where(id => subgroups.Any(s => s.ID == id)).ToList();
-			UpdateDetailsLabel();
 		}
 
 		private void OnConfigureButtonPressed()
@@ -71,44 +64,10 @@
 			{
 				Configuration = dialog.GetConfiguration();
 				app.Stop();
-
-				UpdateDetailsLabel();
 			};
 			dialog.Cancelled += (sender, args) => app.Stop();
 
 			app.ShowDialog(dialog);
-		}
-
-		private void UpdateDetailsLabel()
-		{
-			if (Configuration == null)
-			{
-				if (_forceTraining)
-					_detailsLabel.Text = "Train using default settings";
-				else
-					_detailsLabel.Text = "Keep the existing model unchanged";
-			}
-			else
-			{
-				List<string> lines = new List<string>()
-				{
-					$"Train the model using data from the following time ranges:",
-				};
-
-				lines.AddRange(Configuration.SelectedTimeRanges.Select(tr => $"\t{tr.GetDisplayValue()}").Take(2));
-				if (Configuration.SelectedTimeRanges.Count > 2)
-					lines.Add($"\tand {Configuration.SelectedTimeRanges.Count - 2} more...");
-
-				if (Configuration.ExcludedSubgroupIDs?.Count > 0)
-				{
-					lines.Add("Excluding data from the following subgroups:");
-					lines.AddRange(_subgroups.Where(s => Configuration.ExcludedSubgroupIDs.Contains(s.ID)).Select(s => $"\t{s.DisplayName}").Take(2));
-					if (Configuration.ExcludedSubgroupIDs.Count > 2)
-						lines.Add($"\tand {Configuration.ExcludedSubgroupIDs.Count - 2} more...");
-				}
-
-				_detailsLabel.Text = string.Join("\n", lines);
-			}
 		}
 	}
 }
