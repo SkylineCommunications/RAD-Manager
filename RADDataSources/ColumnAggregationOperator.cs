@@ -161,7 +161,7 @@
 					if (firstType == GQIColumnType.Int && secondType == GQIColumnType.Int)
 						return Tuple.Create<GQIColumn, AggregationFunc>(new GQIIntColumn(columnName), intAggregation);
 					else
-						return Tuple.Create<GQIColumn, AggregationFunc>(new GQIIntColumn(columnName), numericAggregation);
+						return Tuple.Create<GQIColumn, AggregationFunc>(new GQIDoubleColumn(columnName), numericAggregation);
 				case GQIColumnType.TimeSpan:
 					if (secondType != GQIColumnType.TimeSpan)
 						throw new ArgumentException("Can only find min or max between two TimeSpan columns");
