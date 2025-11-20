@@ -88,7 +88,7 @@ namespace RadDataSources
 
 			try
 			{
-				if (_anomalyScoreCache != null)
+				if (!_radHelper.AnomalyScoreCacheAvailable)
 				{
 					IRadGroupID groupID;
 					if (_subGroupID != Guid.Empty)
