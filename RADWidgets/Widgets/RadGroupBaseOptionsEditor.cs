@@ -50,6 +50,7 @@
 				StepSize = 0.1,
 				IsEnabled = options?.AnomalyThreshold != null,
 				Tooltip = "The threshold for detecting anomalies.",
+				Width = 250,
 			};
 			_anomalyThresholdNumeric.Changed += (sender, args) => OnAnomalyThresholdNumericChanged();
 
@@ -67,6 +68,7 @@
 				Minimum = TimeSpan.FromMinutes(0),
 				TimeSpan = options?.MinimalDuration != null ? TimeSpan.FromMinutes(options.MinimalDuration.Value) : TimeSpan.FromMinutes(_defaultMinimalDuration),
 				IsEnabled = options?.MinimalDuration != null,
+				Width = 250,
 			};
 			_minimalDurationTime.Changed += (sender, args) => OnMinimalDurationTimeChanged();
 
