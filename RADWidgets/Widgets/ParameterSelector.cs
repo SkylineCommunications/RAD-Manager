@@ -202,52 +202,58 @@
 
 		private void UpdateValidationState()
 		{
-			if (_elementsDropDown.Selected == null)
+			if (!_initial)
 			{
-				_elementsDropDown.ValidationState = UIValidationState.Invalid;
-				_elementsDropDown.ValidationText = "Select a valid element";
+				if (_elementsDropDown.Selected == null)
+				{
+					_elementsDropDown.ValidationState = UIValidationState.Invalid;
+					_elementsDropDown.ValidationText = "Select a valid element";
+					_parametersDropDown.ValidationState = UIValidationState.Valid;
+					_parametersDropDown.ValidationText = string.Empty;
+					_instanceTextBox.ValidationState = UIValidationState.Valid;
+					_instanceTextBox.ValidationText = string.Empty;
+					return;
+				}
+
+				if (_parametersDropDown.Selected == null)
+				{
+					_elementsDropDown.ValidationState = UIValidationState.Valid;
+					_elementsDropDown.ValidationText = string.Empty;
+					_parametersDropDown.ValidationState = UIValidationState.Invalid;
+					_parametersDropDown.ValidationText = "Select a valid parameter";
+					_instanceTextBox.ValidationState = UIValidationState.Valid;
+					_instanceTextBox.ValidationText = string.Empty;
+					return;
+				}
+
+				if (_hasInvalidInstance)
+				{
+					_elementsDropDown.ValidationState = UIValidationState.Valid;
+					_elementsDropDown.ValidationText = string.Empty;
+					_parametersDropDown.ValidationState = UIValidationState.Valid;
+					_parametersDropDown.ValidationText = string.Empty;
+					_instanceTextBox.ValidationState = UIValidationState.Invalid;
+					_instanceTextBox.ValidationText = "No matching instances found";
+					return;
+				}
+			}
+
+			_elementsDropDown.ValidationState = UIValidationState.Valid;
+			_elementsDropDown.ValidationText = string.Empty;
+
+			if (_instanceTextBox.IsEnabled)
+			{
+				_instanceTextBox.ValidationState = _validationState;
+				_instanceTextBox.ValidationText = _validationText;
 				_parametersDropDown.ValidationState = UIValidationState.Valid;
 				_parametersDropDown.ValidationText = string.Empty;
-				_instanceTextBox.ValidationState = UIValidationState.Valid;
-				_instanceTextBox.ValidationText = string.Empty;
-			}
-			else if (_parametersDropDown.Selected == null)
-			{
-				_elementsDropDown.ValidationState = UIValidationState.Valid;
-				_elementsDropDown.ValidationText = string.Empty;
-				_parametersDropDown.ValidationState = UIValidationState.Invalid;
-				_parametersDropDown.ValidationText = "Select a valid parameter";
-				_instanceTextBox.ValidationState = UIValidationState.Valid;
-				_instanceTextBox.ValidationText = string.Empty;
-			}
-			else if (_hasInvalidInstance)
-			{
-				_elementsDropDown.ValidationState = UIValidationState.Valid;
-				_elementsDropDown.ValidationText = string.Empty;
-				_parametersDropDown.ValidationState = UIValidationState.Valid;
-				_parametersDropDown.ValidationText = string.Empty;
-				_instanceTextBox.ValidationState = UIValidationState.Invalid;
-				_instanceTextBox.ValidationText = "No matching instances found";
 			}
 			else
 			{
-				_elementsDropDown.ValidationState = UIValidationState.Valid;
-				_elementsDropDown.ValidationText = string.Empty;
-
-				if (_instanceTextBox.IsEnabled)
-				{
-					_instanceTextBox.ValidationState = _validationState;
-					_instanceTextBox.ValidationText = _validationText;
-					_parametersDropDown.ValidationState = UIValidationState.Valid;
-					_parametersDropDown.ValidationText = string.Empty;
-				}
-				else
-				{
-					_instanceTextBox.ValidationState = UIValidationState.Valid;
-					_instanceTextBox.ValidationText = string.Empty;
-					_parametersDropDown.ValidationState = _validationState;
-					_parametersDropDown.ValidationText = _validationText;
-				}
+				_instanceTextBox.ValidationState = UIValidationState.Valid;
+				_instanceTextBox.ValidationText = string.Empty;
+				_parametersDropDown.ValidationState = _validationState;
+				_parametersDropDown.ValidationText = _validationText;
 			}
 		}
 
