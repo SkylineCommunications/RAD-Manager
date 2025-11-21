@@ -48,6 +48,7 @@
 			_configureButton = new Button("Configure model training...")
 			{
 				Tooltip = "Configure the time ranges and subgroups to use for training the model",
+				Width = 200,
 			};
 			_configureButton.Pressed += (sender, args) => OnConfigureButtonPressed();
 
