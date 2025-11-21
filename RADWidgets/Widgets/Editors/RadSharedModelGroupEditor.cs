@@ -81,7 +81,7 @@
 			};
 			parameterLabelsEditorButton.Pressed += (sender, args) => OnEditLabelsButtonPressed();
 
-			_optionsEditor = new RadGroupOptionsEditor(radHelper, 3, settings?.Options);
+			_optionsEditor = new RadGroupOptionsEditor(radHelper, 3, RadGroupEditor.OPTION_FIELDS_WIDTH, settings?.Options);
 			_optionsEditor.Changed += (sender, args) => _subgroupSelector.UpdateParentOptions(_optionsEditor.Options);
 			_optionsEditor.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
@@ -89,7 +89,8 @@
 			_subgroupSelector.ValidationChanged += (sender, args) => OnSubgroupSelectorValidationChanged();
 			_subgroupSelector.Changed += (sender, args) => OnSubgroupSelectorChanged();
 
-			_trainingButton = new TrainingConfigurationButton(engine, radHelper, _subgroupSelector.ColumnCount, settings == null, _subgroupSelector.GetSubgroupSelectorItems());
+			_trainingButton = new TrainingConfigurationButton(engine, radHelper, _subgroupSelector.ColumnCount, RadGroupEditor.OPTION_FIELDS_WIDTH,
+				settings == null, _subgroupSelector.GetSubgroupSelectorItems());
 
 			_detailsLabel = new MarginLabel(string.Empty, 3, 10)
 			{

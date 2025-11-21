@@ -13,6 +13,7 @@
 	{
 		public const int MIN_PARAMETERS = 2;
 		public const int MAX_PARAMETERS = 100;
+		public const int OPTION_FIELDS_WIDTH = 200;
 		private readonly GroupNameSection _groupNameSection;
 		private readonly MultiParameterSelector _parameterSelector;
 		private readonly RadGroupOptionsEditor _optionsEditor;
@@ -38,10 +39,10 @@
 					subgroupOptions.MinimalDuration ?? options?.MinimalDuration);
 			}
 
-			_optionsEditor = new RadGroupOptionsEditor(radHelper, 2, options);
+			_optionsEditor = new RadGroupOptionsEditor(radHelper, _parameterSelector.ColumnCount, OPTION_FIELDS_WIDTH, options);
 			_optionsEditor.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
-			_trainingButton = new TrainingConfigurationButton(engine, radHelper, 2, settings == null);
+			_trainingButton = new TrainingConfigurationButton(engine, radHelper, _parameterSelector.ColumnCount, OPTION_FIELDS_WIDTH, settings == null);
 
 			var whiteSpace = new WhiteSpace()
 			{

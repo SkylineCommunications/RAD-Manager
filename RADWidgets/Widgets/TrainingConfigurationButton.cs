@@ -31,7 +31,7 @@
 		private bool _forceTraining;
 		private TrainingConfiguration _configuration;
 
-		public TrainingConfigurationButton(IEngine engine, RadHelper radHelper, int columnSpan, bool forceTraining, List<RadSubgroupSelectorItem> subgroups = null)
+		public TrainingConfigurationButton(IEngine engine, RadHelper radHelper, int columnSpan, int buttonWidth, bool forceTraining, List<RadSubgroupSelectorItem> subgroups = null)
 		{
 			_engine = engine;
 			_radHelper = radHelper;
@@ -48,7 +48,7 @@
 			_configureButton = new Button("Configure model training...")
 			{
 				Tooltip = "Configure the time ranges and subgroups to use for training the model",
-				Width = 200,
+				Width = buttonWidth,
 			};
 			_configureButton.Pressed += (sender, args) => OnConfigureButtonPressed();
 

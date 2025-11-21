@@ -21,6 +21,7 @@
 		public RadGroupOptionsEditor(
 			RadHelper radHelper,
 			int columnCount,
+			int fieldWidth,
 			RadGroupOptions options = null)
 		{
 			_updateModelCheckBox = new CheckBox("Adapt model to new data")
@@ -30,7 +31,7 @@
 				"unless you manually specify a training range.",
 			};
 
-			_baseOptionsEditor = new RadGroupBaseOptionsEditor(columnCount, radHelper.DefaultAnomalyThreshold, radHelper.DefaultMinimumAnomalyDuration,
+			_baseOptionsEditor = new RadGroupBaseOptionsEditor(columnCount, radHelper.DefaultAnomalyThreshold, radHelper.DefaultMinimumAnomalyDuration, fieldWidth,
 				options);
 
 			int row = 0;

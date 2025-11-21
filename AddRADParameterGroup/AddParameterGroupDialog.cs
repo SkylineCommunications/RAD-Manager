@@ -27,13 +27,12 @@
 			{
 				Style = ButtonStyle.CallToAction,
 				Tooltip = OK_BUTTON_TOOLTIP,
-				Width = 100,
 			};
 			_okButton.Pressed += (sender, args) => Accepted?.Invoke(this, EventArgs.Empty);
 
 			var cancelButton = new Button("Cancel")
 			{
-				Width = 100,
+				MaxWidth = 150,
 			};
 			cancelButton.Pressed += (sender, args) => Cancelled?.Invoke(this, EventArgs.Empty);
 
@@ -43,8 +42,8 @@
 			AddSection(_groupEditor, row, 0);
 			row += _groupEditor.RowCount;
 
-			AddWidget(cancelButton, row, 0, 1, 1);
-			AddWidget(_okButton, row, 1, 1, _groupEditor.ColumnCount - 1, horizontalAlignment: HorizontalAlignment.Right);
+			AddWidget(cancelButton, row, _groupEditor.ColumnCount - 2, horizontalAlignment: HorizontalAlignment.Right);
+			AddWidget(_okButton, row, _groupEditor.ColumnCount - 1);
 		}
 
 		public event EventHandler Accepted;

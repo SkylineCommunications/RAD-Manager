@@ -53,7 +53,7 @@
 			_groupNameSection = new GroupNameSection(settings?.Name, _otherSubgroups.Select(s => s.Name).ToList(), parameterSelectorColumnCount, groupNamePlaceHolder);
 			_groupNameSection.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
-			_optionsEditor = new RadSubgroupOptionsEditor(radHelper, parameterSelectorColumnCount + 1, parentOptions, settings?.Options);
+			_optionsEditor = new RadSubgroupOptionsEditor(radHelper, parameterSelectorColumnCount + 1, RadGroupEditor.OPTION_FIELDS_WIDTH, parentOptions, settings?.Options);
 			_optionsEditor.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
 			_detailsLabel = new MarginLabel(string.Empty, 2, 10)
