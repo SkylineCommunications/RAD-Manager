@@ -141,6 +141,8 @@
 		{
 			get
 			{
+				_initial = false;
+
 				var element = _elementsDropDown.Selected;
 				if (element == null)
 				{
