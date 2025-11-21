@@ -6,6 +6,7 @@
 	using RadUtils;
 	using RadWidgets.Widgets.Generic;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
 	public class RadGroupEditor : VisibilitySection
@@ -42,7 +43,12 @@
 
 			_trainingButton = new TrainingConfigurationButton(engine, radHelper, 2, settings == null);
 
-			_detailsLabel = new MarginLabel(string.Empty, _parameterSelector.ColumnCount, 10);
+			var whiteSpace = new WhiteSpace()
+			{
+				Height = 10,
+			};
+
+			_detailsLabel = new MarginLabel(string.Empty, _parameterSelector.ColumnCount, 0);
 
 			UpdateParametersSelectedInRange();
 			UpdateDetailsLabel();
@@ -60,6 +66,9 @@
 
 			AddSection(_trainingButton, row, 0);
 			row += _trainingButton.RowCount;
+
+			AddWidget(whiteSpace, row, 0, 1, _parameterSelector.ColumnCount);
+			row++;
 
 			AddSection(_detailsLabel, row, 0, GetDetailsLabelVisible);
 		}
