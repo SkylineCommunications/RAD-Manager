@@ -37,10 +37,10 @@
 					subgroupOptions.MinimalDuration ?? options?.MinimalDuration);
 			}
 
-			_optionsEditor = new RadGroupOptionsEditor(radHelper, _parameterSelector.ColumnCount, options);
+			_optionsEditor = new RadGroupOptionsEditor(radHelper, 2, options);
 			_optionsEditor.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
-			_trainingButton = new TrainingConfigurationButton(engine, radHelper, _parameterSelector.ColumnCount, settings == null);
+			_trainingButton = new TrainingConfigurationButton(engine, radHelper, 2, settings == null);
 
 			_detailsLabel = new MarginLabel(string.Empty, _parameterSelector.ColumnCount, 10);
 
