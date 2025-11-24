@@ -18,7 +18,7 @@
 		private UIValidationState _validationState = UIValidationState.Valid;
 		private string _validationText = string.Empty;
 
-		public ParameterInstanceSelector(IEngine engine, RadSubgroupSelectorParameter parameter = null)
+		public ParameterInstanceSelector(IEngine engine, int instanceDropDownColumnSpan, RadSubgroupSelectorParameter parameter = null)
 		{
 			_engine = engine;
 
@@ -42,7 +42,7 @@
 
 			AddWidget(_elementsDropDown, 0, 0);
 			AddWidget(_parametersDropDown, 0, 1);
-			AddWidget(_instanceDropDown, 0, 2);
+			AddWidget(_instanceDropDown, 0, 2, 1, instanceDropDownColumnSpan);
 		}
 
 		public event EventHandler Changed;
