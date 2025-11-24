@@ -92,7 +92,7 @@
 			_trainingButton = new TrainingConfigurationButton(engine, radHelper, _subgroupSelector.ColumnCount, RadGroupEditor.OPTION_FIELDS_WIDTH,
 				settings == null, _subgroupSelector.GetSubgroupSelectorItems());
 
-			_detailsLabel = new MarginLabel(string.Empty, 3, 10)
+			_detailsLabel = new MarginLabel(string.Empty, _subgroupSelector.ColumnCount, 10)
 			{
 				MaxTextWidth = 200,
 			};
