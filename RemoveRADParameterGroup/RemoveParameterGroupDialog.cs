@@ -94,7 +94,7 @@
 				});
 			}
 
-			for (int i = 2; i < NrOfColumns - 2; i++)
+			for (int i = 2; i < NrOfColumns - 2; ++i)
 			{
 				whitespaces.Add(new WhiteSpace());
 			}
