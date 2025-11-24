@@ -97,7 +97,7 @@
 				_okButton.Tooltip = "Select at least one time range to train the model.";
 				_okButton.IsEnabled = false;
 			}
-			else if (_excludedSubgroupsList != null && !_excludedSubgroupsList.GetUnchecked().Any())
+			else if (_excludedSubgroupsList != null && _excludedSubgroupsList.GetChecked().Any() && !_excludedSubgroupsList.GetUnchecked().Any())
 			{
 				_okButton.Tooltip = "At least one subgroup must be included for training the model.";
 				_okButton.IsEnabled = false;
