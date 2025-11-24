@@ -32,7 +32,7 @@
 
 			var cancelButton = new Button("Cancel")
 			{
-				MaxWidth = 300,
+				MaxWidth = Constants.SHARED_MODEL_GROUP_EDITOR_CANCEL_BUTTON_MAX_WIDTH,
 			};
 			cancelButton.Pressed += (sender, args) => Cancelled?.Invoke(this, EventArgs.Empty);
 
