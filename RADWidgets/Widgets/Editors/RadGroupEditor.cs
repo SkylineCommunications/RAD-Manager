@@ -121,9 +121,9 @@
 			_detailsLabel.IsVisible = IsSectionVisible && GetDetailsLabelVisible();
 
 			if (!_moreThanMinParametersSelected)
-				_detailsLabel.Text = "Select at least two instances.";
+				_detailsLabel.Text = "You must select at least two instances before you can add the group.";
 			else if (!_lessThanMaxParametersSelected)
-				_detailsLabel.Text = $"Select at most {MAX_PARAMETERS} instances.";
+				_detailsLabel.Text = $"You must select at most {MAX_PARAMETERS} instances before you can add the group.";
 			else
 				_detailsLabel.Text = string.Empty;
 		}

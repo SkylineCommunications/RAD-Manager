@@ -242,22 +242,22 @@
 
 			if (!_subgroupSelector.IsValid)
 			{
-				_detailsLabel.Text = _subgroupSelector.ValidationText;
+				_detailsLabel.Text = $"{_subgroupSelector.ValidationText} You must make sure all subgroup configurations are valid before you can add the group.";
 			}
 			else if (_hasMissingParameterLabels)
 			{
-				_detailsLabel.Text = "Either provide a label for all parameters, or do not provide any labels.";
+				_detailsLabel.Text = "You must either provide a label for all parameters, or do not provide any labels before you can add the group.";
 			}
 			else if (_hasWhiteSpaceLabels)
 			{
-				_detailsLabel.Text = "Parameter labels cannot only contain whitespace characters.";
+				_detailsLabel.Text = "Parameter labels cannot only contain whitespace characters. You must provide valid labels before you can add the group.";
 			}
 			else if (_duplicatedParameterLabels.Count > 0)
 			{
 				if (_duplicatedParameterLabels.Count == 1)
-					_detailsLabel.Text = $"Provide a unique label for each parameter. The following label is duplicated: {_duplicatedParameterLabels.First()}";
+					_detailsLabel.Text = $"You must provide a unique label for each parameter before you can add the group. The following label is duplicated: {_duplicatedParameterLabels.First()}";
 				else
-					_detailsLabel.Text = $"Provide a unique label for each parameter. The following labels are duplicated: {_duplicatedParameterLabels.HumanReadableJoin()}";
+					_detailsLabel.Text = $"You must provide a unique label for each parameter before you can add the group. The following labels are duplicated: {_duplicatedParameterLabels.HumanReadableJoin()}";
 			}
 			else
 			{
