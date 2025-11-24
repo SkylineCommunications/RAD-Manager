@@ -110,18 +110,12 @@
 			return default;
 		}
 
-		public GQIArgument[] GetInputArguments()
+		public virtual GQIArgument[] GetInputArguments()
 		{
-			var inputArgs = new GQIArgument[] { _sortByArg, _sortDirectionArg, _onlyWithErrorArg, _onlyWithAnomaliesArg };
-			var additionalArgs = GetAdditionalInputArguments();
-
-			if (additionalArgs != null)
-				return additionalArgs.Concat(inputArgs).ToArray();
-			else
-				return inputArgs;
+			return new GQIArgument[] { _sortByArg, _sortDirectionArg, _onlyWithErrorArg, _onlyWithAnomaliesArg };
 		}
 
-		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
+		public virtual OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
 			if (!args.TryGetArgumentValue(_sortByArg, out string sortByString) || !EnumExtensions.TryParseDescription(sortByString, out _sortBy))
 				_sortBy = SortingColumn.Name;
@@ -134,8 +128,6 @@
 
 			if (!args.TryGetArgumentValue(_onlyWithAnomaliesArg, out _onlyWithAnomalies))
 				_onlyWithAnomalies = false;
-
-			OnAdditionalArgumentsProcessed(args);
 
 			return default;
 		}
@@ -160,19 +152,12 @@
 				rows = rows.Where(r => r.HasActiveAnomaly);
 
 			// Sorting
-			var sortedRows = Sort(rows, _sortBy);
+			var sortedRows = Sort(rows, _sortBy, _sortDescending);
 			if (sortedRows == null)
 				sortedRows = rows;
 
 			return new GQIPage(sortedRows.Select(r => r.ToGQIRow()).ToArray());
 		}
-
-		protected virtual IEnumerable<GQIArgument> GetAdditionalInputArguments()
-		{
-			return null;
-		}
-
-		protected virtual void OnAdditionalArgumentsProcessed(OnArgumentsProcessedInputArgs args) { }
 
 		protected virtual IEnumerable<T> Sort(IEnumerable<T> rows, SortingColumn sortBy, bool sortDescending)
 		{

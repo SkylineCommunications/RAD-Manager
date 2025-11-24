@@ -104,9 +104,21 @@ namespace RadDataSources
 			};
 		}
 
-		protected override IEnumerable<GQIArgument> GetAdditionalInputArguments()
+		public override GQIArgument[] GetInputArguments()
 		{
-			return new GQIArgument[] { _dataMinerIDArg, _groupNameArg };
+			var extraArgs = new GQIArgument[] { _dataMinerIDArg, _groupNameArg };
+			return extraArgs.Concat(base.GetInputArguments()).ToArray();
+		}
+
+		public override OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
+		{
+			if (!args.TryGetArgumentValue(_dataMinerIDArg, out _dataMinerID))
+				_dataMinerID = -1;
+
+			if (!args.TryGetArgumentValue(_groupNameArg, out _groupName))
+				Logger.Error("No group name provided");
+
+			return base.OnArgumentsProcessed(args);
 		}
 
 		protected override IEnumerable<RadSubgroupRow> Sort(IEnumerable<RadSubgroupRow> rows, SortingColumn sortBy, bool sortDescending)
@@ -123,15 +135,6 @@ namespace RadDataSources
 			}
 
 			return null;
-		}
-
-		protected override void OnAdditionalArgumentsProcessed(OnArgumentsProcessedInputArgs args)
-		{
-			if (!args.TryGetArgumentValue(_dataMinerIDArg, out _dataMinerID))
-				_dataMinerID = -1;
-
-			if (!args.TryGetArgumentValue(_groupNameArg, out _groupName))
-				Logger.Error("No group name provided");
 		}
 
 		protected override List<RadGroupInfo> GetGroupInfos()
