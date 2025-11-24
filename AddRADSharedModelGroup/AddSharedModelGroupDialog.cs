@@ -42,7 +42,7 @@
 			AddSection(_groupEditor, row, 0);
 			row += _groupEditor.RowCount;
 
-			AddWidget(cancelButton, row, _groupEditor.ColumnCount - 2, HorizontalAlignment.Right);
+			AddWidget(cancelButton, row, _groupEditor.ColumnCount - 2, horizontalAlignment: HorizontalAlignment.Right);
 			AddWidget(_okButton, row, _groupEditor.ColumnCount - 1);
 		}
 
