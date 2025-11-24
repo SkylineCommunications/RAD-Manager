@@ -15,6 +15,7 @@
 		private readonly GroupNameSection _groupNameSection;
 		private readonly MultiParameterSelector _parameterSelector;
 		private readonly RadGroupOptionsEditor _optionsEditor;
+		private readonly TrainingConfigurationButton _trainingButton;
 		private readonly MarginLabel _detailsLabel;
 		private bool _moreThanMinParametersSelected = false;
 		private bool _lessThanMaxParametersSelected = false;
@@ -39,6 +40,8 @@
 			_optionsEditor = new RadGroupOptionsEditor(radHelper, _parameterSelector.ColumnCount, options);
 			_optionsEditor.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
+			_trainingButton = new TrainingConfigurationButton(engine, radHelper, _parameterSelector.ColumnCount, settings == null);
+
 			_detailsLabel = new MarginLabel(string.Empty, _parameterSelector.ColumnCount, 10);
 
 			UpdateParametersSelectedInRange();
@@ -55,24 +58,34 @@
 			AddSection(_optionsEditor, row, 0);
 			row += _optionsEditor.RowCount;
 
+			AddSection(_trainingButton, row, 0);
+			row += _trainingButton.RowCount;
+
 			AddSection(_detailsLabel, row, 0, GetDetailsLabelVisible);
 		}
 
 		public event EventHandler<EventArgs> ValidationChanged;
 
-		public RadGroupSettings Settings
-		{
-			get
-			{
-				var parameters = _parameterSelector.GetSelectedParameters().Select(p => new RadParameter(p, string.Empty)).ToList();
-				var subgroup = new RadSubgroupSettings(_groupNameSection.GroupName, Guid.NewGuid(), parameters, new RadSubgroupOptions());
-				return new RadGroupSettings(_groupNameSection.GroupName, _optionsEditor.Options, new List<RadSubgroupSettings> { subgroup });
-			}
-		}
-
 		public bool IsValid { get; private set; }
 
 		public string ValidationText { get; private set; }
+
+		public void GetSettings(out RadGroupSettings settings, out TrainingConfiguration trainingConfiguration)
+		{
+			var parameters = _parameterSelector.GetSelectedParameters().Select(p => new RadParameter(p, string.Empty)).ToList();
+			var subgroup = new RadSubgroupSettings(_groupNameSection.GroupName, Guid.NewGuid(), parameters, new RadSubgroupOptions());
+			settings = new RadGroupSettings(_groupNameSection.GroupName, _optionsEditor.Options, new List<RadSubgroupSettings> { subgroup });
+
+			if (_trainingButton.Configuration != null)
+			{
+				var timeRanges = _trainingButton.Configuration.SelectedTimeRanges.Select(tr => tr.TimeRange).ToList();
+				trainingConfiguration = new TrainingConfiguration(timeRanges, null);
+			}
+			else
+			{
+				trainingConfiguration = null;
+			}
+		}
 
 		private void UpdateIsValid()
 		{

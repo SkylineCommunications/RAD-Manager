@@ -18,7 +18,10 @@
 		private readonly RadGroupOptionsEditor _optionsEditor;
 		private readonly Numeric _parametersCountNumeric;
 		private readonly RadSubgroupSelector _subgroupSelector;
+		private readonly TrainingConfigurationButton _trainingButton;
 		private readonly MarginLabel _detailsLabel;
+		private readonly int? _originalParameterCount;
+		private readonly List<RadSubgroupInfo> _originalSubgroups;
 		private List<string> _parameterLabels;
 		private List<string> _oldParameterLabels;
 		private List<string> _duplicatedParameterLabels;
@@ -29,6 +32,18 @@
 			RadGroupInfo settings = null, Guid? selectedSubgroup = null)
 		{
 			_engine = engine;
+			_originalParameterCount = null;
+			_originalSubgroups = new List<RadSubgroupInfo>();
+			if (settings?.Subgroups != null)
+			{
+				_originalParameterCount = settings.Subgroups.FirstOrDefault()?.Parameters?.Count;
+				foreach (var subgroup in settings.Subgroups)
+				{
+					subgroup.NormalizeParameters();
+					_originalSubgroups.Add(subgroup);
+				}
+			}
+
 			_groupNameSection = new GroupNameSection(settings?.GroupName, existingGroupNames, 2);
 			_groupNameSection.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
@@ -72,6 +87,9 @@
 
 			_subgroupSelector = new RadSubgroupSelector(engine, radHelper, _optionsEditor.Options, _parameterLabels, parametersCache, settings?.Subgroups, selectedSubgroup);
 			_subgroupSelector.ValidationChanged += (sender, args) => OnSubgroupSelectorValidationChanged();
+			_subgroupSelector.Changed += (sender, args) => OnSubgroupSelectorChanged();
+
+			_trainingButton = new TrainingConfigurationButton(engine, radHelper, _subgroupSelector.ColumnCount, settings == null, _subgroupSelector.GetSubgroupSelectorItems());
 
 			_detailsLabel = new MarginLabel(string.Empty, 3, 10)
 			{
@@ -97,6 +115,9 @@
 			AddSection(_optionsEditor, row, 0);
 			row += _optionsEditor.RowCount;
 
+			AddSection(_trainingButton, row, 0);
+			row += _trainingButton.RowCount;
+
 			AddSection(_detailsLabel, row, 0, GetDetailsLabelVisible);
 		}
 
@@ -106,9 +127,71 @@
 
 		public string ValidationText { get; private set; }
 
-		public RadGroupSettings GetSettings()
+		public void GetSettings(out RadGroupSettings settings, out List<RadSubgroupSettings> addedSubgroups, out List<Guid> removedSubgroups,
+			out Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration trainingConfiguration)
 		{
-			return new RadGroupSettings(_groupNameSection.GroupName, _optionsEditor.Options, _subgroupSelector.GetSubgroups());
+			var newSubgroups = _subgroupSelector.GetSubgroups();
+			settings = new RadGroupSettings(_groupNameSection.GroupName, _optionsEditor.Options, newSubgroups);
+			GetAddedAndRemovedSubgroups(newSubgroups, out addedSubgroups, out removedSubgroups);
+			trainingConfiguration = GetTrainingConfiguration(newSubgroups);
+		}
+
+		private void GetAddedAndRemovedSubgroups(List<RadSubgroupSettings> newSubgroups, out List<RadSubgroupSettings> addedSubgroups, out List<Guid> removedSubgroups)
+		{
+			if (_originalParameterCount != _parametersCountNumeric.Value)
+			{
+				addedSubgroups = newSubgroups;
+				removedSubgroups = _originalSubgroups.Select(s => s.ID).ToList();
+				return;
+			}
+
+			bool[] matchedOriginalSubgroups = new bool[_originalSubgroups.Count];
+			addedSubgroups = new List<RadSubgroupSettings>();
+			foreach (var subgroup in newSubgroups)
+			{
+				bool matched = false;
+
+				subgroup.NormalizeParameters();
+				for (int i = 0; i < _originalSubgroups.Count; ++i)
+				{
+					if (matchedOriginalSubgroups[i])
+						continue;
+					if (_originalSubgroups[i].HasSameOrderedParameters(subgroup))
+					{
+						matchedOriginalSubgroups[i] = true;
+						matched = true;
+						break;
+					}
+				}
+
+				if (!matched)
+					addedSubgroups.Add(subgroup);
+			}
+
+			removedSubgroups = new List<Guid>();
+			for (int i = 0; i < matchedOriginalSubgroups.Length; ++i)
+			{
+				if (!matchedOriginalSubgroups[i])
+					removedSubgroups.Add(_originalSubgroups[i].ID);
+			}
+		}
+
+		private Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration GetTrainingConfiguration(List<RadSubgroupSettings> subgroups)
+		{
+			var trainingConfig = _trainingButton.Configuration;
+			if (trainingConfig == null)
+				return null;
+
+			var timeRanges = trainingConfig.SelectedTimeRanges.Select(tr => tr.TimeRange).ToList();
+			var excludedSubgroupIDs = trainingConfig.ExcludedSubgroupIDs;
+			List<int> excludedSubgroups = new List<int>();
+			for (int i = 0; i < subgroups.Count; ++i)
+			{
+				if (excludedSubgroupIDs.Contains(subgroups[i].ID))
+					excludedSubgroups.Add(i);
+			}
+
+			return new Skyline.DataMiner.Utils.RadToolkit.TrainingConfiguration(timeRanges, excludedSubgroups);
 		}
 
 		private void UpdateParameterLabelsValid()
@@ -194,6 +277,27 @@
 			UpdateIsValid();
 		}
 
+		private void UpdateTrainingButton()
+		{
+			_trainingButton.SetSubgroups(!HasPreservedSubgroups(), _subgroupSelector.GetSubgroupSelectorItems());
+		}
+
+		private bool HasPreservedSubgroups()
+		{
+			if (_originalParameterCount != _parametersCountNumeric.Value)
+				return false;
+
+			var newSubgroups = _subgroupSelector.GetSubgroups();
+			foreach (var newSubgroup in newSubgroups)
+			{
+				newSubgroup.NormalizeParameters();
+				if (_originalSubgroups.Any(s => s.HasSameOrderedParameters(newSubgroup)))
+					return true;
+			}
+
+			return false;
+		}
+
 		private void OnEditLabelsButtonPressed()
 		{
 			InteractiveController app = new InteractiveController(_engine);
@@ -244,12 +348,18 @@
 			UpdateParameterLabelsValid();
 			UpdateDetailsLabel();
 			UpdateIsValid();
+			UpdateTrainingButton();
 		}
 
 		private void OnSubgroupSelectorValidationChanged()
 		{
 			UpdateDetailsLabel();
 			UpdateIsValid();
+		}
+
+		private void OnSubgroupSelectorChanged()
+		{
+			UpdateTrainingButton();
 		}
 	}
 }

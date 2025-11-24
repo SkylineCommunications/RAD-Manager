@@ -67,10 +67,10 @@ public class Script
 		if (dialog == null)
 			throw new ArgumentException("Invalid sender type");
 
-		var settings = dialog.GetSettings();
+		dialog.GetSettings(out var settings, out var trainingConfiguration);
 		try
 		{
-			_radHelper.AddParameterGroup(settings);
+			Utils.AddParameterGroup(_app, _radHelper, settings, trainingConfiguration, dialog);
 		}
 		catch (Exception ex)
 		{

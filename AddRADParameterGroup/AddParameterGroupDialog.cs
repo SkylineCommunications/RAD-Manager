@@ -47,7 +47,10 @@
 
 		public event EventHandler Cancelled;
 
-		public RadGroupSettings GroupSettings => _groupEditor.Settings;
+		public void GetSettings(out RadGroupSettings settings, out TrainingConfiguration trainingConfiguration)
+		{
+			_groupEditor.GetSettings(out settings, out trainingConfiguration);
+		}
 
 		private void OnEditorValidationChanged()
 		{

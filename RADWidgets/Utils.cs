@@ -8,6 +8,7 @@
 	using RadUtils;
 	using Skyline.DataMiner.Analytics.DataTypes;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Net.Exceptions;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.RadToolkit;
@@ -307,6 +308,31 @@
 				settings.Parameters = settings.Parameters.OrderBy(p => p?.Label, StringComparer.OrdinalIgnoreCase).ToList();
 		}
 
+		public static void AddParameterGroup(InteractiveController app, RadHelper radHelper, RadGroupSettings settings,
+			TrainingConfiguration trainingConfiguration, Dialog parent)
+		{
+			if (radHelper.TrainingConfigInAddGroupMessageAvailable)
+			{
+				radHelper.AddParameterGroup(settings, trainingConfiguration);
+			}
+			else
+			{
+				radHelper.AddParameterGroup(settings);
+				if (trainingConfiguration != null)
+				{
+					try
+					{
+						Retrain(radHelper, settings.GroupName, trainingConfiguration.TimeRanges, trainingConfiguration.ExcludedSubgroups.Select(i => settings.Subgroups[i]).ToList());
+					}
+					catch (Exception ex)
+					{
+						app.Engine.GenerateInformation($"Failed to retrain relational anomaly group '{settings.GroupName}' after adding it: {ex}");
+						ShowExceptionDialog(app, $"Failed to retrain group with name {settings.GroupName} after adding it", ex, parent);
+					}
+				}
+			}
+		}
+
 		/// <summary>
 		/// Join list of strings into a human readable string. E.g. ["a", "b", "c"] -> "a, b and c".
 		/// </summary>
@@ -405,6 +431,23 @@
 			return new RadHelper(Engine.SLNetRaw, new Logger(s => engine.Log(s, LogType.Error, 0)));
 		}
 
+		/// <summary>
+		/// Gets the subgroups from <paramref name="groupSettings"/> that have the same parameters as any of the subgroups in <paramref name="subgroupsToFind"/>.
+		/// </summary>
+		/// <param name="groupSettings">The group settings.</param>
+		/// <param name="subgroupsToFind">The subgroups to look for.</param>
+		/// <returns>The list of matching subgroups.</returns>
+		private static List<RadSubgroupInfo> GetSubgroupsWithSameParameters(RadGroupInfo groupSettings, List<RadSubgroupSettings> subgroupsToFind)
+		{
+			if (subgroupsToFind == null || groupSettings?.Subgroups == null)
+				return new List<RadSubgroupInfo>();
+
+			foreach (var subgroup in subgroupsToFind)
+				subgroup.NormalizeParameters();
+
+			return groupSettings.Subgroups.Where(g => subgroupsToFind.Any(s => g.HasSameOrderedParameters(s))).ToList();
+		}
+
 		private static DynamicTableIndex[] FetchInstances(IEngine engine, int dataMinerID, int elementID, int tableParameterID, string displayKeyFilter = null)
 		{
 			try
@@ -434,6 +477,27 @@
 				engine.Log($"Could not fetch primary keys for element {dataMinerID}/{elementID} parameter {tableParameterID} with filter '{displayKeyFilter ?? string.Empty}': {e}", LogType.Error, 5);
 				return Array.Empty<DynamicTableIndex>();
 			}
+		}
+
+		/// <summary>
+		/// Retrain the given group, excluding the subgroups with the same parameters as those in <paramref name="excludedSubgroups"/>. Note that this method will ignore the ID of
+		/// the subgroups to exclude, and will only compare the parameters (this is needed since this method is used when adding parameter groups, in which case the subgroup ID we get
+		/// from the dialog does not match the actual IDs).
+		/// </summary>
+		/// <param name="radHelper">The RAD helper.</param>
+		/// <param name="groupName">The name of the group to retrain.</param>
+		/// <param name="timeRanges">The time ranges to use for retraining.</param>
+		/// <param name="excludedSubgroups">The subgroups to exclude from retraining.</param>
+		/// <exception cref="DataMinerCommunicationException">Thrown when the group could not be found.</exception>
+		private static void Retrain(RadHelper radHelper, string groupName, List<TimeRange> timeRanges, List<RadSubgroupSettings> excludedSubgroups)
+		{
+			var addedGroup = radHelper.FetchParameterGroupInfo(groupName);
+			if (addedGroup == null)
+				throw new DataMinerCommunicationException($"Could not find newly added relational anomaly group '{groupName}'");
+
+			var excludedSubgroupsFromInfo = GetSubgroupsWithSameParameters(addedGroup, excludedSubgroups);
+			var excludedSubgroupIDs = excludedSubgroupsFromInfo.Select(s => s.ID).ToList();
+			radHelper.RetrainParameterGroup(-1, groupName, timeRanges, excludedSubgroupIDs);
 		}
 	}
 }

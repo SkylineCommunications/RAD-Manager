@@ -23,7 +23,7 @@
 			int columnCount,
 			RadGroupOptions options = null)
 		{
-			_updateModelCheckBox = new CheckBox("Adapt model to new data?")
+			_updateModelCheckBox = new CheckBox("Adapt model to new data")
 			{
 				IsChecked = options?.UpdateModel ?? false,
 				Tooltip = "Whether to continuously update the RAD model when new trend data is available. If not selected, the model will remain static after creation, " +

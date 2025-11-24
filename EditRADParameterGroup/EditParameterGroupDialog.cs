@@ -1,7 +1,6 @@
 ﻿namespace EditRADParameterGroup
 {
 	using System;
-	using System.Linq;
 	using RadWidgets;
 	using RadWidgets.Widgets.Editors;
 	using Skyline.DataMiner.Automation;
@@ -49,7 +48,10 @@
 
 		public int DataMinerID { get; private set; }
 
-		public RadGroupSettings GroupSettings => _groupEditor.Settings;
+		public void GetSettings(out RadGroupSettings settings, out TrainingConfiguration trainingConfiguration)
+		{
+			_groupEditor.GetSettings(out settings, out trainingConfiguration);
+		}
 
 		private void OnGroupEditorValidationChanged()
 		{

@@ -67,14 +67,16 @@ public class Script
 		if (dialog == null)
 			throw new ArgumentException("Invalid sender type");
 
+		dialog.GetSettings(out RadGroupSettings settings, out TrainingConfiguration trainingConfig);
+
 		try
 		{
-			_radHelper.AddParameterGroup(dialog.GroupSettings);
+			Utils.AddParameterGroup(_app, _radHelper, settings, trainingConfig, dialog);
 		}
 		catch (Exception ex)
 		{
-			_app.Engine.GenerateInformation($"Failed to add relational anomaly group '{dialog.GroupSettings.GroupName}': {ex}");
-			Utils.ShowExceptionDialog(_app, $"Failed to create group with name {dialog.GroupSettings.GroupName}", ex, dialog);
+			_app.Engine.GenerateInformation($"Failed to add relational anomaly group '{settings.GroupName}': {ex}");
+			Utils.ShowExceptionDialog(_app, $"Failed to create group with name {settings.GroupName}", ex, dialog);
 			return;
 		}
 
