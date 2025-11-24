@@ -26,6 +26,7 @@
 		public const int IndentWidth = 10;
 		public const int TextWrapWidth = 150;
 		public const int TextWrapIndentWidth = 5;
+		public const int NrOfColumns = 6;
 		private readonly IEngine _engine;
 		private readonly RadHelper _radHelper;
 		private readonly ParametersCache _parametersCache;
@@ -49,7 +50,6 @@
 			_noButton = new Button()
 			{
 				Text = "No",
-				MinWidth = 300,
 			};
 			_noButton.Pressed += (sender, args) => Cancelled?.Invoke(this, EventArgs.Empty);
 
@@ -57,14 +57,12 @@
 			{
 				Text = "Yes",
 				Style = ButtonStyle.CallToAction,
-				MinWidth = 300,
 			};
 			_yesButton.Pressed += (sender, args) => Accepted?.Invoke(this, EventArgs.Empty);
 
 			_cancelButton = new Button()
 			{
 				Text = "Cancel",
-				MinWidth = 300,
 			};
 			_cancelButton.Pressed += (sender, args) => Cancelled?.Invoke(this, EventArgs.Empty);
 
@@ -72,7 +70,6 @@
 			{
 				Text = "OK",
 				Style = ButtonStyle.CallToAction,
-				MinWidth = 300,
 			};
 			_okButton.Pressed += (sender, args) => Accepted?.Invoke(this, EventArgs.Empty);
 
@@ -87,19 +84,20 @@
 				SetWidgetsForMultipleGroups(parameterGroups);
 			}
 
-			// White spaces to make the indentation look pretty
-			var whitespace1 = new WhiteSpace()
+			// White spaces to make the indentation and buttons look pretty
+			var whitespaces = new List<WhiteSpace>();
+			for (int i = 0; i < 2; ++i)
 			{
-				MinWidth = IndentWidth,
-			};
-			var whitespace2 = new WhiteSpace()
+				whitespaces.Add(new WhiteSpace()
+				{
+					MinWidth = IndentWidth,
+				});
+			}
+
+			for (int i = 2; i < NrOfColumns - 2; i++)
 			{
-				MinWidth = IndentWidth,
-			};
-			var whitespace3 = new WhiteSpace()
-			{
-				MinWidth = _yesButton.MinWidth - (2 * IndentWidth),
-			};
+				whitespaces.Add(new WhiteSpace());
+			}
 
 			int row = 0;
 			AddWidget(_label, row, 0, 1, 4);
@@ -111,17 +109,16 @@
 				row += groupWidget.RowCount;
 			}
 
-			AddWidget(whitespace1, row, 0);
-			AddWidget(whitespace2, row, 1);
-			AddWidget(whitespace3, row, 2);
+			for (int i = 0; i < whitespaces.Count; ++i)
+				AddWidget(whitespaces[i], row, i);
 			row += 1;
 
-			AddWidget(_yesButton, row, 0, 1, 3);
-			AddWidget(_noButton, row, 3);
+			AddWidget(_yesButton, row, NrOfColumns - 2);
+			AddWidget(_noButton, row, NrOfColumns - 1);
 			row++;
 
-			AddWidget(_cancelButton, row, 0, 1, 3);
-			AddWidget(_okButton, row, 3);
+			AddWidget(_cancelButton, row, NrOfColumns - 2);
+			AddWidget(_okButton, row, NrOfColumns - 1);
 		}
 
 		public event EventHandler Accepted;
