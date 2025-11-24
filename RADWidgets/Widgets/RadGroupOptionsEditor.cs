@@ -18,6 +18,7 @@
 		/// <param name="radHelper">RadHelper instance to use.</param>
 		/// <param name="columnCount">The number of columns the section should take (should be 2 or greater).</param>
 		/// <param name="options">The initial settings to display (if any).</param>
+		/// <param name="fieldWidth">The width of the input fields.</param>
 		public RadGroupOptionsEditor(
 			RadHelper radHelper,
 			int columnCount,

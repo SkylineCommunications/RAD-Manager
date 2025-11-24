@@ -26,6 +26,7 @@
 		/// <param name="options">The initial settings to display (if any).</param>
 		/// <param name="defaultAnomalyThreshold">The default anomaly threshold to use if not overridden.</param>
 		/// <param name="defaultMinimalDuration">The default minimal duration to use if not overridden.</param>
+		/// <param name="fieldWidth">The width of the input fields.</param>
 		public RadGroupBaseOptionsEditor(
 			int columnCount,
 			double defaultAnomalyThreshold,
