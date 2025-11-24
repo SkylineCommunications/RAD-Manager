@@ -98,7 +98,6 @@
 				AddWidget(ws, row, col++);
 			row++;
 
-
 			AddWidget(_detailsLabel, row, 0, 1, _labelEditors.First().ColumnCount);
 			row++;
 
