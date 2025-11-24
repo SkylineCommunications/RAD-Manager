@@ -246,7 +246,7 @@
 			}
 			else if (_hasMissingParameterLabels)
 			{
-				_detailsLabel.Text = "You must either provide a label for all parameters, or do not provide any labels before you can add the group.";
+				_detailsLabel.Text = "You must either provide a label for all parameters or provide no labels before you can add the group.";
 			}
 			else if (_hasWhiteSpaceLabels)
 			{
