@@ -53,7 +53,10 @@
 			};
 			_okButton.Pressed += (sender, args) => Accepted?.Invoke(this, EventArgs.Empty);
 
-			var cancelButton = new Button("Cancel");
+			var cancelButton = new Button("Cancel")
+			{
+				MaxWidth = 150,
+			};
 			cancelButton.Pressed += (sender, args) => Cancelled?.Invoke(this, EventArgs.Empty);
 
 			UpdateIsValid();
@@ -71,8 +74,8 @@
 				row += _excludedSubgroupsList.RowCount;
 			}
 
-			AddWidget(cancelButton, row, 0, 1, 2);
-			AddWidget(_okButton, row, 2, 1, _timeRangeSelector.ColumnCount - 2);
+			AddWidget(cancelButton, row, _timeRangeSelector.ColumnCount - 2, horizontalAlignment: HorizontalAlignment.Right);
+			AddWidget(_okButton, row, _timeRangeSelector.ColumnCount - 1);
 		}
 
 		public event EventHandler Accepted;
