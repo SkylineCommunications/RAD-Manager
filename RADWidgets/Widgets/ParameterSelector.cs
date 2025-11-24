@@ -289,7 +289,6 @@
 			}
 
 			SetPossibleParameters(element.DataMinerID, element.ElementID, initial);
-			UpdateValidationState();
 		}
 	}
 }
