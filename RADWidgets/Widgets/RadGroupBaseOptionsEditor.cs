@@ -63,7 +63,7 @@
 				"effect on the anomaly score. If checked, the duration can be set on the right.",
 			};
 			_minimalDurationOverrideCheckBox.Changed += (sender, args) => OnMinimalDurationOverrideCheckBoxChanged();
-			
+
 			_minimalDurationTime = new Time()
 			{
 				HasSeconds = false,

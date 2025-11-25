@@ -99,7 +99,6 @@
 			return RadHelper.FetchParameterGroupInfos();
 		}
 
-
 		protected override IEnumerable<RadGroupRow> GetRowsForGroup(RadGroupInfo groupInfo, HashSet<Guid> subgroupsWithActiveAnomaly,
 			Dictionary<Guid, int> anomaliesPerSubgroup)
 		{

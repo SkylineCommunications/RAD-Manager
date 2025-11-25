@@ -9,6 +9,7 @@
 
 	public class AnomalyScoreData
 	{
+		[Obsolete("On recent DataMiner versions, the cache is implemented in DataMiner itself.")]
 		public AnomalyScoreData(string userDomainName, IRadGroupID groupID,
 			DateTime cacheTime, DateTime requestStartTime, DateTime requestEndTime, List<KeyValuePair<DateTime, double>> anomalyScores)
 		{
@@ -39,7 +40,9 @@
 
 		public bool IsExpired()
 		{
+#pragma warning disable CS0618 // Type or member is obsolete
 			return DateTime.UtcNow > CacheTime.AddMinutes(AnomalyScoreCache.CACHE_TIME_MINUTES);
+#pragma warning restore CS0618 // Type or member is obsolete
 		}
 
 		public bool IsValidEntry(string userDomainName, IRadGroupID groupID,
