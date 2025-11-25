@@ -64,25 +64,85 @@
 		}
 	}
 
-	public class ParameterSelector : ParameterSelectorBase<ParameterSelectorInfo>
+	public class ParameterSelector : MultiSelectorItemSelector<ParameterSelectorInfo>, IValidationWidget
 	{
+		private readonly IEngine _engine;
 		private readonly ElementsDropDown _elementsDropDown;
+		private readonly RadParametersDropDown _parametersDropDown;
+		private readonly TextBox _instanceTextBox;
+		private UIValidationState _validationState = UIValidationState.Valid;
+		private string _validationText = string.Empty;
+		private bool _hasInvalidInstance = false;
+		private bool _initial;
 
-		public ParameterSelector(IEngine engine) : base(engine, true)
+		public ParameterSelector(IEngine engine)
 		{
+			_engine = engine;
+			_initial = true;
+
 			var elementsLabel = new Label("Element");
 			_elementsDropDown = new ElementsDropDown(engine);
-			_elementsDropDown.Changed += (sender, args) => OnSelectedElementChanged();
-			OnSelectedElementChanged();
+			_elementsDropDown.Changed += (sender, args) => OnSelectedElementChanged(false);
+
+			var parametersLabel = new Label("Parameter");
+			_parametersDropDown = new RadParametersDropDown(engine);
+			_parametersDropDown.Changed += (sender, args) => OnSelectedParameterChanged(false);
+
+			string instanceTooltip = "Specify the display key to include specific cells from the current table column. Use * and ? as wildcards.";
+			var instanceLabel = new Label("Display key filter")
+			{
+				Tooltip = instanceTooltip,
+			};
+			_instanceTextBox = new TextBox()
+			{
+				Tooltip = instanceTooltip,
+			};
+			_instanceTextBox.Changed += (sender, args) => OnInstanceChanged();
+
+			OnSelectedElementChanged(true);
 
 			AddWidget(elementsLabel, 0, 0);
 			AddWidget(_elementsDropDown, 1, 0);
+			AddWidget(parametersLabel, 0, 1);
+			AddWidget(_parametersDropDown, 1, 1);
+			AddWidget(instanceLabel, 0, 2);
+			AddWidget(_instanceTextBox, 1, 2);
+		}
+
+		public event EventHandler<EventArgs> Changed;
+
+		public UIValidationState ValidationState
+		{
+			get => _validationState;
+			set
+			{
+				if (_validationState == value)
+					return;
+
+				_validationState = value;
+				UpdateValidationState();
+			}
+		}
+
+		public string ValidationText
+		{
+			get => _validationText;
+			set
+			{
+				if (_validationText == value)
+					return;
+
+				_validationText = value;
+				UpdateValidationState();
+			}
 		}
 
 		public override ParameterSelectorInfo SelectedItem
 		{
 			get
 			{
+				_initial = false;
+
 				var element = _elementsDropDown.Selected;
 				if (element == null)
 				{
@@ -90,7 +150,7 @@
 					return null;
 				}
 
-				var parameter = ParametersDropDown.Selected;
+				var parameter = _parametersDropDown.Selected;
 				if (parameter == null)
 				{
 					UpdateValidationState();
@@ -100,10 +160,10 @@
 				var matchingInstances = new List<DynamicTableIndex>();
 				if (parameter.IsTableColumn && parameter.ParentTable != null)
 				{
-					matchingInstances = Utils.FetchInstancesWithTrending(Engine, element.DataMinerID, element.ElementID, parameter, InstanceTextBox.Text).ToList();
+					matchingInstances = Utils.FetchInstancesWithTrending(_engine, element.DataMinerID, element.ElementID, parameter, _instanceTextBox.Text).ToList();
 					if (matchingInstances.Count == 0)
 					{
-						HasInvalidInstance = true;
+						_hasInvalidInstance = true;
 						UpdateValidationState();
 						return null;
 					}
@@ -116,33 +176,110 @@
 					DataMinerID = element.DataMinerID,
 					ElementID = element.ElementID,
 					ParameterID = parameter.ID,
-					DisplayKeyFilter = parameter.IsTableColumn ? InstanceTextBox.Text : string.Empty,
+					DisplayKeyFilter = parameter.IsTableColumn ? _instanceTextBox.Text : string.Empty,
 					MatchingInstances = matchingInstances,
 					IsTableColumn = parameter.IsTableColumn,
 				};
 			}
 		}
 
-		protected override void UpdateValidationState()
+		private void OnSelectedParameterChanged(bool initial)
 		{
-			if (_elementsDropDown.Selected == null)
+			var parameter = _parametersDropDown.Selected;
+			if (parameter?.IsTableColumn != true)
 			{
-				_elementsDropDown.ValidationState = UIValidationState.Invalid;
-				_elementsDropDown.ValidationText = "Select a valid element";
-				ParametersDropDown.ValidationState = UIValidationState.Valid;
-				ParametersDropDown.ValidationText = string.Empty;
-				InstanceTextBox.ValidationState = UIValidationState.Valid;
-				InstanceTextBox.ValidationText = string.Empty;
+				_instanceTextBox.IsEnabled = false;
+				_instanceTextBox.Text = string.Empty;
 			}
 			else
 			{
-				_elementsDropDown.ValidationState = UIValidationState.Valid;
-				_elementsDropDown.ValidationText = string.Empty;
-				base.UpdateValidationState();
+				_instanceTextBox.IsEnabled = true;
+			}
+
+			Changed?.Invoke(this, EventArgs.Empty);
+			_hasInvalidInstance = false;
+			_initial = initial;
+			UpdateValidationState();
+		}
+
+		private void UpdateValidationState()
+		{
+			if (!_initial)
+			{
+				if (_elementsDropDown.Selected == null)
+				{
+					_elementsDropDown.ValidationState = UIValidationState.Invalid;
+					_elementsDropDown.ValidationText = "Select a valid element";
+					_parametersDropDown.ValidationState = UIValidationState.Valid;
+					_parametersDropDown.ValidationText = string.Empty;
+					_instanceTextBox.ValidationState = UIValidationState.Valid;
+					_instanceTextBox.ValidationText = string.Empty;
+					return;
+				}
+
+				if (_parametersDropDown.Selected == null)
+				{
+					_elementsDropDown.ValidationState = UIValidationState.Valid;
+					_elementsDropDown.ValidationText = string.Empty;
+					_parametersDropDown.ValidationState = UIValidationState.Invalid;
+					_parametersDropDown.ValidationText = "Select a valid parameter";
+					_instanceTextBox.ValidationState = UIValidationState.Valid;
+					_instanceTextBox.ValidationText = string.Empty;
+					return;
+				}
+
+				if (_hasInvalidInstance)
+				{
+					_elementsDropDown.ValidationState = UIValidationState.Valid;
+					_elementsDropDown.ValidationText = string.Empty;
+					_parametersDropDown.ValidationState = UIValidationState.Valid;
+					_parametersDropDown.ValidationText = string.Empty;
+					_instanceTextBox.ValidationState = UIValidationState.Invalid;
+					_instanceTextBox.ValidationText = "No matching instances found";
+					return;
+				}
+			}
+
+			_elementsDropDown.ValidationState = UIValidationState.Valid;
+			_elementsDropDown.ValidationText = string.Empty;
+
+			if (_instanceTextBox.IsEnabled)
+			{
+				_instanceTextBox.ValidationState = _validationState;
+				_instanceTextBox.ValidationText = _validationText;
+				_parametersDropDown.ValidationState = UIValidationState.Valid;
+				_parametersDropDown.ValidationText = string.Empty;
+			}
+			else
+			{
+				_instanceTextBox.ValidationState = UIValidationState.Valid;
+				_instanceTextBox.ValidationText = string.Empty;
+				_parametersDropDown.ValidationState = _validationState;
+				_parametersDropDown.ValidationText = _validationText;
 			}
 		}
 
-		private void OnSelectedElementChanged()
+		private void SetPossibleParameters(int dataMinerID, int elementID, bool initial)
+		{
+			_parametersDropDown.SetPossibleParameters(dataMinerID, elementID);
+			OnSelectedParameterChanged(initial);
+		}
+
+		private void ClearPossibleParameters()
+		{
+			_parametersDropDown.ClearPossibleParameters();
+			OnSelectedParameterChanged(false);
+		}
+
+		private void OnInstanceChanged()
+		{
+			_hasInvalidInstance = false;
+			_initial = false;
+			UpdateValidationState();
+			Changed?.Invoke(this, EventArgs.Empty);
+		}
+
+		private void OnSelectedElementChanged(bool initial)
 		{
 			var element = _elementsDropDown.Selected;
 			if (element == null)
@@ -151,8 +288,7 @@
 				return;
 			}
 
-			SetPossibleParameters(element.DataMinerID, element.ElementID);
-			UpdateValidationState();
+			SetPossibleParameters(element.DataMinerID, element.ElementID, initial);
 		}
 	}
 }
