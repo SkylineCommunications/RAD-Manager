@@ -152,30 +152,43 @@
 				rows = rows.Where(r => r.HasActiveAnomaly);
 
 			// Sorting
-			var sortedRows = Sort(rows, _sortBy, _sortDescending);
-			if (sortedRows == null)
-				sortedRows = rows;
+			bool sorted = Sort(rows, _sortBy, _sortDescending, out var sortedRows);
+			if (!sorted)
+				_logger.Error($"Could not sort rows: Unknown sorting column {_sortBy}");
 
 			return new GQIPage(sortedRows.Select(r => r.ToGQIRow()).ToArray());
 		}
 
-		protected virtual IEnumerable<T> Sort(IEnumerable<T> rows, SortingColumn sortBy, bool sortDescending)
+		/// <summary>
+		/// Sort the rows based on the specified column and direction.
+		/// </summary>
+		/// <param name="rows">The rows to sort.</param>
+		/// <param name="sortBy">The column to sort on.</param>
+		/// <param name="sortDescending">Whether to sort descending or ascending.</param>
+		/// <param name="sortedRows">The resulting sorted rows.</param>
+		/// <returns>True if the rows were sorted, false if the correct column was not found.</returns>
+		protected virtual bool Sort(IEnumerable<T> rows, SortingColumn sortBy, bool sortDescending, out IEnumerable<T> sortedRows)
 		{
 			switch (sortBy)
 			{
 				case SortingColumn.Name:
-					return sortDescending ? rows.OrderByDescending(r => r.Name, StringComparer.OrdinalIgnoreCase) : rows.OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+					sortedRows = sortDescending ? rows.OrderByDescending(r => r.Name, StringComparer.OrdinalIgnoreCase) : rows.OrderBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+					return true;
 				case SortingColumn.AnomaliesInLast30Days:
-					return sortDescending ? rows.OrderByDescending(r => r.AnomaliesInLast30Days).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+					sortedRows = sortDescending ? rows.OrderByDescending(r => r.AnomaliesInLast30Days).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
 						: rows.OrderBy(r => r.AnomaliesInLast30Days).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+					return true;
 				case SortingColumn.AnomalyThreshold:
-					return sortDescending ? rows.OrderByDescending(r => r.AnomalyThreshold).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+					sortedRows = sortDescending ? rows.OrderByDescending(r => r.AnomalyThreshold).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
 						: rows.OrderBy(r => r.AnomalyThreshold).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+					return true;
 				case SortingColumn.MinimumAnomalyDuration:
-					return sortDescending ? rows.OrderByDescending(r => r.MinimumAnomalyDuration.Ticks).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+					sortedRows = sortDescending ? rows.OrderByDescending(r => r.MinimumAnomalyDuration.Ticks).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
 						: rows.OrderBy(r => r.MinimumAnomalyDuration.Ticks).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+					return true;
 				default:
-					return null;
+					sortedRows = rows;
+					return false;
 			}
 		}
 

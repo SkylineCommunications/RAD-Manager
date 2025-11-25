@@ -78,20 +78,21 @@
 			};
 		}
 
-		protected override IEnumerable<RadGroupRow> Sort(IEnumerable<RadGroupRow> rows, SortingColumn sortBy, bool sortDescending)
+		protected override bool Sort(IEnumerable<RadGroupRow> rows, SortingColumn sortBy, bool sortDescending, out IEnumerable<RadGroupRow> sortedRows)
 		{
-			var sorted = base.Sort(rows, sortBy, sortDescending);
-			if (sorted != null)
-				return sorted;
+			var sorted = base.Sort(rows, sortBy, sortDescending, out sortedRows);
+			if (sorted)
+				return true;
 
 			if (sortBy == SortingColumn.UpdateModel)
 			{
 				// Order by and order by descending are inverted since 'adaptive' (i.e. true) should come before 'static' (i.e. false)
-				return sortDescending ? rows.OrderBy(r => r.UpdateModel).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+				sortedRows = sortDescending ? rows.OrderBy(r => r.UpdateModel).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
 					: rows.OrderByDescending(r => r.UpdateModel).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+				return true;
 			}
 
-			return null;
+			return false;
 		}
 
 		protected override List<RadGroupInfo> GetGroupInfos()

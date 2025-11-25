@@ -121,19 +121,20 @@ namespace RadDataSources
 			return base.OnArgumentsProcessed(args);
 		}
 
-		protected override IEnumerable<RadSubgroupRow> Sort(IEnumerable<RadSubgroupRow> rows, SortingColumn sortBy, bool sortDescending)
+		protected override bool Sort(IEnumerable<RadSubgroupRow> rows, SortingColumn sortBy, bool sortDescending, out IEnumerable<RadSubgroupRow> sortedRows)
 		{
-			var sorted = base.Sort(rows, sortBy, sortDescending);
-			if (sorted != null)
-				return sorted;
+			bool sorted = base.Sort(rows, sortBy, sortDescending, out sortedRows);
+			if (sorted)
+				return true;
 
 			if (sortBy == SortingColumn.IsOutlier)
 			{
-				return sortDescending ? rows.OrderByDescending(r => r.ModelFitScore).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+				sortedRows = sortDescending ? rows.OrderByDescending(r => r.ModelFitScore).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
 					: rows.OrderBy(r => r.ModelFitScore).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+				return true;
 			}
 
-			return null;
+			return false;
 		}
 
 		protected override List<RadGroupInfo> GetGroupInfos()
