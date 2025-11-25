@@ -129,9 +129,8 @@ namespace RadDataSources
 
 			if (sortBy == SortingColumn.IsOutlier)
 			{
-				// I want to sort 'No outlier' before 'Outlier' when ascending
-				return sortDescending ? rows.OrderBy(r => r.ModelFitScore).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
-					: rows.OrderByDescending(r => r.ModelFitScore).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
+				return sortDescending ? rows.OrderByDescending(r => r.ModelFitScore).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
+					: rows.OrderBy(r => r.ModelFitScore).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
 			}
 
 			return null;
