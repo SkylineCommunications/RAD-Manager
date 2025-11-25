@@ -116,7 +116,7 @@ namespace RadDataSources
 				_dataMinerID = -1;
 
 			if (!args.TryGetArgumentValue(_groupNameArg, out _groupName))
-				Logger.Error("No group name provided");
+				throw new ArgumentException("No group name provided");
 
 			return base.OnArgumentsProcessed(args);
 		}
