@@ -37,8 +37,8 @@
 			AddSection(_subgroupEditor, 0, 0);
 			row += _subgroupEditor.RowCount;
 
-			AddWidget(cancelButton, row, 0);
-			AddWidget(_okButton, row, 1, 1, _subgroupEditor.ColumnCount - 1);
+			AddWidget(cancelButton, row, _subgroupEditor.ColumnCount - 2);
+			AddWidget(_okButton, row, _subgroupEditor.ColumnCount - 1);
 		}
 
 		public event EventHandler Accepted;

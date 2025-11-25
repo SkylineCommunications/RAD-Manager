@@ -35,6 +35,7 @@
 			var parametersLabel = new Label("Parameter");
 			var instanceLabel = new Label("Display key");
 
+			int instanceColumnSpan = 2;
 			_parameterSelectors = new List<Tuple<Label, ParameterInstanceSelector>>(_parameterLabels.Count);
 			for (int i = 0; i < _parameterLabels.Count; i++)
 			{
@@ -43,7 +44,7 @@
 				RadSubgroupSelectorParameter parameter = null;
 				if (settings != null && i < settings.Parameters.Count)
 					parameter = settings.Parameters[i];
-				var parameterSelector = new ParameterInstanceSelector(engine, parameter);
+				var parameterSelector = new ParameterInstanceSelector(engine, instanceColumnSpan, parameter);
 				parameterSelector.Changed += (sender, args) => OnParameterSelectorChanged();
 
 				_parameterSelectors.Add(Tuple.Create(label, parameterSelector));
@@ -53,10 +54,10 @@
 			_groupNameSection = new GroupNameSection(settings?.Name, _otherSubgroups.Select(s => s.Name).ToList(), parameterSelectorColumnCount, groupNamePlaceHolder);
 			_groupNameSection.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
-			_optionsEditor = new RadSubgroupOptionsEditor(radHelper, parameterSelectorColumnCount + 1, parentOptions, settings?.Options);
+			_optionsEditor = new RadSubgroupOptionsEditor(radHelper, parameterSelectorColumnCount + 1, RadGroupEditor.OPTION_FIELDS_WIDTH, parentOptions, settings?.Options);
 			_optionsEditor.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
-			_detailsLabel = new MarginLabel(string.Empty, 2, 10)
+			_detailsLabel = new MarginLabel(string.Empty, parameterSelectorColumnCount + 1, 10)
 			{
 				MaxTextWidth = 200,
 			};
@@ -69,7 +70,7 @@
 
 			AddWidget(elementsLabel, row, 1);
 			AddWidget(parametersLabel, row, 2);
-			AddWidget(instanceLabel, row, 3);
+			AddWidget(instanceLabel, row, 3, 1, instanceColumnSpan);
 			row++;
 
 			foreach (var (label, parameterSelector) in _parameterSelectors)

@@ -18,9 +18,11 @@
 		/// <param name="radHelper">RadHelper instance to use.</param>
 		/// <param name="columnCount">The number of columns the section should take (should be 2 or greater).</param>
 		/// <param name="options">The initial settings to display (if any).</param>
+		/// <param name="fieldWidth">The width of the input fields.</param>
 		public RadGroupOptionsEditor(
 			RadHelper radHelper,
 			int columnCount,
+			int fieldWidth,
 			RadGroupOptions options = null)
 		{
 			_updateModelCheckBox = new CheckBox("Adapt model to new data")
@@ -30,7 +32,7 @@
 				"unless you manually specify a training range.",
 			};
 
-			_baseOptionsEditor = new RadGroupBaseOptionsEditor(columnCount, radHelper.DefaultAnomalyThreshold, radHelper.DefaultMinimumAnomalyDuration,
+			_baseOptionsEditor = new RadGroupBaseOptionsEditor(columnCount, radHelper.DefaultAnomalyThreshold, radHelper.DefaultMinimumAnomalyDuration, fieldWidth,
 				options);
 
 			int row = 0;

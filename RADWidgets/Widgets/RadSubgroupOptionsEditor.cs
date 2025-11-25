@@ -8,11 +8,12 @@
 	{
 		private readonly RadGroupBaseOptionsEditor _baseOptionsEditor;
 
-		public RadSubgroupOptionsEditor(RadHelper radHelper, int columnCount, RadGroupOptions parentOptions, RadSubgroupOptions options = null)
+		public RadSubgroupOptionsEditor(RadHelper radHelper, int columnCount, int fieldWidth, RadGroupOptions parentOptions, RadSubgroupOptions options = null)
 		{
 			_baseOptionsEditor = new RadGroupBaseOptionsEditor(columnCount,
 				parentOptions?.GetAnomalyThresholdOrDefault(radHelper) ?? radHelper.DefaultAnomalyThreshold,
 				parentOptions?.GetMinimalDurationOrDefault(radHelper) ?? radHelper.DefaultMinimumAnomalyDuration,
+				fieldWidth,
 				options);
 
 			AddSection(_baseOptionsEditor, 0, 0);

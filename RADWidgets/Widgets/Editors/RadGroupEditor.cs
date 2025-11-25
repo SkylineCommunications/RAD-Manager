@@ -6,12 +6,14 @@
 	using RadUtils;
 	using RadWidgets.Widgets.Generic;
 	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
 	public class RadGroupEditor : VisibilitySection
 	{
 		public const int MIN_PARAMETERS = 2;
 		public const int MAX_PARAMETERS = 100;
+		public const int OPTION_FIELDS_WIDTH = 200;
 		private readonly GroupNameSection _groupNameSection;
 		private readonly MultiParameterSelector _parameterSelector;
 		private readonly RadGroupOptionsEditor _optionsEditor;
@@ -37,12 +39,17 @@
 					subgroupOptions.MinimalDuration ?? options?.MinimalDuration);
 			}
 
-			_optionsEditor = new RadGroupOptionsEditor(radHelper, _parameterSelector.ColumnCount, options);
+			_optionsEditor = new RadGroupOptionsEditor(radHelper, _parameterSelector.ColumnCount, OPTION_FIELDS_WIDTH, options);
 			_optionsEditor.ValidationChanged += (sender, args) => UpdateIsValidAndDetailsLabelVisibility();
 
-			_trainingButton = new TrainingConfigurationButton(engine, radHelper, _parameterSelector.ColumnCount, settings == null);
+			_trainingButton = new TrainingConfigurationButton(engine, radHelper, _parameterSelector.ColumnCount, OPTION_FIELDS_WIDTH, settings == null);
 
-			_detailsLabel = new MarginLabel(string.Empty, _parameterSelector.ColumnCount, 10);
+			var whiteSpace = new WhiteSpace()
+			{
+				Height = 10,
+			};
+
+			_detailsLabel = new MarginLabel(string.Empty, _parameterSelector.ColumnCount, 0);
 
 			UpdateParametersSelectedInRange();
 			UpdateDetailsLabel();
@@ -60,6 +67,9 @@
 
 			AddSection(_trainingButton, row, 0);
 			row += _trainingButton.RowCount;
+
+			AddWidget(whiteSpace, row, 0, 1, _parameterSelector.ColumnCount);
+			row++;
 
 			AddSection(_detailsLabel, row, 0, GetDetailsLabelVisible);
 		}
@@ -111,9 +121,9 @@
 			_detailsLabel.IsVisible = IsSectionVisible && GetDetailsLabelVisible();
 
 			if (!_moreThanMinParametersSelected)
-				_detailsLabel.Text = "Select at least two instances.";
+				_detailsLabel.Text = "You must select at least two instances before you can add the group.";
 			else if (!_lessThanMaxParametersSelected)
-				_detailsLabel.Text = $"Select at most {MAX_PARAMETERS} instances.";
+				_detailsLabel.Text = $"You must select at most {MAX_PARAMETERS} instances before you can add the group.";
 			else
 				_detailsLabel.Text = string.Empty;
 		}
