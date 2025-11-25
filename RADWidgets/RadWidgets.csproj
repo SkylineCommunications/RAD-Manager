@@ -17,7 +17,7 @@
     <PackageReference Include="Skyline.DataMiner.Core.DataMinerSystem.Automation" Version="1.1.3.4" />
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.5.4.2" />
     <PackageReference Include="Skyline.DataMiner.Utils.InteractiveAutomationScriptToolkit" Version="10.5.4.4" />
-    <PackageReference Include="Skyline.DataMiner.Utils.RadToolkit" Version="1.0.1-retraining3" />
+    <PackageReference Include="Skyline.DataMiner.Utils.RadToolkit" Version="1.0.1-anomalyscorecache" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

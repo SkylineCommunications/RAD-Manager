@@ -52,6 +52,7 @@
 		}
 	}
 
+	[Obsolete("On recent DataMiner versions, the cache is implemented in DataMiner itself.")]
 	public class AnomalyScoreCache
 	{
 		public const int MAX_CACHE_SIZE = 5;
