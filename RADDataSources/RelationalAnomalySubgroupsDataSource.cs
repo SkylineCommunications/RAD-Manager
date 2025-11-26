@@ -11,7 +11,7 @@ namespace RadDataSources
 
 	public class RadSubgroupRow : RadGroupBaseRow
 	{
-		public RadSubgroupRow(RadHelper radHelper, RadGroupInfo groupInfo, RadSubgroupInfo subgroupInfo, string subgroupName, FitScore? fitScore)
+		public RadSubgroupRow(RadHelper radHelper, RadGroupInfo groupInfo, RadSubgroupInfo subgroupInfo, string subgroupName, FitScore fitScore)
 			: base(name: subgroupName,
 				 dataMinerID: groupInfo.DataMinerID,
 				 parameters: subgroupInfo.Parameters?.Select(p => p?.Key).WhereNotNull().ToList() ?? new List<ParameterKey>(),
@@ -22,10 +22,10 @@ namespace RadDataSources
 			ParentGroup = groupInfo.GroupName;
 			SubgroupID = subgroupInfo.ID;
 			HasError = !subgroupInfo.IsMonitored;
-			if (fitScore.HasValue)
+			if (fitScore != null)
 			{
-				ModelFitScore = fitScore.Value.ModelFit;
-				IsOutlier = fitScore.Value.IsOutlier;
+				ModelFitScore = fitScore.ModelFit;
+				IsOutlier = fitScore.IsOutlier;
 			}
 			else
 			{
@@ -180,10 +180,8 @@ namespace RadDataSources
 				}
 
 				string subgroupDisplayName = string.IsNullOrEmpty(subgroupInfo.Name) ? RadUtils.Utils.GetSubgroupPlaceHolderName(++unnamedSubgroupCount) : subgroupInfo.Name;
-				FitScore? fitScore;
-				if (fitScores != null && fitScores.TryGetValue(subgroupInfo.ID, out FitScore score))
-					fitScore = score;
-				else
+				FitScore fitScore;
+				if (fitScores == null || !fitScores.TryGetValue(subgroupInfo.ID, out fitScore))
 					fitScore = null;
 
 				yield return new RadSubgroupRow(RadHelper, groupInfo, subgroupInfo, subgroupDisplayName, fitScore)
