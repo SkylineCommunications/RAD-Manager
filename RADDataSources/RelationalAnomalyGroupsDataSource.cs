@@ -18,6 +18,7 @@
 				  minimumAnomalyDuration: TimeSpan.FromMinutes(groupInfo.Options?.GetMinimalDurationOrDefault(radHelper) ?? radHelper.DefaultMinimumAnomalyDuration))
 		{
 			HasError = groupInfo.Subgroups.Any(sg => !sg.IsMonitored);
+			ParameterGroupID = groupInfo.ParameterGroupID;
 			IsSharedModelGroup = groupInfo.Subgroups?.Count > 1;
 			if (!IsSharedModelGroup)
 			{
@@ -33,6 +34,8 @@
 				}
 			}
 		}
+
+		public Guid? ParameterGroupID { get; set; }
 
 		public bool IsSharedModelGroup { get; set; }
 
@@ -50,6 +53,7 @@
 				new GQICell { Value = HasActiveAnomaly },                        // Has Active Anomaly
 				new GQICell { Value = AnomaliesInLast30Days },                   // Anomalies in Last 30 Days
 				new GQICell { Value = IsSharedModelGroup },                      // Is Shared Model Group
+				new GQICell { Value = ParameterGroupID.HasValue ? ParameterGroupID.ToString() : string.Empty },             // Parameter Group ID
 			};
 		}
 	}
@@ -75,6 +79,7 @@
 				new GQIBooleanColumn("Has Active Anomaly"),
 				new GQIIntColumn("Anomalies in Last 30 Days"),
 				new GQIBooleanColumn("Is Shared Model Group"),
+				new GQIStringColumn("Parameter Group ID"),
 			};
 		}
 
