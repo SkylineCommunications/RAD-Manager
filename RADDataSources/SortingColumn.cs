@@ -14,7 +14,7 @@
 		AnomalyThreshold,
 		[Description("Minimum Anomaly Duration")]
 		MinimumAnomalyDuration,
-		[Description("Is Outlier")]
-		IsOutlier,
+		[Description("Is Outlier Group")]
+		IsOutlierGroup,
 	}
 }

@@ -58,7 +58,7 @@ namespace RadDataSources
 				new GQICell { Value = ParentGroup },                             // Parent Group
 				new GQICell { Value = SubgroupID.ToString() },                   // Subgroup ID
 				new GQICell { Value = ModelFitScore },                           // Model Fit Score
-				new GQICell { Value = IsOutlier },                               // Is Outlier
+				new GQICell { Value = IsOutlier },                               // Is Outlier Group
 			};
 		}
 	}
@@ -100,7 +100,7 @@ namespace RadDataSources
 				new GQIStringColumn("Parent Group"),
 				new GQIStringColumn("Subgroup ID"),
 				new GQIDoubleColumn("Model Fit Score"),
-				new GQIBooleanColumn("Is Outlier"),
+				new GQIBooleanColumn("Is Outlier Group"),
 			};
 		}
 
@@ -127,7 +127,7 @@ namespace RadDataSources
 			if (sorted)
 				return true;
 
-			if (sortBy == SortingColumn.IsOutlier)
+			if (sortBy == SortingColumn.IsOutlierGroup)
 			{
 				sortedRows = sortDescending ? rows.OrderByDescending(r => r.ModelFitScore).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase)
 					: rows.OrderBy(r => r.ModelFitScore).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase);
