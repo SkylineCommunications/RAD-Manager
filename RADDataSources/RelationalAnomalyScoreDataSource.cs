@@ -109,6 +109,8 @@ namespace RadDataSources
 				_anomalyScores = FetchAnomalyScoresBySubgroupID(groupInfo, _subGroupID);
 			else if (!string.IsNullOrEmpty(_subGroupName))
 				_anomalyScores = FetchAnomalyScoresBySubgroupName(groupInfo, _subGroupName);
+			else
+				_anomalyScores = new List<KeyValuePair<DateTime, double>>();
 
 			return default;
 		}
