@@ -182,6 +182,7 @@
 			{
 				// Scroll down by a fixed amount (e.g., 500 pixels)
 				await Page.Mouse.WheelAsync(1,10000);
+
 				// Optionally, wait a bit for lazy-loaded content
 				await Task.Delay(200);
 
@@ -203,6 +204,7 @@
 			{
 				// Scroll down by a fixed amount (e.g., 500 pixels)
 				await Page.Mouse.WheelAsync(1, 10000);
+
 				// Optionally, wait a bit for lazy-loaded content
 				await Task.Delay(200);
 

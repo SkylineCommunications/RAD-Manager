@@ -10,6 +10,7 @@
 	using Skyline.DataMiner.Net.Messages;
 
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.RadToolkit;
 
 	public class ParameterSelectorInfo : SelectorItem
 	{
@@ -68,10 +69,10 @@
 	{
 		private readonly ElementsDropDown _elementsDropDown;
 
-		public ParameterSelector(IEngine engine) : base(engine, true)
+		public ParameterSelector(IEngine engine, RadHelper radHelper) : base(engine, true)
 		{
 			var elementsLabel = new Label("Element");
-			_elementsDropDown = new ElementsDropDown(engine);
+			_elementsDropDown = new ElementsDropDown(engine, radHelper);
 			_elementsDropDown.Changed += (sender, args) => OnSelectedElementChanged();
 			OnSelectedElementChanged();
 

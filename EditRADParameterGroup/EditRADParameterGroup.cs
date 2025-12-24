@@ -138,17 +138,25 @@ public class Script
 			var originalParameters = originalSettings.Subgroups.First().Parameters.Select(p => p.Key).ToHashSet(new ParameterKeyEqualityComparer());
 			if (originalParameters.SetEquals(newSettings.Subgroups.First().Parameters.Select(p => p.Key)))
 			{
+				bool removed = false;
 				if (!originalSettings.GroupName.Equals(newSettings.GroupName, StringComparison.OrdinalIgnoreCase))
 				{
-					try
+					if (_radHelper.AllowSharedModelGroups)
 					{
 						_radHelper.RenameParameterGroup(dialog.DataMinerID, originalSettings.GroupName, newSettings.GroupName);
 					}
-					catch (NotSupportedException)
+					else
 					{
-						// We can't rename, so remove the old group instead
 						_radHelper.RemoveParameterGroup(dialog.DataMinerID, originalSettings.GroupName);
+						removed = true;
 					}
+				}
+
+				if (!removed)
+				{
+					// Old and new parameters are the same (up to order), but we actually want to keep the labels if any
+					// (which could have been added if the group used to be a shared model group at some point). Otherwise, AddParameterGroup below will not work.
+					newSettings.Subgroups.First().Parameters = originalSettings.Subgroups.First().Parameters;
 				}
 			}
 			else

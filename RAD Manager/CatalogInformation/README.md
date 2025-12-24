@@ -18,11 +18,13 @@ The app has the following key features:
 
 - Easily configure **which parameters to monitor** with RAD.
 - **Visualize** current and historical results of RAD.
+- **View historical anomalies** detected by RAD (from DataMiner 10.5.12/10.6.0 onwards).
 - **Experiment** with all available options in RAD to see which work best for you.
 
 ## Prerequisites
 
-This app requires DataMiner version 10.5.4/10.6.0 or higher.
+This app requires DataMiner version 10.5.4/10.6.0 or higher. To view the historical anomalies detected by RAD,
+DataMiner version 10.5.12/10.6.0 or higher is required.
 
 ## Related resources
 

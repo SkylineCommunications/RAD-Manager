@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<DMSScript options="272" xmlns="http://www.skyline.be/automation">
+	<Name>AddRADSharedModelGroup</Name>
+	<Description>Add a relational anomaly group with a shared model to the RAD configuration</Description>
+	<Type>Automation</Type>
+	<Author>Tobe Deprez</Author>
+	<CheckSets>FALSE</CheckSets>
+	<Folder>DataMiner Catalog/RAD Manager</Folder>
+	<Interactivity>Auto</Interactivity>
+
+	<Protocols>
+	</Protocols>
+
+	<Memory>
+	</Memory>
+
+	<Parameters>
+	</Parameters>
+
+	<Script>
+		<Exe id="1" type="csharp">
+			<Value><![CDATA[[Project:AddRADSharedModelGroup]]]></Value>
+			<!--<Param type="debug">true</Param>-->
+			<Message></Message>
+		</Exe>
+	</Script>
+</DMSScript>

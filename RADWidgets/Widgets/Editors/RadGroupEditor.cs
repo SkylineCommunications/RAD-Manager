@@ -22,7 +22,7 @@
 		public RadGroupEditor(IEngine engine, RadHelper radHelper, List<string> existingGroupNames, ParametersCache parametersCache,
 			RadGroupInfo settings = null)
 		{
-			_parameterSelector = new MultiParameterSelector(engine, parametersCache, settings?.Subgroups?.FirstOrDefault()?.Parameters?.Select(p => p?.Key));
+			_parameterSelector = new MultiParameterSelector(engine, radHelper, parametersCache, settings?.Subgroups?.FirstOrDefault()?.Parameters?.Select(p => p?.Key));
 			_parameterSelector.Changed += (sender, args) => OnParameterSelectorChanged();
 
 			_groupNameSection = new GroupNameSection(settings?.GroupName, existingGroupNames, _parameterSelector.ColumnCount - 1);

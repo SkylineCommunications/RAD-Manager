@@ -30,6 +30,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RADDataSources", "RADDataSo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RADPlaywright", "RADPlaywright\RADPlaywright.csproj", "{76CD10C9-965B-4A03-B4D1-BF4F676768D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddRADSharedModelGroup", "AddRADSharedModelGroup\AddRADSharedModelGroup.csproj", "{30706914-EFA5-482C-905F-CF000DB0AFE4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +70,10 @@ Global
 		{76CD10C9-965B-4A03-B4D1-BF4F676768D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76CD10C9-965B-4A03-B4D1-BF4F676768D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76CD10C9-965B-4A03-B4D1-BF4F676768D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30706914-EFA5-482C-905F-CF000DB0AFE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30706914-EFA5-482C-905F-CF000DB0AFE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30706914-EFA5-482C-905F-CF000DB0AFE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30706914-EFA5-482C-905F-CF000DB0AFE4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

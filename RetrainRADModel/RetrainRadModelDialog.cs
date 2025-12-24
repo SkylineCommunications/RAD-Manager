@@ -5,6 +5,7 @@
 	using System.Linq;
 	using RadUtils;
 	using RadWidgets;
+	using RadWidgets.Widgets.Generic;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.RadToolkit;
@@ -27,6 +28,7 @@
 			_timeRangeSelector = new MultiTimeRangeSelector(engine);
 			_timeRangeSelector.Changed += (sender, args) => OnTimeRangeSelectorChanged();
 
+			MarginLabel delayInfoLabel = null;
 			if (groupInfo.Subgroups?.Count > 1)
 			{
 				var parametersCache = new EngineParametersCache(engine);
@@ -40,6 +42,10 @@
 					ExpandText = "Select",
 					CollapseText = "Unselect all",
 				};
+
+				delayInfoLabel = new MarginLabel(
+					"Note that it can take up to 5 minutes before the updated anomaly score of the retrained model is shown in the anomaly score graph",
+					_timeRangeSelector.ColumnCount, 5);
 			}
 
 			_okButton = new Button("Retrain")
@@ -65,6 +71,12 @@
 			{
 				AddSection(_excludedSubgroupsList, row, 0);
 				row += _excludedSubgroupsList.RowCount;
+			}
+
+			if (delayInfoLabel != null)
+			{
+				AddSection(delayInfoLabel, row, 0);
+				row += delayInfoLabel.RowCount;
 			}
 
 			AddWidget(cancelButton, row, 0, 1, 2);
