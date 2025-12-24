@@ -18,19 +18,21 @@
 		/// <param name="radHelper">RadHelper instance to use.</param>
 		/// <param name="columnCount">The number of columns the section should take (should be 2 or greater).</param>
 		/// <param name="options">The initial settings to display (if any).</param>
+		/// <param name="fieldWidth">The width of the input fields.</param>
 		public RadGroupOptionsEditor(
 			RadHelper radHelper,
 			int columnCount,
+			int fieldWidth,
 			RadGroupOptions options = null)
 		{
-			_updateModelCheckBox = new CheckBox("Update model on new data?")
+			_updateModelCheckBox = new CheckBox("Adapt model to new data")
 			{
 				IsChecked = options?.UpdateModel ?? false,
-				Tooltip = "Whether to continuously update the RAD model when new trend data is available. If not selected, the model will only be trained after " +
-				"creation and when you manually specify a training range.",
+				Tooltip = "Whether to continuously update the RAD model when new trend data is available. If not selected, the model will remain static after creation, " +
+				"unless you manually specify a training range.",
 			};
 
-			_baseOptionsEditor = new RadGroupBaseOptionsEditor(columnCount, radHelper.DefaultAnomalyThreshold, radHelper.DefaultMinimumAnomalyDuration,
+			_baseOptionsEditor = new RadGroupBaseOptionsEditor(columnCount, radHelper.DefaultAnomalyThreshold, radHelper.DefaultMinimumAnomalyDuration, fieldWidth,
 				options);
 
 			int row = 0;

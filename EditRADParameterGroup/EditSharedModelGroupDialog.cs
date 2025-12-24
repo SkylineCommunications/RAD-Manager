@@ -1,7 +1,7 @@
 ﻿namespace EditRADParameterGroup
 {
 	using System;
-	using System.Linq;
+	using System.Collections.Generic;
 	using RadWidgets;
 	using RadWidgets.Widgets.Editors;
 	using Skyline.DataMiner.Automation;
@@ -30,7 +30,10 @@
 			};
 			_okButton.Pressed += (sender, args) => Accepted?.Invoke(this, EventArgs.Empty);
 
-			var cancelButton = new Button("Cancel");
+			var cancelButton = new Button("Cancel")
+			{
+				MaxWidth = Constants.SHARED_MODEL_GROUP_EDITOR_CANCEL_BUTTON_MAX_WIDTH,
+			};
 			cancelButton.Pressed += (sender, args) => Cancelled?.Invoke(this, EventArgs.Empty);
 
 			OnGroupEditorValidationChanged();
@@ -39,8 +42,8 @@
 			AddSection(_sharedGroupEditor, row, 0);
 			row += _sharedGroupEditor.RowCount;
 
-			AddWidget(cancelButton, row, 0, 1, 1);
-			AddWidget(_okButton, row, 1, 1, 3);
+			AddWidget(cancelButton, row, _sharedGroupEditor.ColumnCount - 2, horizontalAlignment: HorizontalAlignment.Right);
+			AddWidget(_okButton, row, _sharedGroupEditor.ColumnCount - 1);
 		}
 
 		public event EventHandler Accepted;
@@ -49,7 +52,11 @@
 
 		public int DataMinerID { get; private set; }
 
-		public RadGroupSettings GetGroupSettings() => _sharedGroupEditor.GetSettings();
+		public void GetGroupSettings(out RadGroupSettings settings, out List<RadSubgroupSettings> addedSubgroups, out List<Guid> removedSubgroups,
+			out TrainingConfiguration trainingConfiguration)
+		{
+			_sharedGroupEditor.GetSettings(out settings, out addedSubgroups, out removedSubgroups, out trainingConfiguration);
+		}
 
 		private void OnGroupEditorValidationChanged()
 		{

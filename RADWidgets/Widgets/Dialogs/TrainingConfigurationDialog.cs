@@ -1,0 +1,112 @@
+﻿namespace RadWidgets.Widgets.Dialogs
+{
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using RadWidgets.Widgets;
+	using RadWidgets.Widgets.Generic;
+	using Skyline.DataMiner.Automation;
+	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.RadToolkit;
+
+	public class TrainingConfigurationDialog : Dialog
+	{
+		private readonly Button _okButton;
+		private readonly MultiTimeRangeSelector _timeRangeSelector;
+		private readonly CollapsibleCheckboxList<Guid> _excludedSubgroupsList = null;
+
+		public TrainingConfigurationDialog(IEngine engine, RadHelper radHelper, List<RadSubgroupSelectorItem> subgroups = null,
+			Widgets.TrainingConfiguration configuration = null) : base(engine)
+		{
+			var endTime = DateTime.Now;
+			var startTime = endTime - TimeSpan.FromDays(radHelper.DefaultTrainingDays);
+
+			Title = $"Configure Model Training";
+
+			var label = new Label($"Train the model using data from the following time ranges with normal behavior:");
+
+			string emptyText = "No time ranges selected. Select at least one time range above and press 'Add'.";
+			_timeRangeSelector = new MultiTimeRangeSelector(engine, startTime, endTime, emptyText);
+			if (configuration?.SelectedTimeRanges != null)
+				_timeRangeSelector.SetSelected(configuration.SelectedTimeRanges);
+			_timeRangeSelector.Changed += (sender, args) => UpdateIsValid();
+
+			if (subgroups != null)
+			{
+				var options = subgroups.Select(s => new Option<Guid>(s.DisplayName, s.ID)).OrderBy(o => o.DisplayValue);
+				_excludedSubgroupsList = new CollapsibleCheckboxList<Guid>(options, _timeRangeSelector.ColumnCount)
+				{
+					Text = "Exclude specific subgroups",
+					Tooltip = "Data from the selected subgroups will not be taken into account when training the model. " +
+						"This can be used to exclude subgroups that had anomalous behavior during the selected time range.",
+					ExpandText = "Select",
+					CollapseText = "Unselect all",
+				};
+				if (configuration?.ExcludedSubgroupIDs != null)
+					_excludedSubgroupsList.SetChecked(configuration.ExcludedSubgroupIDs);
+				_excludedSubgroupsList.Changed += (sender, args) => UpdateIsValid();
+			}
+
+			_okButton = new Button("Apply")
+			{
+				Style = ButtonStyle.CallToAction,
+			};
+			_okButton.Pressed += (sender, args) => Accepted?.Invoke(this, EventArgs.Empty);
+
+			var cancelButton = new Button("Cancel")
+			{
+				MaxWidth = 150,
+			};
+			cancelButton.Pressed += (sender, args) => Cancelled?.Invoke(this, EventArgs.Empty);
+
+			UpdateIsValid();
+
+			int row = 0;
+			AddWidget(label, row, 0, 1, _timeRangeSelector.ColumnCount);
+			row++;
+
+			AddSection(_timeRangeSelector, row, 0);
+			row += _timeRangeSelector.RowCount;
+
+			if (_excludedSubgroupsList != null)
+			{
+				AddSection(_excludedSubgroupsList, row, 0);
+				row += _excludedSubgroupsList.RowCount;
+			}
+
+			AddWidget(cancelButton, row, _timeRangeSelector.ColumnCount - 2, horizontalAlignment: HorizontalAlignment.Right);
+			AddWidget(_okButton, row, _timeRangeSelector.ColumnCount - 1);
+		}
+
+		public event EventHandler Accepted;
+
+		public event EventHandler Cancelled;
+
+		public Widgets.TrainingConfiguration GetConfiguration()
+		{
+			var selectedTimeRanges = _timeRangeSelector.GetSelected().ToList();
+			var excludedSubgroupIDs = _excludedSubgroupsList?.GetChecked().ToList() ?? new List<Guid>();
+
+			return new Widgets.TrainingConfiguration(selectedTimeRanges, excludedSubgroupIDs);
+		}
+
+		private void UpdateIsValid()
+		{
+			if (!_timeRangeSelector.GetSelected().Any())
+			{
+				_okButton.Tooltip = "Select at least one time range to train the model.";
+				_okButton.IsEnabled = false;
+			}
+			else if (_excludedSubgroupsList != null && _excludedSubgroupsList.GetChecked().Any() && !_excludedSubgroupsList.GetUnchecked().Any())
+			{
+				_okButton.Tooltip = "At least one subgroup must be included for training the model.";
+				_okButton.IsEnabled = false;
+			}
+			else
+			{
+				_okButton.Tooltip = "Train the selected relational anomaly group using the trend data in the time ranges selected above.";
+				_okButton.IsEnabled = true;
+			}
+		}
+	}
+}

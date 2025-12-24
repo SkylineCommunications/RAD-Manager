@@ -12,7 +12,7 @@
 	{
 		private readonly TextBox _textBox;
 
-		public LabelEditor(int index, string parameterLabel = null)
+		public LabelEditor(int index, int textBoxColumnSpan, string parameterLabel = null)
 		{
 			string tooltip = $"The label of the parameter {index + 1}.";
 			var label = new Label($"Parameter {index + 1}")
@@ -30,7 +30,7 @@
 			_textBox.Changed += (sender, args) => Changed?.Invoke(this, EventArgs.Empty);
 
 			AddWidget(label, 0, 0);
-			AddWidget(_textBox, 0, 1);
+			AddWidget(_textBox, 0, 1, 1, textBoxColumnSpan);
 		}
 
 		public event EventHandler Changed;
@@ -62,16 +62,22 @@
 			_labelEditors = new List<LabelEditor>(labels.Count);
 			foreach (var label in labels)
 			{
-				var editor = new LabelEditor(_labelEditors.Count, label);
+				var editor = new LabelEditor(_labelEditors.Count, 10, label);
 				editor.Changed += (sender, args) => OnLabelChanged(sender as LabelEditor);
 				_labelEditors.Add(editor);
 			}
+
+			int nrOfWhitespaces = _labelEditors.First().ColumnCount - 1;
+			var whitespaces = new List<WhiteSpace>(nrOfWhitespaces);
+			for (int i = 0; i < nrOfWhitespaces; ++i)
+				whitespaces.Add(new WhiteSpace());
 
 			_detailsLabel = new WrappingLabel(200);
 
 			var cancelButton = new Button("Cancel")
 			{
 				Tooltip = "Discard the changes to the labels above.",
+				MaxWidth = 150,
 			};
 			cancelButton.Pressed += (sender, args) => Cancelled?.Invoke(this, EventArgs.Empty);
 
@@ -87,11 +93,16 @@
 			foreach (var editor in _labelEditors)
 				AddSection(editor, row++, 0);
 
-			AddWidget(_detailsLabel, row, 0, 1, 2);
+			int col = 1;
+			foreach (var ws in whitespaces)
+				AddWidget(ws, row, col++);
 			row++;
 
-			AddWidget(cancelButton, row, 0);
-			AddWidget(_okButton, row, 1);
+			AddWidget(_detailsLabel, row, 0, 1, _labelEditors.First().ColumnCount);
+			row++;
+
+			AddWidget(cancelButton, row, _labelEditors.First().ColumnCount - 2, horizontalAlignment: HorizontalAlignment.Right);
+			AddWidget(_okButton, row, _labelEditors.First().ColumnCount - 1);
 		}
 
 		public event EventHandler Accepted;

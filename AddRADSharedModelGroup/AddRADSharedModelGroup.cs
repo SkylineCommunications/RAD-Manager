@@ -1,5 +1,5 @@
 using System;
-using AddRadParameterGroup;
+using AddRadSharedModelGroup;
 using RadWidgets;
 using Skyline.DataMiner.Automation;
 using Skyline.DataMiner.Utils.InteractiveAutomationScript;
@@ -28,7 +28,7 @@ public class Script
 			_app = new InteractiveController(engine);
 			_radHelper = RadWidgets.Utils.GetRadHelper(engine);
 
-			var dialog = new AddParameterGroupDialog(engine, _radHelper);
+			var dialog = new AddSharedModelGroupDialog(engine, _radHelper);
 			dialog.Accepted += Dialog_Accepted;
 			dialog.Cancelled += Dialog_Cancelled;
 
@@ -63,15 +63,14 @@ public class Script
 
 	private void Dialog_Accepted(object sender, EventArgs e)
 	{
-		var dialog = sender as AddParameterGroupDialog;
+		var dialog = sender as AddSharedModelGroupDialog;
 		if (dialog == null)
 			throw new ArgumentException("Invalid sender type");
 
-		dialog.GetSettings(out RadGroupSettings settings, out TrainingConfiguration trainingConfig);
-
+		dialog.GetSettings(out var settings, out var trainingConfiguration);
 		try
 		{
-			Utils.AddParameterGroup(_app, _radHelper, settings, trainingConfig, dialog);
+			Utils.AddParameterGroup(_app, _radHelper, settings, trainingConfiguration, dialog);
 		}
 		catch (Exception ex)
 		{

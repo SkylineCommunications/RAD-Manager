@@ -187,6 +187,11 @@
 			AddWidget(whitespace, 4, 2);
 		}
 
+		/// <summary>
+		/// Emitted when a subgroup is added or removed
+		/// </summary>
+		public event EventHandler Changed;
+
 		public event EventHandler ValidationChanged;
 
 		public bool IsValid { get; private set; }
@@ -196,6 +201,11 @@
 		public List<RadSubgroupSettings> GetSubgroups()
 		{
 			return _subgroupViewer.GetItems().Select(s => s.ToRadSubgroupSettings(_parameterLabels)).ToList();
+		}
+
+		public List<RadSubgroupSelectorItem> GetSubgroupSelectorItems()
+		{
+			return _subgroupViewer.GetItems();
 		}
 
 		public void UpdateParameterLabels(List<string> parameterLabels)
@@ -215,17 +225,14 @@
 
 			// We might need to append the missing parameters suffix to the display value, hence recalculate all items
 			UpdateSubgroupViewerItems(newItems, selectedID);
+			Changed?.Invoke(this, EventArgs.Empty);
 		}
 
 		public void UpdateParentOptions(RadGroupOptions parentOptions)
 		{
 			_parentOptions = parentOptions ?? throw new ArgumentNullException(nameof(parentOptions));
 			_subgroupDetailsView.SetParentOptions(parentOptions);
-		}
-
-		private string GetSubgroupPlaceHolderName(int count)
-		{
-			return $"Unnamed subgroup {count}";
+			Changed?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void SetSubgroups(List<RadSubgroupInfo> subgroups, Guid? selectedSubgroup)
@@ -235,6 +242,7 @@
 			{
 				UpdateSubgroupViewerItems(items);
 				CalculateAndUpdateIsValid(items);
+				Changed?.Invoke(this, EventArgs.Empty);
 				return;
 			}
 
@@ -253,7 +261,7 @@
 					});
 				}
 
-				string displayName = string.IsNullOrEmpty(subgroup.Name) ? GetSubgroupPlaceHolderName(++_unnamedSubgroupCount) : subgroup.Name;
+				string displayName = string.IsNullOrEmpty(subgroup.Name) ? RadUtils.Utils.GetSubgroupPlaceHolderName(++_unnamedSubgroupCount) : subgroup.Name;
 				items.Add(new RadSubgroupSelectorItem(subgroup.ID, subgroup.Name, subgroup.Options, parameters, displayName, _parameterLabels));
 			}
 
@@ -262,6 +270,7 @@
 			else
 				UpdateSubgroupViewerItems(items);
 			CalculateAndUpdateIsValid(items);
+			Changed?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void UpdateSubgroupViewerItems(List<RadSubgroupSelectorItem> subgroups, Guid? selectedGroup = null)
@@ -513,7 +522,7 @@
 			var settings = _subgroupViewer.GetSelected();
 			if (settings == null)
 				return;
-			var placeHolderName = string.IsNullOrEmpty(settings.Name) ? settings.DisplayName : GetSubgroupPlaceHolderName(_unnamedSubgroupCount + 1);
+			var placeHolderName = string.IsNullOrEmpty(settings.Name) ? settings.DisplayName : RadUtils.Utils.GetSubgroupPlaceHolderName(_unnamedSubgroupCount + 1);
 
 			InteractiveController app = new InteractiveController(_engine);
 			EditSubgroupDialog dialog = new EditSubgroupDialog(_engine, _radHelper, _subgroupViewer.GetItems().ToList(), _parameterLabels, settings, placeHolderName, _parentOptions);
@@ -533,6 +542,7 @@
 				UpdateSubgroupViewerItems(newItems, settings.ID);
 				CalculateIsValidOnEditedSubgroup(newItems, newSettings, settings);
 				UpdateIsValid(newItems);
+				Changed?.Invoke(this, EventArgs.Empty);
 			};
 			dialog.Cancelled += (sender, args) => app.Stop();
 
@@ -548,11 +558,12 @@
 			var newItems = _subgroupViewer.GetItems().Where(s => s.ID != selectedKey).ToList();
 			CalculateAndUpdateIsValid(newItems);
 			UpdateSubgroupViewerItems(newItems);
+			Changed?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void OnAddButtonPressed()
 		{
-			var placeHolderName = GetSubgroupPlaceHolderName(_unnamedSubgroupCount + 1);
+			var placeHolderName = RadUtils.Utils.GetSubgroupPlaceHolderName(_unnamedSubgroupCount + 1);
 			InteractiveController app = new InteractiveController(_engine);
 			AddSubgroupDialog dialog = new AddSubgroupDialog(_engine, _radHelper, _subgroupViewer.GetItems().ToList(), _parameterLabels, _parentOptions, placeHolderName);
 			dialog.Accepted += (sender, args) =>
@@ -572,6 +583,7 @@
 				CalculateIsValidOnAddedSubgroup(newItems, newSettings);
 				UpdateIsValid(newItems);
 				UpdateSubgroupViewerItems(newItems, newSettings.ID);
+				Changed?.Invoke(this, EventArgs.Empty);
 			};
 			dialog.Cancelled += (sender, args) => app.Stop();
 

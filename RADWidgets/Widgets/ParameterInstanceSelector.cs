@@ -18,19 +18,16 @@
 		private UIValidationState _validationState = UIValidationState.Valid;
 		private string _validationText = string.Empty;
 
-		public ParameterInstanceSelector(IEngine engine, RadSubgroupSelectorParameter parameter = null)
+		public ParameterInstanceSelector(IEngine engine, int instanceDropDownColumnSpan, RadSubgroupSelectorParameter parameter = null)
 		{
 			_engine = engine;
 
-			var elementsLabel = new Label("Element");
 			_elementsDropDown = new ElementsDropDown(engine);
 			_elementsDropDown.Changed += (sender, args) => OnElementsDropDownChanged();
 
-			var parametersLabel = new Label("Parameter");
 			_parametersDropDown = new RadParametersDropDown(engine);
 			_parametersDropDown.Changed += (sender, args) => OnParametersDropDownChanged();
 
-			var instanceLabel = new Label("Display key");
 			_instanceDropDown = new TooltipDropDown<DynamicTableIndex>()
 			{
 				IsDisplayFilterShown = true,
@@ -43,14 +40,9 @@
 			if (parameter != null)
 				SelectItem(parameter);
 
-			AddWidget(elementsLabel, 0, 0);
-			AddWidget(_elementsDropDown, 1, 0);
-
-			AddWidget(parametersLabel, 0, 1);
-			AddWidget(_parametersDropDown, 1, 1);
-
-			AddWidget(instanceLabel, 0, 2);
-			AddWidget(_instanceDropDown, 1, 2);
+			AddWidget(_elementsDropDown, 0, 0);
+			AddWidget(_parametersDropDown, 0, 1);
+			AddWidget(_instanceDropDown, 0, 2, 1, instanceDropDownColumnSpan);
 		}
 
 		public event EventHandler Changed;

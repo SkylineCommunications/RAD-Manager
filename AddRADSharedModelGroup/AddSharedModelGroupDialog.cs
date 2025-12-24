@@ -1,4 +1,4 @@
-﻿namespace EditRADParameterGroup
+﻿namespace AddRadSharedModelGroup
 {
 	using System;
 	using RadWidgets;
@@ -7,35 +7,36 @@
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 	using Skyline.DataMiner.Utils.RadToolkit;
 
-	public class EditParameterGroupDialog : Dialog
+	public class AddSharedModelGroupDialog : Dialog
 	{
-		private readonly RadGroupEditor _groupEditor;
+		private const string OK_BUTTON_TOOLTIP = "Add a relational anomaly group with multiple subgroups that share a single model.";
+		private readonly RadSharedModelGroupEditor _groupEditor;
 		private readonly Button _okButton;
 
-		public EditParameterGroupDialog(IEngine engine, RadHelper radHelper, RadGroupInfo groupSettings, int dataMinerID) : base(engine)
+		public AddSharedModelGroupDialog(IEngine engine, RadHelper radHelper) : base(engine)
 		{
 			ShowScriptAbortPopup = false;
-			DataMinerID = dataMinerID;
-			Title = $"Edit Group '{groupSettings.GroupName}'";
+			Title = "Add Relational Anomaly Group With Shared Model";
+
+			var existingGroupNames = radHelper.FetchParameterGroups();
 			var parametersCache = new EngineParametersCache(engine);
+			_groupEditor = new RadSharedModelGroupEditor(engine, radHelper, existingGroupNames, parametersCache);
+			_groupEditor.ValidationChanged += (sender, args) => OnEditorValidationChanged();
 
-			var groupNames = radHelper.FetchParameterGroups();
-			_groupEditor = new RadGroupEditor(engine, radHelper, groupNames, parametersCache, groupSettings);
-			_groupEditor.ValidationChanged += (sender, args) => OnGroupEditorValidationChanged();
-
-			_okButton = new Button("Apply")
+			_okButton = new Button("Add group")
 			{
 				Style = ButtonStyle.CallToAction,
+				Tooltip = OK_BUTTON_TOOLTIP,
 			};
 			_okButton.Pressed += (sender, args) => Accepted?.Invoke(this, EventArgs.Empty);
 
 			var cancelButton = new Button("Cancel")
 			{
-				MaxWidth = Constants.GROUP_EDITOR_CANCEL_BUTTON_MAX_WIDTH,
+				MaxWidth = Constants.SHARED_MODEL_GROUP_EDITOR_CANCEL_BUTTON_MAX_WIDTH,
 			};
 			cancelButton.Pressed += (sender, args) => Cancelled?.Invoke(this, EventArgs.Empty);
 
-			OnGroupEditorValidationChanged();
+			OnEditorValidationChanged();
 
 			int row = 0;
 			AddSection(_groupEditor, row, 0);
@@ -49,19 +50,17 @@
 
 		public event EventHandler Cancelled;
 
-		public int DataMinerID { get; private set; }
-
 		public void GetSettings(out RadGroupSettings settings, out TrainingConfiguration trainingConfiguration)
 		{
-			_groupEditor.GetSettings(out settings, out trainingConfiguration);
+			_groupEditor.GetSettings(out settings, out var _, out var _, out trainingConfiguration);
 		}
 
-		private void OnGroupEditorValidationChanged()
+		private void OnEditorValidationChanged()
 		{
 			if (_groupEditor.IsValid)
 			{
 				_okButton.IsEnabled = true;
-				_okButton.Tooltip = "Edit the selected relational anomaly group as specified above";
+				_okButton.Tooltip = OK_BUTTON_TOOLTIP;
 			}
 			else
 			{

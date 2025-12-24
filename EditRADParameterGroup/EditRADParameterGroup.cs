@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using EditRADParameterGroup;
 using RadUtils;
@@ -129,26 +128,32 @@ public class Script
 	{
 		if (dialog == null)
 			throw new ArgumentException("Invalid sender type");
-		var newSettings = dialog.GroupSettings;
-		if (newSettings == null)
-			throw new ArgumentException($"{nameof(dialog.GroupSettings)} should not return null", nameof(dialog));
+		dialog.GetSettings(out var newSettings, out var trainingConfiguration);
 
 		try
 		{
 			var originalParameters = originalSettings.Subgroups.First().Parameters.Select(p => p.Key).ToHashSet(new ParameterKeyEqualityComparer());
 			if (originalParameters.SetEquals(newSettings.Subgroups.First().Parameters.Select(p => p.Key)))
 			{
+				bool removed = false;
 				if (!originalSettings.GroupName.Equals(newSettings.GroupName, StringComparison.OrdinalIgnoreCase))
 				{
-					try
+					if (_radHelper.AllowSharedModelGroups)
 					{
 						_radHelper.RenameParameterGroup(dialog.DataMinerID, originalSettings.GroupName, newSettings.GroupName);
 					}
-					catch (NotSupportedException)
+					else
 					{
-						// We can't rename, so remove the old group instead
 						_radHelper.RemoveParameterGroup(dialog.DataMinerID, originalSettings.GroupName);
+						removed = true;
 					}
+				}
+
+				if (!removed)
+				{
+					// Old and new parameters are the same (up to order), but we actually want to keep the labels if any
+					// (which could have been added if the group used to be a shared model group at some point). Otherwise, AddParameterGroup below will not work.
+					newSettings.Subgroups.First().Parameters = originalSettings.Subgroups.First().Parameters;
 				}
 			}
 			else
@@ -156,7 +161,7 @@ public class Script
 				_radHelper.RemoveParameterGroup(dialog.DataMinerID, originalSettings.GroupName);
 			}
 
-			_radHelper.AddParameterGroup(newSettings);
+			RadWidgets.Utils.AddParameterGroup(_app, _radHelper, newSettings, trainingConfiguration, dialog);
 		}
 		catch (Exception ex)
 		{
@@ -171,14 +176,10 @@ public class Script
 	{
 		if (dialog == null)
 			throw new ArgumentNullException(nameof(dialog), "Invalid sender type");
-		var newSettings = dialog.GetGroupSettings();
-		if (newSettings == null)
-			throw new ArgumentException($"{nameof(dialog.GetGroupSettings)} should not return null", nameof(dialog));
+		dialog.GetGroupSettings(out var newSettings, out var addedSubgroups, out var removedSubgroupIDs, out var trainingConfiguration);
 
 		try
 		{
-			GetAddedAndRemovedSubgroups(newSettings.Subgroups, originalSettings.Subgroups,
-				out List<RadSubgroupSettings> addedSubgroups, out List<RadSubgroupSettings> removedSubgroups);
 			if (addedSubgroups.Count == newSettings.Subgroups.Count)
 			{
 				// No subgroup is preserved, so we remove the entire group
@@ -190,13 +191,13 @@ public class Script
 				if (!originalSettings.GroupName.Equals(newSettings.GroupName, StringComparison.OrdinalIgnoreCase))
 					_radHelper.RenameParameterGroup(dialog.DataMinerID, originalSettings.GroupName, newSettings.GroupName);
 
-				foreach (var removedSubgroup in removedSubgroups)
-					_radHelper.RemoveSubgroup(dialog.DataMinerID, newSettings.GroupName, removedSubgroup.ID);
+				foreach (var removedSubgroupID in removedSubgroupIDs)
+					_radHelper.RemoveSubgroup(dialog.DataMinerID, newSettings.GroupName, removedSubgroupID);
 				foreach (var addedSubgroup in addedSubgroups)
 					_radHelper.AddSubgroup(dialog.DataMinerID, newSettings.GroupName, addedSubgroup);
 			}
 
-			_radHelper.AddParameterGroup(newSettings);
+			RadWidgets.Utils.AddParameterGroup(_app, _radHelper, newSettings, trainingConfiguration, dialog);
 		}
 		catch (Exception ex)
 		{
@@ -205,43 +206,6 @@ public class Script
 		}
 
 		_app.Engine.ExitSuccess("Successfully edited relational anomaly group");
-	}
-
-	private void GetAddedAndRemovedSubgroups(List<RadSubgroupSettings> newSubgroups, List<RadSubgroupInfo> oldSubgroups,
-		out List<RadSubgroupSettings> addedSubgroups, out List<RadSubgroupSettings> removedSubgroups)
-	{
-		foreach (var subgroup in oldSubgroups)
-			subgroup.NormalizeParameters();
-
-		bool[] matchedOldSubgroups = new bool[oldSubgroups.Count];
-		addedSubgroups = new List<RadSubgroupSettings>();
-		removedSubgroups = new List<RadSubgroupSettings>();
-		foreach (var subgroup in newSubgroups)
-		{
-			bool matched = false;
-
-			subgroup.NormalizeParameters();
-			for (int i = 0; i < oldSubgroups.Count; ++i)
-			{
-				if (matchedOldSubgroups[i])
-					continue;
-				if (oldSubgroups[i].HasSameOrderedParameters(subgroup))
-				{
-					matchedOldSubgroups[i] = true;
-					matched = true;
-					break;
-				}
-			}
-
-			if (!matched)
-				addedSubgroups.Add(subgroup);
-		}
-
-		for (int i = 0; i < matchedOldSubgroups.Length; ++i)
-		{
-			if (!matchedOldSubgroups[i])
-				removedSubgroups.Add(oldSubgroups[i]);
-		}
 	}
 
 	private void Dialog_Cancelled()

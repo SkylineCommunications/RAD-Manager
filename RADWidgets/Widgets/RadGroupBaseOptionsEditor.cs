@@ -26,57 +26,51 @@
 		/// <param name="options">The initial settings to display (if any).</param>
 		/// <param name="defaultAnomalyThreshold">The default anomaly threshold to use if not overridden.</param>
 		/// <param name="defaultMinimalDuration">The default minimal duration to use if not overridden.</param>
+		/// <param name="fieldWidth">The width of the input fields.</param>
 		public RadGroupBaseOptionsEditor(
 			int columnCount,
 			double defaultAnomalyThreshold,
 			int defaultMinimalDuration,
+			int fieldWidth,
 			RadGroupBaseOptions options = null)
 		{
 			_defaultAnomalyThreshold = defaultAnomalyThreshold;
 			_defaultMinimalDuration = defaultMinimalDuration;
 
-			_anomalyThresholdOverrideCheckBox = new CheckBox("Override default anomaly threshold?")
+			_anomalyThresholdOverrideCheckBox = new CheckBox("Override default anomaly threshold")
 			{
 				IsChecked = options?.AnomalyThreshold != null,
 				Tooltip = "Whether to override the default threshold for detecting anomalies. Anomalies are detected when the anomaly score exceeds this threshold. " +
-				"With a high threshold less anomalies will be detected, with a low threshold more anomalies will be detected. If checked, the threshold can be set below.",
+				"With a high threshold less anomalies will be detected, with a low threshold more anomalies will be detected. If checked, the threshold can be set on the right.",
 			};
 			_anomalyThresholdOverrideCheckBox.Changed += (sender, args) => OnAnomalyThresholdOverrideCheckBoxChanged();
 
-			string anomalyThresholdTooltip = "The threshold for detecting anomalies.";
-			var anomalyThresholdLabel = new Label("Anomaly threshold")
-			{
-				Tooltip = anomalyThresholdTooltip,
-			};
 			_anomalyThresholdNumeric = new Numeric()
 			{
 				Minimum = 0,
 				Value = options?.AnomalyThreshold ?? _defaultAnomalyThreshold,
 				StepSize = 0.1,
 				IsEnabled = options?.AnomalyThreshold != null,
-				Tooltip = anomalyThresholdTooltip,
+				Tooltip = "The threshold for detecting anomalies.",
+				Width = fieldWidth,
 			};
 			_anomalyThresholdNumeric.Changed += (sender, args) => OnAnomalyThresholdNumericChanged();
 
-			_minimalDurationOverrideCheckBox = new CheckBox("Override default minimum anomaly duration?")
+			_minimalDurationOverrideCheckBox = new CheckBox("Override default minimum anomaly duration (in minutes)")
 			{
 				IsChecked = options?.MinimalDuration != null,
 				Tooltip = "Whether to override the default duration an anomaly must last before a suggestion event is generated. Note that changing this duration will also have an " +
-				"effect on the anomaly score. If checked, the duration can be set below.",
+				"effect on the anomaly score. If checked, the duration can be set on the right.",
 			};
 			_minimalDurationOverrideCheckBox.Changed += (sender, args) => OnMinimalDurationOverrideCheckBoxChanged();
 
-			string minimalDurationTooltip = "The minimum duration in minutes an anomaly must last before a suggestion event is generated.";
-			var minimalDurationLabel = new Label("Minimum anomaly duration (in minutes)")
-			{
-				Tooltip = minimalDurationTooltip,
-			};
 			_minimalDurationTime = new Time()
 			{
 				HasSeconds = false,
 				Minimum = TimeSpan.FromMinutes(0),
 				TimeSpan = options?.MinimalDuration != null ? TimeSpan.FromMinutes(options.MinimalDuration.Value) : TimeSpan.FromMinutes(_defaultMinimalDuration),
 				IsEnabled = options?.MinimalDuration != null,
+				Width = fieldWidth,
 			};
 			_minimalDurationTime.Changed += (sender, args) => OnMinimalDurationTimeChanged();
 
@@ -85,17 +79,11 @@
 			UpdateIsValid();
 
 			int row = 0;
-			AddWidget(_anomalyThresholdOverrideCheckBox, row, 0, 1, columnCount);
-			++row;
-
-			AddWidget(anomalyThresholdLabel, row, 0);
+			AddWidget(_anomalyThresholdOverrideCheckBox, row, 0);
 			AddWidget(_anomalyThresholdNumeric, row, 1, 1, columnCount - 1);
 			++row;
 
-			AddWidget(_minimalDurationOverrideCheckBox, row, 0, 1, columnCount);
-			++row;
-
-			AddWidget(minimalDurationLabel, row, 0);
+			AddWidget(_minimalDurationOverrideCheckBox, row, 0);
 			AddWidget(_minimalDurationTime, row, 1, 1, columnCount - 1);
 		}
 
