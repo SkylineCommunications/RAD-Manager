@@ -43,7 +43,7 @@
 				RadSubgroupSelectorParameter parameter = null;
 				if (settings != null && i < settings.Parameters.Count)
 					parameter = settings.Parameters[i];
-				var parameterSelector = new ParameterInstanceSelector(engine, parameter);
+				var parameterSelector = new ParameterInstanceSelector(engine, radHelper, parameter);
 				parameterSelector.Changed += (sender, args) => OnParameterSelectorChanged();
 
 				_parameterSelectors.Add(Tuple.Create(label, parameterSelector));
