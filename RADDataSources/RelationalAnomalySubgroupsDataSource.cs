@@ -181,9 +181,7 @@ namespace RadDataSources
 
 				string subgroupDisplayName = string.IsNullOrEmpty(subgroupInfo.Name) ? RadUtils.Utils.GetSubgroupPlaceHolderName(++unnamedSubgroupCount) : subgroupInfo.Name;
 				FitScore fitScore;
-				if (fitScores != null && fitScores.TryGetValue(subgroupInfo.ID, out FitScore score))
-					fitScore = score;
-				else
+				if (fitScores == null || !fitScores.TryGetValue(subgroupInfo.ID, out fitScore))
 					fitScore = null;
 
 				yield return new RadSubgroupRow(RadHelper, groupInfo, subgroupInfo, subgroupDisplayName, fitScore)
