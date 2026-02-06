@@ -8,6 +8,7 @@
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.RadToolkit;
 
 	public class ParameterInstanceSelector : Section, IValidationWidget
 	{
@@ -18,11 +19,11 @@
 		private UIValidationState _validationState = UIValidationState.Valid;
 		private string _validationText = string.Empty;
 
-		public ParameterInstanceSelector(IEngine engine, int instanceDropDownColumnSpan, RadSubgroupSelectorParameter parameter = null)
+		public ParameterInstanceSelector(IEngine engine, int instanceDropDownColumnSpan, RadHelper radHelper, RadSubgroupSelectorParameter parameter = null)
 		{
 			_engine = engine;
 
-			_elementsDropDown = new ElementsDropDown(engine);
+			_elementsDropDown = new ElementsDropDown(engine, radHelper);
 			_elementsDropDown.Changed += (sender, args) => OnElementsDropDownChanged();
 
 			_parametersDropDown = new RadParametersDropDown(engine);

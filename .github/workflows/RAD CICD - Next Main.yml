@@ -1,7 +1,7 @@
-name: RAD CICD 
+name: RAD CICD - Next Main
 on:
   schedule:
-    - cron: '0 18 * * *' # Every day at 6pm UTC
+    - cron: '0 7 * * *' # Every day at 7 AM UTC
   # push:
   #   branches: 
   #    - '**'
@@ -30,7 +30,7 @@ jobs:
 
   CD:   
     name: CD
-    environment: Analytics 56 Cluster System
+    environment: Analytics Next Main Cluster System
     runs-on: ubuntu-latest
     needs: [nugetCheck]
     steps:
@@ -111,7 +111,7 @@ jobs:
          run: dataminer-package-deploy from-volatile --artifact-id "${{ steps.uploadToCatalog.outputs.id }}" --dm-system-token ${{ secrets.DATAMINER_DEPLOY_KEY_LOAD_SYSTEM }}
 
   playwright:
-    environment: Analytics 56 Cluster System
+    environment: Analytics Next Main Cluster System
     runs-on: windows-latest
     timeout-minutes: 60
     needs: [nugetCheck, CD]
@@ -119,7 +119,7 @@ jobs:
       PLAYWRIGHT_USERNAME: ${{ secrets.PLAYWRIGHT_USERNAME }}
       PLAYWRIGHT_PASSWORD: ${{ secrets.PLAYWRIGHT_PASSWORD }}
       EMAIL:  ${{ secrets.EMAIL }}
-      PLAYWRIGHT_URL: https://analyticscl56-skyline.on.dataminer.services/
+      PLAYWRIGHT_URL: https://analytics8640-skyline.on.dataminer.services/
     steps:
       - uses: actions/checkout@v4
 
