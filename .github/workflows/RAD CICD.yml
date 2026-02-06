@@ -1,7 +1,7 @@
 name: RAD CICD 
 on:
   schedule:
-    - cron: '0 18 * * *' # Every day at 6pm UTC
+    - cron: '0 0 * * *' # Every day at midnight UTC
   # push:
   #   branches: 
   #    - '**'

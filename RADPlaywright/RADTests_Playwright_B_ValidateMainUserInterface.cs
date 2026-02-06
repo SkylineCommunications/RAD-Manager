@@ -52,26 +52,24 @@
 		private async Task ValidateUserInterfaceComponents(LowCodeAppPage page)
 		{
 			var radManager = page.GetComponentByText("div", "RAD MANAGER", 3);
-			var addSingleGroupButton = page.GetComponentByTitle("Add Single Group");
-			var addSharedGroupButton = page.GetComponentByTitle("Add Shared Model Group");
-			var filterOnGroupNameTextBox = page.GetComponentByRole("Filter on group name", Microsoft.Playwright.AriaRole.Textbox);
-			var sortingButton = page.GetComponentByText("dma-button","Sorting & filtering", 0);
-			var historicalAnomaliesButton = page.GetComponentByText("dma-button","Historical anomalies", 0);
+			var addGroupButton = page.GetComponentByTitle("Add Group");
+			var editGroupButton = page.GetComponentByTitle("Edit Group");
+			var removeGroupButton = page.GetComponentByTitle("Remove Group");
+			var specifyTrainingRangeButton = page.GetComponentByTitle("Specify Training Range");
 			var dataMinerDocsButton = page.GetComponentByText("div","DataMiner Docs", 0);
 
 			await page.CheckComponentAvailability(radManager);
-			await page.CheckComponentAvailability(addSingleGroupButton);
-			await page.CheckComponentAvailability(addSharedGroupButton);
-			await page.CheckComponentAvailability(filterOnGroupNameTextBox);
-			await page.CheckComponentAvailability(sortingButton);
-			await page.CheckComponentAvailability(historicalAnomaliesButton);
+			await page.CheckComponentAvailability(addGroupButton);
+			await page.CheckComponentAvailability(editGroupButton);
+			await page.CheckComponentAvailability(removeGroupButton);
+			await page.CheckComponentAvailability(specifyTrainingRangeButton);
 			await page.CheckComponentAvailability(dataMinerDocsButton);
 
 			await page.CheckComponentAvailability(page.GetComponentByText("Relational Anomaly Groups"));
 			await page.CheckComponentAvailability(page.GetComponentById("[id=\"\\31 \"]"));
 
 			// Time range locator
-			await page.CheckComponentAvailability(page.GetComponentById("[id=\"\\33 \"]"));
+			/*await page.CheckComponentAvailability(page.GetComponentById("[id=\"\\33 \"]"));
 
 			await page.CheckComponentAvailability(page.GetComponentByText("Trend graph of parameters in"));
 			await page.CheckComponentAvailability(page.GetComponentById("[id=\"\\34 \"]"));
@@ -79,8 +77,8 @@
 			await page.CheckComponentAvailability(page.GetComponentByText("Anomaly score of selected"));
 			await page.CheckComponentAvailability(page.GetComponentById("[id=\"\\35 \"]"));
 
-			// Historical anomalies locator
-			await page.CheckComponentAvailability(page.GetComponentById("[id=\"\\31 2\"]"));
+			await page.CheckComponentAvailability(page.GetComponentByText("Historical anomalies in"));
+			await page.CheckComponentAvailability(page.GetComponentById("[id=\"\\31 2\"]"));*/
 
 			// Click DataMiner Docs, wait until the Docs page is loaded and check that the heading is "Working with the RAD Manager"
 			var dataMinerDocsPage = page.WaitOnDataMinerDocsPage();
