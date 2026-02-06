@@ -56,8 +56,8 @@ documentation_url: https://aka.dataminer.services/RADManager
 #   The name is required; max 256 characters.
 #   The email and URL are optional, and should be in valid email/URL formats.
 owners:
-  - name: 'Tobe Deprez <tobe.deprez@skyline.be>'
   - name: 'Dennis Dreesen <dennis.dreesen@skyline.be>'
+  - name: 'Veerle Ledoux <veerle.ledoux@skyline.be>'
 # [Optional]
 # Tags that allow you to categorize your Catalog items.
 #   Max number of tags: 5
