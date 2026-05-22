@@ -25,15 +25,10 @@
 			return new LowCodeAppPage(page);
 		}
 
-		public async Task<LowCodeAppPage> NavigateToPageAsync(string title)
+		public async Task<LowCodeAppPage> NavigateToPageAsync()
 		{
-			if (String.IsNullOrWhiteSpace(title))
-			{
-				throw new ArgumentException($"'{nameof(title)}' cannot be null or whitespace.", nameof(title));
-			}
-
 			var page = await _browserContext.NewPageAsync();
-			await page.GotoAsync($"/app/{ID}/{Uri.EscapeUriString(title)}");
+			await page.GotoAsync($"/app/{ID}");
 
 			return new LowCodeAppPage(page);
 		}

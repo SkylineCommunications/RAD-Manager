@@ -3,6 +3,7 @@
 	using System;
 	using System.Threading.Tasks;
 	using Microsoft.Playwright;
+	using Skyline.DataMiner.CICD.Tools.WinEncryptedKeys.Lib;
 
 	public class Authentication
 	{
@@ -159,13 +160,19 @@
 		{
 			public Credentials(string? username, string? password, string? email)
 			{
-				if(username != null)
+				if (!Keys.TryRetrieveKey("QAOpsDataMinerUser", out var userName) || string.IsNullOrWhiteSpace(userName))
+					throw new InvalidOperationException("Could not retrieve QAOpsDataMinerUser.");
+
+				if (!Keys.TryRetrieveKey("QAOpsDataMinerPassword", out var pws) || string.IsNullOrWhiteSpace(pws))
+					throw new InvalidOperationException("Could not retrieve QAOpsDataMinerPassword.");
+
+				if (username != null)
 				{
 					Username = username;
 				}
 				else
 				{
-					throw new ArgumentNullException(nameof(username), "Username must be provided.");
+					Username =userName;
 				}
 
 				if (password != null)
@@ -174,7 +181,7 @@
 				}
 				else
 				{
-				    throw new ArgumentNullException(nameof(password), "Password must be provided.");
+					Password = pws;
 				}
 
 				if (email != null)
