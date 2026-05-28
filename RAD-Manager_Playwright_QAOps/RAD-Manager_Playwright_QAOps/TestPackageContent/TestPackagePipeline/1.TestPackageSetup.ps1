@@ -16,31 +16,6 @@
             throw "Failed to install skyline.dataminer.cicd.tools.runautomationscript."
         }
 
-        function Copy-DirWithRobocopy {
-            param(
-                [Parameter(Mandatory=$true)][string]$Source,
-                [Parameter(Mandatory=$true)][string]$Destination
-            )
-
-            if (-not (Test-Path -Path $Source)) {
-                Write-Warning "Source not found, skipping: $Source"
-                return
-            }
-
-            if (-not (Test-Path -Path $Destination)) {
-                New-Item -ItemType Directory -Force -Path $Destination | Out-Null
-            }
-
-            # /E = subdirs incl empty, /R /W = retries, and quiet switches
-            $null = robocopy $Source $Destination *.* /E /R:3 /W:5 /NFL /NDL /NJH /NJS /NC /NS /NP
-            $rc = $LASTEXITCODE
-
-            # Robocopy exit codes: 0–7 => success; >=8 => failure
-            if ($rc -ge 8) {
-                throw "RoboCopy failed copying `"$Source`" to `"$Destination`" with exit code $rc"
-            }
-        }
-
         $radPlaywrightTests = 'C:\RADPlaywrightTests'
 
         # Ensure the RADPlaywrightTests folder exists

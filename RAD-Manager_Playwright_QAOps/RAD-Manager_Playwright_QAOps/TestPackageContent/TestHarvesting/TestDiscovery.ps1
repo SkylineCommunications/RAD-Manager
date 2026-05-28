@@ -40,7 +40,7 @@ $buildOutputPath = Join-Path $radTestsPath 'bin\Debug\net48'
 Write-Host "Looking for build output files in: $buildOutputPath" -ForegroundColor Cyan
 
 if (Test-Path $buildOutputPath) {
-    # Copy entire net8.0 directory
+    # Copy entire net48 directory
     Copy-Item -Path $buildOutputPath -Destination $pathToGeneratedDependencies -Recurse -Force
     
     # Count all files copied (including subdirectories)
