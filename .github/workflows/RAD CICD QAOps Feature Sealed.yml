@@ -1,0 +1,83 @@
+name: RAD Manager QAOps run Feature Sealed
+on:
+  schedule:
+   - cron: '0 6 * * *' # Every day at 6am UTC
+  # push:
+  #   branches: 
+  #    - '**'
+  # pull_request:
+  #   branches: 
+  #    - '**'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  QAOPS_TESTSUITE_ID: "01KS7WS99N8J590Z8TEDK4SM59" 
+  QAOPS_CONFIG_ID_RC: "01KSS80CPMJXK830SQSJ59Q7CN"
+  QAOPS_TOKEN: ${{ secrets.QAOPS_TOKEN_FeatureSealed }}
+
+jobs:
+  build-and-run-qaops:
+    runs-on: windows-latest
+    environment: QAOps
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+
+      - name: Configure NuGet sources
+        shell: pwsh
+        run: |
+          if (-not (Test-Path nuget.config)) {
+            dotnet new nugetconfig
+          }
+          dotnet nuget add source "https://nuget.pkg.github.com/SkylineCommunications/index.json" `
+            --name github `
+            --username USERNAME `
+            --password ${{ secrets.GITHUB_TOKEN }} `
+            --store-password-in-clear-text `
+            --configfile nuget.config
+
+      - name: Enable cache
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/*.csproj') }}
+          path: | 
+            ~\.nuget\packages
+            %LOCALAPPDATA%\ms-playwright
+
+      - name: Install dotnet-consolidate
+        run: dotnet tool install -g dotnet-consolidate || dotnet tool update -g dotnet-consolidate
+
+      - name: Run dotnet consolidate
+        run: |
+          dotnet consolidate -s "RAD Manager.sln"
+          dotnet consolidate -s "RAD-Manager_Playwright_QAOps.slnx"
+
+      - name: Build solutions    
+        run: |
+          dotnet build "RAD Manager.sln" --configuration Debug
+          dotnet build "RAD-Manager_Playwright_QAOps.slnx" --configuration Debug
+
+      - name: Find and save .dmtest file path
+        id: find-dmtest
+        shell: pwsh
+        run: |
+          $dmtestPath = Get-ChildItem -Path . -Filter "*.dmtest" -File -Recurse | Select-Object -First 1 -ExpandProperty FullName
+          if ([string]::IsNullOrEmpty($dmtestPath)) {
+            Write-Error "Error: No .dmtest file found!"
+            exit 1
+          }
+          echo "dmtest-path=$dmtestPath" >> $env:GITHUB_OUTPUT
+          Write-Host "Found .dmtest file at: $dmtestPath"
+
+      - name: Install .NET Tools
+        run: |
+          dotnet tool install -g Skyline.DataMiner.QAOps --version 2.* || dotnet tool update -g Skyline.DataMiner.QAOps --version 2.*
+      
+      - name: Trigger QAOps Run
+        shell: pwsh
+        run: |
+          dataminer-qaops test-run --token "$env:QAOPS_TOKEN_FeatureSealed" -t "$env:QAOPS_TESTSUITE_ID" -c "$env:QAOPS_CONFIG_ID_RC" --tags "RAD Manager Playwright Feature Sealed" --test-packages "${{ steps.find-dmtest.outputs.dmtest-path }}"
