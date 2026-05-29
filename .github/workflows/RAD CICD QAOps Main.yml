@@ -16,6 +16,7 @@ env:
   QAOPS_TESTSUITE_ID: "01KS7WS99N8J590Z8TEDK4SM59" 
   QAOPS_CONFIG_ID_RC: "01KSS8E08742WF827PWSC59X75"
   QAOPS_TOKEN: ${{ secrets.QAOPS_TOKEN_Main }}
+  skyline__sdk__dataminertoken: ${{ secrets.DATAMINER_TOKEN }}
 
 jobs:
   build-and-run-qaops:
