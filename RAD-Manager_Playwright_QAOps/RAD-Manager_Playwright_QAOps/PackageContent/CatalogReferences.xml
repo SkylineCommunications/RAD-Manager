@@ -1,0 +1,20 @@
+<CatalogReferences xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.skyline.be/catalogReferences">
+	<CatalogReference id="174b9848-43c8-470d-afc2-1b1722f05e74">
+		<Name>RAD Manager</Name>
+		<Selection>
+			<Specific>4.0.2</Specific>
+		</Selection>
+	</CatalogReference>
+    <!--<CatalogReference id="guid">
+		<Name>Example Catalog Item (Range)</Name>
+		<Selection>
+			<Range>1.0.0</Range>
+		</Selection>
+	</CatalogReference>-->
+	<!--<CatalogReference id="174b9848-43c8-470d-afc2-1b1722f05e74">
+		<Name>RAD Manager</Name>
+		<Selection>
+			<Range allowPrerelease="true">4.0.0</Range>
+		</Selection>
+	</CatalogReference>-->
+</CatalogReferences>

@@ -21,7 +21,7 @@
 
 			Credentials = new Authentication.Credentials(configuration["PLAYWRIGHT_USERNAME"], configuration["PLAYWRIGHT_PASSWORD"], configuration["EMAIL"]);
 
-			BaseUrl = configuration["PLAYWRIGHT_URL"] ?? "https://analyticscl56-skyline.on.dataminer.services/";
+			BaseUrl = configuration["PLAYWRIGHT_URL"] ?? "https://localhost/";
 		}
 
 		public Authentication.Credentials Credentials { get; }

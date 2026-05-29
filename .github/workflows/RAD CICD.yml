@@ -1,8 +1,8 @@
 name: RAD CICD 
 on:
-  schedule:
-    - cron: '0 18 * * *' # Every day at 6pm UTC
-  # push:
+  # schedule:
+  #   - cron: '0 18 * * *' # Every day at 6pm UTC
+  # # push:
   #   branches: 
   #    - '**'
   # pull_request:

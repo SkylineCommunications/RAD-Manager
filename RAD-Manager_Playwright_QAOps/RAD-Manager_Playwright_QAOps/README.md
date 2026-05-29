@@ -1,0 +1,1 @@
+# Technical Documentation for RAD-Manager_Playwright_QAOps
