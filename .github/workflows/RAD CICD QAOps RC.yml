@@ -55,12 +55,12 @@ jobs:
       - name: Run dotnet consolidate
         run: |
           dotnet consolidate -s "RAD Manager.sln"
-          dotnet consolidate -s "RAD-Manager_Playwright_QAOps/RAD-Manager_Playwright_QAOps.slnx"
+          dotnet consolidate -s "Playwright_QAOps/Playwright_QAOps.slnx"
 
       - name: Build solutions    
         run: |
           dotnet build "RAD Manager.sln" --configuration Debug
-          dotnet build "RAD-Manager_Playwright_QAOps/RAD-Manager_Playwright_QAOps.slnx" --configuration Debug
+          dotnet build "Playwright_QAOps/Playwright_QAOps.slnx" --configuration Debug
 
       - name: Find and save .dmtest file path
         id: find-dmtest

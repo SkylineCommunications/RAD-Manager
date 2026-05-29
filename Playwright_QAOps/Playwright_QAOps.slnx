@@ -5,5 +5,5 @@
     <File Path="Internal/Code Analysis/qaction-release.ruleset" />
     <File Path="Internal/Code Analysis/stylecop.json" />
   </Folder>
-  <Project Path="RAD-Manager_Playwright_QAOps/RAD-Manager_Playwright_QAOps.csproj" />
+  <Project Path="Playwright_QAOps/Playwright_QAOps.csproj" />
 </Solution>
