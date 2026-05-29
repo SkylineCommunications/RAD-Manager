@@ -55,12 +55,12 @@ jobs:
       - name: Run dotnet consolidate
         run: |
           dotnet consolidate -s "RAD Manager.sln"
-          dotnet consolidate -s "RAD-Manager_Playwright_QAOps/RAD-Manager_Playwright_QAOps.slnx"
+          dotnet consolidate -s "Playwright_QAOps/Playwright_QAOps.slnx"
 
       - name: Build solutions    
         run: |
           dotnet build "RAD Manager.sln" --configuration Debug
-          dotnet build "RAD-Manager_Playwright_QAOps/RAD-Manager_Playwright_QAOps.slnx" --configuration Debug
+          dotnet build "Playwright_QAOps/Playwright_QAOps.slnx" --configuration Debug
 
       - name: Find and save .dmtest file path
         id: find-dmtest
@@ -81,4 +81,4 @@ jobs:
       - name: Trigger QAOps Run
         shell: pwsh
         run: |
-          dataminer-qaops test-run --token "$env:QAOPS_TOKEN_FeatureSealed" -t "$env:QAOPS_TESTSUITE_ID" -c "$env:QAOPS_CONFIG_ID_RC" --tags "RAD Manager Playwright Feature Sealed" --test-packages "${{ steps.find-dmtest.outputs.dmtest-path }}"
+          dataminer-qaops test-run --token "$env:QAOPS_TOKEN_FEATURESEALED" -t "$env:QAOPS_TESTSUITE_ID" -c "$env:QAOPS_CONFIG_ID_RC" --tags "RAD Manager Playwright Feature Sealed" --test-packages "${{ steps.find-dmtest.outputs.dmtest-path }}"
