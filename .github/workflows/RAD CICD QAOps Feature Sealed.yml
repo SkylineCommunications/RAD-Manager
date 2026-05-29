@@ -81,4 +81,4 @@ jobs:
       - name: Trigger QAOps Run
         shell: pwsh
         run: |
-          dataminer-qaops test-run --token "$env:QAOPS_TOKEN_FEATURESEALED" -t "$env:QAOPS_TESTSUITE_ID" -c "$env:QAOPS_CONFIG_ID_RC" --tags "RAD Manager Playwright Feature Sealed" --test-packages "${{ steps.find-dmtest.outputs.dmtest-path }}"
+          dataminer-qaops test-run --token "$env:QAOPS_TOKEN" -t "$env:QAOPS_TESTSUITE_ID" -c "$env:QAOPS_CONFIG_ID_RC" --tags "RAD Manager Playwright Feature Sealed" --test-packages "${{ steps.find-dmtest.outputs.dmtest-path }}"
