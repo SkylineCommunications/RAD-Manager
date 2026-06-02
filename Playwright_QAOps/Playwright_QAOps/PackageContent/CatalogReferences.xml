@@ -2,7 +2,7 @@
 	<CatalogReference id="174b9848-43c8-470d-afc2-1b1722f05e74">
 		<Name>RAD Manager</Name>
 		<Selection>
-			<Specific>4.0.2</Specific>
+			<Specific>4.1.0</Specific>
 		</Selection>
 	</CatalogReference>
     <!--<CatalogReference id="guid">
