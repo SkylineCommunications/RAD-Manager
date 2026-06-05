@@ -94,7 +94,7 @@ try {
 
         Write-Host "Playwright UI test SUCCEEDED." -ForegroundColor Green
 
-        try { Push-TestCaseResult -Outcome 'OK' -Name 'pipeline_PlaywrightUITest' -Duration ((Get-Date) - $scriptStart) -Message $playwrightMessage -TestAspect Assertion } catch {}
+        try { Push-TestCaseResult -Outcome 'OK' -Name 'RADManager_PlaywrightUITest' -Duration ((Get-Date) - $scriptStart) -Message $playwrightMessage -TestAspect Assertion } catch {}
     }
     else {
         if ([string]::IsNullOrWhiteSpace($playwrightMessage)) { 
@@ -103,19 +103,19 @@ try {
 
         Write-Host "Playwright UI test FAILED." -ForegroundColor Red
 
-        try { Push-TestCaseResult -Outcome 'Fail' -Name 'pipeline_PlaywrightUITest' -Duration ((Get-Date) - $scriptStart) -Message $playwrightMessage -TestAspect Assertion } catch {}
+        try { Push-TestCaseResult -Outcome 'Fail' -Name 'RADManager_PlaywrightUITest' -Duration ((Get-Date) - $scriptStart) -Message $playwrightMessage -TestAspect Assertion } catch {}
 
         throw "Playwright UI test failed with exit code $playwrightExitCode."
     }
 
     Write-Host "Test Package execution finished successfully." -ForegroundColor Green
 
-    try { Push-TestCaseResult -Outcome 'OK' -Name 'pipeline_TestPackageExecution' -Duration ((Get-Date) - $scriptStart) -Message 'Test Package execution finished.' -TestAspect Execution } catch {}
+    try { Push-TestCaseResult -Outcome 'OK' -Name 'RADManager_TestPackageExecution' -Duration ((Get-Date) - $scriptStart) -Message 'Test Package execution finished.' -TestAspect Execution } catch {}
 }
 catch {
     Write-Host "Test Package execution FAILED: $($_.Exception.Message)" -ForegroundColor Red
 
-    try { Push-TestCaseResult -Outcome 'Fail' -Name 'pipeline_TestPackageExecution' -Duration ((Get-Date) - $scriptStart) -Message "Exception during Test Package execution: $($_.Exception.Message)" -TestAspect Execution } catch {}
+    try { Push-TestCaseResult -Outcome 'Fail' -Name 'RADManager_TestPackageExecution' -Duration ((Get-Date) - $scriptStart) -Message "Exception during Test Package execution: $($_.Exception.Message)" -TestAspect Execution } catch {}
 
     exit 1
 }
