@@ -301,5 +301,74 @@
 				}
 			}
 		}
+
+		public async Task<string> GetServerVersion()
+		{
+			var picture = Page.Locator("div").Filter(new() { HasText = "check" }).Nth(3);
+			await picture.WaitForAsync();
+			await picture.ClickAsync();
+			var aboutButton = Page.GetByText("About");
+			await aboutButton.WaitForAsync();
+			await aboutButton.ClickAsync();
+
+			// Grant clipboard permissions
+			await Page.Context.GrantPermissionsAsync(new[] { "clipboard-read", "clipboard-write" });
+
+			// Wait for the About dialog to be fully loaded
+			await Task.Delay(500);
+
+			// Clear clipboard before copying to ensure we get fresh content
+			await Page.EvaluateAsync("navigator.clipboard.writeText('')");
+			await Task.Delay(200);
+
+			// Click the copy button
+			await Page.GetByRole(AriaRole.Button, new() { Name = "content_copy Copy versions" }).ClickAsync();
+
+			// Wait longer for the clipboard to be updated and retry if needed
+			string clipboardContent = null;
+			int maxRetries = 5;
+			for (int i = 0; i < maxRetries; i++)
+			{
+				await Task.Delay(1000);
+				clipboardContent = await Page.EvaluateAsync<string>("navigator.clipboard.readText()");
+
+				// Check if we got valid content (should contain "Server:")
+				if (!string.IsNullOrWhiteSpace(clipboardContent) && clipboardContent.Contains("Server", StringComparison.OrdinalIgnoreCase))
+				{
+					break;
+				}
+
+				// If this is not the last retry, click the copy button again
+				if (i < maxRetries - 1)
+				{
+					await Page.GetByRole(AriaRole.Button, new() { Name = "content_copy Copy versions" }).ClickAsync();
+				}
+			}
+
+			// Parse the server version from the clipboard content
+			var serverVersion = ParseServerVersion(clipboardContent);
+
+			await Page.Locator("dwa-small-popup").GetByRole(AriaRole.Button, new() { Name = "close" }).ClickAsync();
+			return serverVersion;
+		}
+
+		private string ParseServerVersion(string clipboardContent)
+		{
+			if (string.IsNullOrWhiteSpace(clipboardContent))
+			{
+				throw new InvalidOperationException("Clipboard content is empty");
+			}
+
+			// Look for "Server:" pattern (case-insensitive)
+			// Expected format: "Server: 10.6.9.0-17409"
+			var match = Regex.Match(clipboardContent, @"Server\s*:\s*([^\r\n]+)", RegexOptions.IgnoreCase);
+			if (match.Success)
+			{
+				return match.Groups[1].Value.Trim();
+			}
+
+			// If no match found, throw exception with the content for debugging
+			throw new InvalidOperationException($"Could not parse server version from clipboard content: {clipboardContent}");
+		}
 	}
 }

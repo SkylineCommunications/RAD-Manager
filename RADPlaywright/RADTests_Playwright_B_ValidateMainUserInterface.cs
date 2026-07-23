@@ -1,5 +1,6 @@
 ﻿namespace RADPlaywright
 {
+	using Microsoft.Playwright;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using RADPlaywright.Apps;
 
@@ -51,12 +52,35 @@
 
 		private async Task ValidateUserInterfaceComponents(LowCodeAppPage page)
 		{
+			//Check server version
+			var serverVersion = await page.GetServerVersion();
+			Console.WriteLine($"Server Version: {serverVersion}");
+			ILocator sortingButton = null, historicalAnomaliesButton = null;
+
+			// Parse server version to compare against 10.6.9.0 - 17377.
+			// Right after this version the style of sortingButton and historicalAnomaliesButton changed
+			if (Version.TryParse(serverVersion.Split('-')[0].Trim(), out var version))
+			{
+				var minVersion = new Version(10, 6, 9, 0);
+				if (version > minVersion || (version == minVersion && serverVersion.Contains("-") && 
+					int.TryParse(serverVersion.Split('-')[1].Trim(), out int build) && build > 17377))
+				{
+					Console.WriteLine("Server version is higher than 10.6.9.0 - 17377");
+					sortingButton = page.GetComponentByRole("Sorting & filtering", AriaRole.Button);
+					historicalAnomaliesButton = page.GetComponentByRole(" Historical anomalies", AriaRole.Button);
+				}
+				else
+				{
+					Console.WriteLine("Server version is 10.6.9.0 - 17377 or lower");
+				    sortingButton = page.GetComponentByText("dma-button", "Sorting & filtering", 0);
+					historicalAnomaliesButton = page.GetComponentByText("dma-button", "Historical anomalies", 0);
+				}
+			}
+
 			var radManager = page.GetComponentByText("div", "RAD MANAGER", 3);
 			var addSingleGroupButton = page.GetComponentByTitle("Add Single Group");
 			var addSharedGroupButton = page.GetComponentByTitle("Add Shared Model Group");
 			var filterOnGroupNameTextBox = page.GetComponentByRole("Filter on group name", Microsoft.Playwright.AriaRole.Textbox);
-			var sortingButton = page.GetComponentByText("dma-button","Sorting & filtering", 0);
-			var historicalAnomaliesButton = page.GetComponentByText("dma-button","Historical anomalies", 0);
 			var dataMinerDocsButton = page.GetComponentByText("div","DataMiner Docs", 0);
 
 			await page.CheckComponentAvailability(radManager);
